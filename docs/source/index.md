@@ -1,6 +1,27 @@
-# 🎉  Delta Prox
+---
+hide-toc: true
+---
 
-A differentiable modeling language for proximal algorithms on large-scale optimization.
+# Welcome to ∇-Prox
+
+
+```{toctree}
+:maxdepth: 3
+:hidden: true
+
+install
+```
+
+
+```{toctree}
+:caption: Useful Links
+:hidden:
+PyPI page <https://pypi.org/project/torchlights/>
+GitHub Repository <https://github.com/Zeqiang-Lai/torchlight>
+```
+
+🎉  ∇-Prox is a differentiable modeling language for proximal algorithms on large-scale optimization
+
 
 
 <a href="#/">Docs</a> |
@@ -60,22 +81,4 @@ out = prob.solve(method='admm', x0=b)
 
 Here is what we got,
 
-<img src="docs/source/_static/example_deconv.png" width="500" />
-
-
-Please refer to the [documentation]() site for more instructions on the efficient differentiation of proximal algorithm with ∇-Prox.
-
-## Citation
-
-```bibtex
-@article{deltaprox2023,
-  title={∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
-  author={Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and HÄRTEL, PHILIPP and HEIDE, FELIX},
-  journal={arXiv preprint arXiv:2301.11525},
-  year={2023},
-}
-```
-
-## License
-
-Delta Prox is licensed under the MIT License.
+<img src="_static/example_deconv.png" width="500" />
