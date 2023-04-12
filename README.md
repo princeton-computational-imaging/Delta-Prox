@@ -1,6 +1,6 @@
 # 🎉  Delta Prox
 
-A differentiable modeling language for proximal algorithms on large-scale optimization.
+Differentiable modeling for proximal algorithms on large-scale optimization.
 
 
 <a href="#/">Docs</a> |
@@ -70,8 +70,7 @@ Please refer to the [documentation]() site for more instructions on the efficien
 ```bibtex
 @article{deltaprox2023,
   title={∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
-  author={Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and HÄRTEL, PHILIPP and HEIDE, FELIX},
-  journal={arXiv preprint arXiv:2301.11525},
+  author={Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and Hartel, Philipp and Heide, Felix},
   year={2023},
 }
 ```
