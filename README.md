@@ -1,17 +1,15 @@
-# 🎉  Delta Prox
-
-Differentiable modeling for proximal algorithms on large-scale optimization.
+<a href="https://deltaprox.readthedocs.io/"><img src="https://user-images.githubusercontent.com/26198430/229363778-a546ffce-b43d-4f4a-9869-629208f050cc.svg" alt="" width="30%"></a> &ensp; 
 
 
-<a href="#/">Docs</a> |
-<a href="#">Tutorials</a> |
-<a href="#">Examples</a> |
+Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
+
+<a href="https://deltaprox.readthedocs.io/">Docs</a> |
+<a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/tutorials">Tutorials</a> |
+<a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/examples">Examples</a> |
 <a href="#">Paper</a> |
-<a href="#">Citation</a> 
-
+<a href="https://github.com/Zeqiang-Lai/DeltaProx#citation">Citation</a> 
 
 <a href="https://pypi.org/project/dprox/">![Version](https://img.shields.io/pypi/v/dprox)</a>
-![GitHub](https://img.shields.io/github/license/princeton-computational-imaging/Delta-Prox)
   <a href="https://arxiv.org/abs/2207.02849">![arXiv](https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg)</a>
 
 
@@ -19,17 +17,16 @@ Differentiable modeling for proximal algorithms on large-scale optimization.
 pip install dprox
 ```
 
-**Features**
+## Introduction
 
-- ∇-Prox allows users to specify optimization objective functions of unknowns concisely at a high level, and intelligently compiles the problem into compute and memory efficient differentiable solvers.
+$\nabla$-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. Departing from handwriting these solvers and differentiating via autograd, $\nabla$-Prox requires only a few lines of code to define a solver that can be *specialized based on user requirements w.r.t memory constraints or training budget* by optimized algorithm unrolling, deep equilibrium learning, and deep reinforcement learning. $\nabla$-Prox makes it easier to prototype different learning-based bi-level optimization problems for a diverse range of applications. We compare our framework against existing methods with naive implementations. $\nabla$-Prox is significantly more compact in terms of lines of code and compares favorably in memory consumption in applications across domains.
 
-
-**News**
+## News
  
+ > 🚧 The code is still under construction, more features would be migrated from our dev code.
+
 - **[Jan 21 2023]**  Release preview code.
 
-
-> 🚧 The code is still under construction, more features would be migrated from our dev code.
 
 ## Getting Started
 
@@ -70,11 +67,8 @@ Please refer to the [documentation]() site for more instructions on the efficien
 ```bibtex
 @article{deltaprox2023,
   title={∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
-  author={Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and Hartel, Philipp and Heide, Felix},
+  author={Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and Härtel, Philipp and Heide, Felix},
+  journal={ACM Transactions on Graphics},
   year={2023},
 }
 ```
-
-## License
-
-Delta Prox is licensed under the MIT License.
