@@ -37,7 +37,7 @@ class sum(LinOp):
         """
         return all([arg.is_gram_diag(freq) for arg in self.input_nodes])
 
-    def get_diag(self, shape, freq=False):
+    def get_diag(self, ref, freq=False):
         """Returns the diagonal representation (A^TA)^(1/2).
 
         Parameters
@@ -55,7 +55,7 @@ class sum(LinOp):
         #     for var, diag in arg_diags.items():
         #         var_diags[var] = var_diags[var] + diag
         # return var_diags.values()[0]
-        return self.input_nodes[0].get_diag(shape, freq)
+        return self.input_nodes[0].get_diag(ref, freq)
 
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.

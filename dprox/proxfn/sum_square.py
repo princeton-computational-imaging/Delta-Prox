@@ -1,11 +1,8 @@
 from typing import List
 
 import torch
-import torch.nn as nn
-import numpy as np
 
-from dprox.linop import LinOp, vstack, eval, adjoint, gram, CompGraph
-from dprox.utils import to_torch_tensor
+from dprox.linop import LinOp, vstack, eval, adjoint
 from .linear_solve import LINEAR_SOLVER
 
 from . import ProxFn

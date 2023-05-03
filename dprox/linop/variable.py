@@ -9,7 +9,7 @@ class Variable(LinOp):
     """A variable.
     """
 
-    def __init__(self, value=None, shape=None, name=None):
+    def __init__(self, shape=None, value=None, name=None):
         super(Variable, self).__init__([])
         self.uuid = uuid.uuid1()
         self._value = value

@@ -70,7 +70,7 @@ class LinOp(nn.Module):
         return len(self.variables()) == 0
 
     @abc.abstractmethod
-    def forward(self, inputs, outputs):
+    def forward(self, inputs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
@@ -78,7 +78,7 @@ class LinOp(nn.Module):
         return NotImplemented
 
     @abc.abstractmethod
-    def adjoint(self, inputs, outputs):
+    def adjoint(self, inputs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.

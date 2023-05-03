@@ -79,7 +79,6 @@ class Problem:
 
     def solve(self, method='admm', device='cuda', **kwargs):
         prox_fns = optimize(self.prox_fns, merge=self.merge, absorb=self.absorb)
-        print(prox_fns)
         solver = compile(prox_fns, method=method, device=device, **self.solver_args)
         results = solver.solve(**kwargs)
         return results

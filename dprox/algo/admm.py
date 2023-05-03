@@ -59,6 +59,7 @@ class ADMM(Algorithm):
     def initialize(self, x0):
         x = x0
         v = self.K.forward([x])
+        if v is None: v = [] # in case there is no psi fns
         u = [torch.zeros_like(e) for e in v]
         return x, v, u
 

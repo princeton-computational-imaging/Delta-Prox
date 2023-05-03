@@ -28,7 +28,6 @@ def absorb_linop(prox_fn):
        For example, elementwise multiplication can be folded into
        a separable function's prox.
     """
-    print(prox_fn.linop)
     if isinstance(prox_fn.linop, mosaic) and isinstance(prox_fn, sum_squares):
         new_fn = weighted_sum_squares(prox_fn.linop.input_nodes[0], prox_fn.linop, prox_fn.b)
         return [new_fn]

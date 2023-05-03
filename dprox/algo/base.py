@@ -66,7 +66,7 @@ class Algorithm(nn.Module):
         super().__init__()
         self.psi_fns = nn.ModuleList(psi_fns)
         self.omega_fns = nn.ModuleList(omega_fns)
-        self.K = CompGraph(vstack([fn.linop for fn in psi_fns]))
+        self.K = CompGraph(vstack([fn.linop for fn in psi_fns+omega_fns]))
 
     @property
     def device(self):
