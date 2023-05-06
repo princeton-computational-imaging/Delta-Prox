@@ -1,11 +1,23 @@
 import numpy as np
-from dprox import *
+import dprox as dp
 
 def test_lsq():
-    x = Variable((3,3))
+    x = dp.Variable((3,3))
     rhs = np.array([[1, 2, 3],[4,5,6],[7,8,9]])
-    prob = Problem(sum_squares(2*x - rhs))
+    prob = dp.Problem(dp.sum_squares(2*x - rhs))
     prob.solve('admm', x0=np.zeros((3,3)))
     print(x.value)
 
     assert (x.value.cpu().numpy() == rhs / 2).all()
+    
+    
+def test_lsq2():
+    x = dp.Variable((3,3))
+    rhs = np.array([[1, 2, 3],[4,5,6],[7,8,9]])
+    kernel = np.array([[1,1],[1,1]]) / 4
+    prob = dp.Problem(dp.sum_squares(dp.conv(x, kernel) - rhs))
+    prob.solve('admm', x0=np.zeros((3,3)))
+    out = dp.eval(dp.conv(x, kernel)-rhs, inputs=[x.value], zero_out_constant=False)
+    print(x.value)
+    print(out)
+    assert (out[0] - 0 < 1e-5).all()
