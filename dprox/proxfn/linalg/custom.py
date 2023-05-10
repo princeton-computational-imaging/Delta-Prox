@@ -42,38 +42,18 @@ class LinearSolve(torch.autograd.Function):
 
         x = ctx.saved_tensors[0]
         x = x.detach().clone()
-        Aparams = ctx.saved_tensors[1:]
 
-        Aparams = [Aparam.detach().clone().requires_grad_() for Aparam in Aparams]
-        A = ctx.A.clone(Aparams)
+        A = ctx.A.clone()
         with torch.enable_grad():
             loss = -A(x)
-        grad_Aparams = torch.autograd.grad((loss,), Aparams,
+        grad_Aparams = torch.autograd.grad((loss,), A.parameters(),
                                            grad_outputs=(grad_B,),
                                            create_graph=torch.is_grad_enabled(),
                                            allow_unused=True)
 
         return (None, grad_B, None, *grad_Aparams)
 
-    # @staticmethod
-    # def backward(ctx, grad_x):
-    #     grad_B = ctx.linear_solver(ctx.A.T, grad_x)
-
-    #     x = ctx.saved_tensors[0]
-    #     x = x.detach().clone()
-
-    #     A = ctx.A.clone()
-    #     with torch.enable_grad():
-    #         loss = -A(x)
-    #     grad_Aparams = torch.autograd.grad((loss,), A.parameters(),
-    #                                        grad_outputs=(grad_B,),
-    #                                        create_graph=torch.is_grad_enabled(),
-    #                                        allow_unused=True)
-
-    #     return (None, grad_B, None, *grad_Aparams)
-
 
 def linear_solve(A: dprox.LinOp, b: torch.Tensor, config: LinearSolveConfig = LinearSolveConfig()):
-    out = LinearSolve.apply(A, b, config, *A.params)
-    # out = LinearSolve.apply(A, b, config, *A.parameters())
+    out = LinearSolve.apply(A, b, config, *A.parameters())
     return out

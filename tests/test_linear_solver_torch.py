@@ -1,7 +1,7 @@
 import torch
-import torch.autograd
-
+import torch.nn as nn
 import dprox
+import copy
 
 
 seed = 123
@@ -10,7 +10,7 @@ seed = 123
 class LinOp(torch.nn.Module):
     def __init__(self, A) -> None:
         super().__init__()
-        self.A = A
+        self.A = nn.parameter.Parameter(A)
 
     def forward(self, x):
         return self.A @ x
@@ -21,13 +21,29 @@ class LinOp(torch.nn.Module):
     @property
     def T(self):
         return LinOp(self.A.T)
+    
+    def clone(self):
+        return copy.deepcopy(self)
+    
+    
+class SymmetricLinOp(torch.nn.Module):
+    def __init__(self, P):
+        super().__init__()
+        self.P = nn.parameter.Parameter(P)
+
+    def forward(self, x):
+        return self.P.T @ self.P @ x
+
+    def adjoint(self, x):
+        return self.P.T @ self.P @ x
 
     @property
-    def params(self):
-        return [self.A]
+    def T(self):
+        return SymmetricLinOp(self.P)
     
-    def clone(self, params):
-        return LinOp(params[0])
+    def clone(self):
+        return copy.deepcopy(self)
+
 
 
 def test_linear_solver_torch_forward():
@@ -82,7 +98,6 @@ def test_linear_solver_torch_backward_db():
     xhat.mean().backward()
 
     grad2 = b.grad
-    grad2_P = P.grad
     
     print(grad1)
     print(grad2)
@@ -94,65 +109,37 @@ def test_linear_solver_torch_backward_dtheta():
     # gradient with implicit differentiation
     torch.manual_seed(seed)
 
-    P = torch.randn(5, 5).requires_grad_(True)
-    A = P.T @ P
-    A.retain_grad()
-    # A = A.clone().detach().requires_grad_(True)
+    P = torch.randn(5, 5)
+    A = SymmetricLinOp(P)
+    
     x = torch.randn(5)
-    b = A @ x
+    with torch.no_grad():
+        b = A(x)
     b = b.clone().detach().requires_grad_(True)
 
-    K = LinOp(A)
-
-    xhat = dprox.proxfn.linalg.linear_solve(K, b)
-
+    xhat = dprox.proxfn.linalg.linear_solve(A, b)
     xhat.mean().backward()
-
-    # grad1 = A.A.grad
-    grad1 = P.grad
-    gradA1 = A.grad
+    grad1 = A.P.grad
     
     # gradient with unrolling
     torch.manual_seed(seed)
 
-    # P = torch.randn(5, 5)
-    P = torch.randn(5, 5).requires_grad_(True) 
-    A = P.T @ P
-    A.retain_grad()
-    # A = A.clone().detach().requires_grad_(True)
+    P = torch.randn(5, 5)
+    A = SymmetricLinOp(P)
+    
     x = torch.randn(5)
-    b = A @ x
+    with torch.no_grad():
+        b = A(x)
     b = b.clone().detach().requires_grad_(True)
 
-    K = LinOp(A)
-
-    xhat = dprox.proxfn.linalg.solve.conjugate_gradient(K, b)
-
+    xhat = dprox.proxfn.linalg.solve.conjugate_gradient(A, b)
     xhat.mean().backward()
-
-    # grad2 = A.A.grad
-    grad2 = P.grad
-    gradA2 = A.grad
+    grad2 = A.P.grad
     
-    print(grad1.numpy())
-    print(grad2.numpy())
-    
-    print(gradA1.numpy())
-    print(gradA2.numpy())
+    # summary
+    print('dtheta')
+    print(grad1)
+    print(grad2)
     
     print((grad1-grad2).abs().max())
-    
-    
-    torch.manual_seed(seed)
-
-    # P = torch.randn(5, 5)
-    P = torch.randn(5, 5).requires_grad_(True) 
-    
-    jab = torch.autograd.functional.jacobian(lambda P: P.T @ P, P)
-    jab = jab.reshape(25,25)
-    
-    print(jab)
-    print(jab.T @ gradA1.reshape(25))
-    
-    
     assert torch.allclose(grad1, grad2, rtol=1e-2, atol=1e-2)
