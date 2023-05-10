@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from .lin_op import LinOp
+from .base import LinOp
 
 
 class Constant(LinOp):

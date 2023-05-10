@@ -2,7 +2,7 @@ import uuid
 
 import torch
 
-from .lin_op import LinOp
+from .base import LinOp
 
 
 class Variable(LinOp):

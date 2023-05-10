@@ -2,7 +2,7 @@ import numpy as np
 
 from dprox.utils.misc import to_nn_parameter, to_torch_tensor
 
-from .lin_op import LinOp
+from .base import LinOp
 
 
 class mosaic(LinOp):

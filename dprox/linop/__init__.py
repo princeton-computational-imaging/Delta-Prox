@@ -6,7 +6,7 @@ from .scale import scale
 from .subsample import mosaic
 from .sum import sum, copy
 from .variable import Variable
-from .lin_op import LinOp
+from .base import LinOp
 from .vstack import vstack, split
 from .placeholder import Placeholder
 from .grad import grad

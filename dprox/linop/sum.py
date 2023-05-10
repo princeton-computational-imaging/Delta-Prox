@@ -1,6 +1,6 @@
 import torch
 
-from .lin_op import LinOp
+from .base import LinOp
 
 
 class sum(LinOp):

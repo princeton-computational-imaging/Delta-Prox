@@ -1,6 +1,6 @@
 import numpy as np
 
-from .lin_op import LinOp
+from .base import LinOp
 
 
 class vstack(LinOp):

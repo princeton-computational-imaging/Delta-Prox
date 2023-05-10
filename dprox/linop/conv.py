@@ -3,7 +3,7 @@ import torch
 from dprox.utils.misc import batchify, to_ndarray
 from dprox.utils.psf2otf import psf2otf
 
-from .lin_op import LinOp
+from .base import LinOp
 
 
 class conv(LinOp):

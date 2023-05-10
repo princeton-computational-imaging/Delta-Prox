@@ -1,4 +1,4 @@
-from .lin_op import LinOp
+from .base import LinOp
 
 
 def LinOpFactory(forward, adjoint, diag=None, norm_bound=None):
