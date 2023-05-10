@@ -1,6 +1,7 @@
 import torch
 from functools import partial
 
+
 atol, rtol = 1e-6, 1e-3
 allclose = partial(torch.allclose, atol=atol, rtol=rtol)
 
@@ -8,6 +9,7 @@ allclose = partial(torch.allclose, atol=atol, rtol=rtol)
 def tol(input, other):
     tmp = torch.abs(input-other) - atol - rtol * torch.abs(other)
     return torch.max(tmp).item()
+
 
 def auto_diff(seed):
     torch.manual_seed(seed)

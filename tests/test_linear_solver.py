@@ -1,41 +1,62 @@
 import torch
 import dprox as dp
 import torch.nn as nn
+import numpy as np
 
-class LinOp(torch.nn.Module):
-    def __init__(self, A) -> None:
-        super().__init__()
-        self.A = nn.parameter.Parameter(A).double() 
-    def forward(self, x):
-        return self.A@x.double()
+P = np.random.rand(5,5)
+A = P.T@P
+x = np.random.rand(5)
+b = A@x
     
-    def adjoint(self, x):
-        return self.A.T@x
     
-    def T(self):
-        return LinOp(self.A.T)
+def test_gmres_scipy():
+    from scipy.sparse.linalg import gmres, LinearOperator
+    A_op = LinearOperator(shape=(5,5), matvec=lambda b: A@b)
     
-    def params(self):
-        return [self.A]
+    xhat, _ = gmres(A_op, b)
+    
+    print('gmres scipy')
+    print(x)
+    print(xhat)
+    
+    print(np.mean(np.abs(xhat-x)))
+    assert np.allclose(xhat, x, rtol=1e-3)
+
+
+def test_cg_scipy():
+    from scipy.sparse.linalg import cg, LinearOperator
+    A_op = LinearOperator(shape=(5,5), matvec=lambda b: A@b)
+    
+    xhat, _ = cg(A_op, b)
+    
+    print('cg scipy')
+    print(x)
+    print(xhat)
+    
+    print(np.mean(np.abs(xhat-x)))
+    assert np.allclose(xhat, x, rtol=1e-3)
     
     
 def test_cg():
-    P = torch.randn(5,5)
-    A = P.T@P
-    K = lambda x: A@x
-    x = torch.randn(5)
-    b = A@x
+    A2 = torch.from_numpy(A)
+    K = lambda x: A2@x
+    x2 = torch.from_numpy(x)
+    b2 = torch.from_numpy(b)
     
-    xhat1 = dp.proxfn.linear_solve.conjugate_gradient(K, b)
-    xhat2 = dp.proxfn.linear_solve.conjugate_gradient2(K, b)
+    xhat1 = dp.proxfn.linalg.solve.conjugate_gradient(K, b2)
+    xhat2 = dp.proxfn.linalg.solve.conjugate_gradient2(K, b2)
     
-    print(x)
     
-    print(torch.mean(torch.abs(xhat1-x)))
-    print(xhat1)
-    assert torch.allclose(xhat1, x, rtol=1e-3)
+    print('conjugate_gradient')
+    print(torch.mean(torch.abs(xhat1-x2)).item())
+    print(xhat1.numpy())
+    assert torch.allclose(xhat1, x2, rtol=1e-3)
     
-    print(torch.mean(torch.abs(xhat2-x)))
-    print(xhat2)
-    assert torch.allclose(xhat2, x, rtol=1e-3)
-  
+    print('conjugate_gradient2')
+    print(torch.mean(torch.abs(xhat2-x2)).item())
+    print(xhat2.numpy())
+    assert torch.allclose(xhat2, x2, rtol=1e-3)
+
+
+
+    

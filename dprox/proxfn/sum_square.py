@@ -3,7 +3,7 @@ from typing import List
 import torch
 
 from dprox.linop import LinOp, vstack, eval, adjoint
-from .linear_solve import LINEAR_SOLVER
+# from .linalg import LINEAR_SOLVER
 
 from . import ProxFn
 

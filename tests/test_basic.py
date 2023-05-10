@@ -21,3 +21,14 @@ def test_lsq2():
     print(x.value)
     print(out)
     assert (out[0] - 0 < 1e-5).all()
+    
+    
+def test_lsq3():
+    x = dp.Variable((3))
+    rhs = np.array([1, 2, 3])
+    prob = dp.Problem(dp.sum_squares(2*x - rhs))
+    prob.solve('admm', x0=np.zeros(3))
+    print(x.value)
+
+    assert (x.value.cpu().numpy() == rhs / 2).all()
+    
