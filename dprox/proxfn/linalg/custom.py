@@ -26,6 +26,10 @@ def build_solver(config: LinearSolveConfig):
     return solve_fn
 
 
+def trainable_parameters(module):
+    return [p for p in module.parameters() if p.requires_grad]
+
+
 class LinearSolve(torch.autograd.Function):
 
     @staticmethod
@@ -46,7 +50,7 @@ class LinearSolve(torch.autograd.Function):
         A = ctx.A.clone()
         with torch.enable_grad():
             loss = -A(x)
-        grad_Aparams = torch.autograd.grad((loss,), A.parameters(),
+        grad_Aparams = torch.autograd.grad((loss,), trainable_parameters(A),
                                            grad_outputs=(grad_B,),
                                            create_graph=torch.is_grad_enabled(),
                                            allow_unused=True)
@@ -55,5 +59,4 @@ class LinearSolve(torch.autograd.Function):
 
 
 def linear_solve(A: dprox.LinOp, b: torch.Tensor, config: LinearSolveConfig = LinearSolveConfig()):
-    out = LinearSolve.apply(A, b, config, *A.parameters())
-    return out
+    return LinearSolve.apply(A, b, config, *trainable_parameters(A))

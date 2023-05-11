@@ -6,7 +6,7 @@ import numpy as np
 
 def conjugate_gradient(
     A, b, 
-    x0=None, tol=1e-6, max_iters=500, verbose=False
+    x0=None, tol=1e-6, max_iters=100, verbose=False
 ):
 
     # Temp vars
@@ -59,6 +59,9 @@ def conjugate_gradient(
 
         gamma_1 = gamma
 
+    if verbose:
+        print(f'Not converged, r norm={normr.item()}')
+    
     return x
 
 

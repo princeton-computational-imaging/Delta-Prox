@@ -130,6 +130,14 @@ class LinOp(nn.Module):
         op.forward, op.adjoint = op.adjoint, op.forward
         return op
 
+    @property
+    def gram(self):
+        op = self.clone()
+        forward, adjoint = op.forward, op.adjoint
+        op.forward = lambda inputs: adjoint(forward(inputs))
+        op.adjoint = lambda inputs: forward(adjoint(inputs))
+        return op
+
     def clone(self):
         return copy.deepcopy(self)
 

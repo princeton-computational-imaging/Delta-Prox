@@ -1,6 +1,5 @@
 import torch
 import dprox as dp
-import torch.nn as nn
 import numpy as np
 
 P = np.random.rand(5,5)

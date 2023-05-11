@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import dprox
-import copy
 
 
 seed = 123
@@ -186,3 +185,80 @@ def test_linear_solver_torch_backward_dtheta2():
 
     print((grad1 - grad3).abs().max())
     assert torch.allclose(grad1, grad3, rtol=1e-2, atol=1e-2)
+
+
+def test_linear_solver_torch_forward_dconv_doe():
+    torch.manual_seed(seed)
+    x = dprox.Variable((1,1,10,10))
+    psf = torch.randn((5,5))
+    KtK = dprox.conv_doe(x, psf=psf).gram
+    
+    x = torch.randn(1,1,10,10)
+    b = KtK(x)
+    
+    xhat = dprox.proxfn.linalg.linear_solve(KtK, b)
+    
+    print(x.squeeze()[0])
+    print(xhat.squeeze()[0])
+    print((xhat-x).abs().mean())
+    
+    assert torch.allclose(xhat, x, atol=0.5, rtol=1)
+    
+    
+def test_linear_solver_torch_backward_dconv_doe():
+    torch.manual_seed(seed)
+    x = dprox.Variable((1,1,10,10))
+    psf = torch.randn((5,5))
+    KtK = dprox.conv_doe(x, psf=psf).gram
+    
+    x = torch.randn(1,1,10,10)
+    b = KtK(x)
+    
+    xhat = dprox.proxfn.linalg.linear_solve(KtK, b)
+    
+    xhat.mean().backward()
+    
+    grad1 = KtK.psf.grad
+    print(KtK.psf.grad)
+    print(x.squeeze()[0])
+    print(xhat.squeeze()[0])
+    print((xhat-x).abs().mean())
+    
+    torch.manual_seed(seed)
+    x = dprox.Variable((1,1,10,10))
+    psf = torch.randn((5,5))
+    KtK = dprox.conv_doe(x, psf=psf).gram
+    
+    x = torch.randn(1,1,10,10)
+    b = KtK(x)
+    
+    xhat = dprox.proxfn.linalg.solve.conjugate_gradient(KtK, b)
+    
+    xhat.mean().backward()
+    
+    grad2 = KtK.psf.grad
+    print(KtK.psf.grad)
+    print(x.squeeze()[0])
+    print(xhat.squeeze()[0])
+    print((xhat-x).abs().mean())
+    
+    print('########')
+    print((grad1-grad2).abs().mean())
+    
+    
+def test_linear_solver_torch_backward_dconv_doe_ktk():
+    torch.manual_seed(seed)
+    x = dprox.Variable((1,1,10,10))
+    psf = torch.randn((5,5))
+    KtK = dprox.conv_doe(x, psf=psf).gram
+    
+    x = torch.randn(1,1,10,10)
+    b = KtK(x)
+    
+    xhat = dprox.proxfn.linalg.linear_solve(KtK, b)
+    
+    xhat.mean().backward()
+    
+    print(KtK.psf.grad)
+    # TODO: need a finite difference method to check gradient
+    
