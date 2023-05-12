@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 
+import dprox as dp
 
 def to_nn_parameter(*tensor, requires_grad=False):
     if(len(tensor) == 1):
@@ -10,12 +11,11 @@ def to_nn_parameter(*tensor, requires_grad=False):
 
 
 def batchify(out):
-    if len(out.shape) == 2:
-        out = out.unsqueeze(-1)
-    if len(out.shape) == 3 and out.shape[2] == 1 or out.shape[2] == 3:
+    if isinstance(out, dp.tensor):
+        return out
+    if len(out.shape) == 3 and (out.shape[2] == 1 or out.shape[2] == 3):
         out = out.permute(2, 0, 1)
-    if len(out.shape) == 3:
-        out = out.unsqueeze(0)
+    out = out.unsqueeze(0)
     return out
 
 

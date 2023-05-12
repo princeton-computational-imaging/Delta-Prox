@@ -12,11 +12,11 @@ def test_lsq():
     
     
 def test_lsq2():
-    x = dp.Variable((3,3))
-    rhs = np.array([[1, 2, 3],[4,5,6],[7,8,9]])
+    x = dp.Variable((3,3,1))
+    rhs = np.array([[[1, 2, 3],[4,5,6],[7,8,9]]])
     kernel = np.array([[1,1],[1,1]]) / 4
     prob = dp.Problem(dp.sum_squares(dp.conv(x, kernel) - rhs))
-    prob.solve('admm', x0=np.zeros((3,3)))
+    prob.solve('admm', x0=np.zeros((3,3,1)))
     out = dp.eval(dp.conv(x, kernel)-rhs, x.value, zero_out_constant=False)
     print(x.value)
     print(out)

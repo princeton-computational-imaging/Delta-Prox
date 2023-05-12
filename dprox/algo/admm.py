@@ -58,7 +58,7 @@ class ADMM(Algorithm):
 
     def initialize(self, x0):
         x = x0
-        v = self.K.forward([x])
+        v = self.K.forward(x)
         if v is None: v = [] # in case there is no psi fns
         u = [torch.zeros_like(e) for e in v]
         return x, v, u
@@ -82,14 +82,14 @@ class LinearizedADMM(ADMM):
             # coeff = expand(rho/lam[fn])
             # we empircally find ignore the coefficient works better.
             coeff = 1
-            tmp = eval(fn.linop, [x])[0] - v[i] + u[i]
-            tmp = adjoint(fn.linop, [tmp])[0]
+            tmp = eval(fn.linop, x) - v[i] + u[i]
+            tmp = adjoint(fn.linop, tmp)
             b += [x - coeff * tmp]
 
         x = self.least_square.solve(b, rho)
 
         # solve proximal fns
-        Kx = self.K.forward([x])  # cache Kx
+        Kx = self.K.forward(x)  # cache Kx
         for i, fn in enumerate(self.psi_fns):
             v[i] = fn.prox(Kx[i] + u[i], lam=lam[fn])
             u[i] = u[i] + Kx[i] - v[i]
@@ -103,7 +103,7 @@ class ADMM_vxu(ADMM):
     def _iter(self, state, rho, lam):
         z, x, u = state
 
-        Kz = self.K.forward([z])  # cache Kx
+        Kz = self.K.forward(z)  # cache Kx
         for i, fn in enumerate(self.psi_fns):
             x[i] = fn.prox(Kz[i] - u[i], lam=lam[fn])
             
