@@ -14,29 +14,27 @@ class Constant(LinOp):
             value = torch.tensor(value)
         self._value = value
 
-    def variables(self):
-        return []
+    # ---------------------------------------------------------------------------- #
+    #                                  Computation                                 #
+    # ---------------------------------------------------------------------------- #
 
-    def constants(self):
-        return [self]
-
-    def forward(self, inputs):
+    def forward(self):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
-        return [self.value]
+        return self.value
 
-    def adjoint(self, inputs):
+    def adjoint(self):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
         """
-        return [self.value*0]
-    
-    @property
-    def value(self):
-        return self._value.to(self.device)
+        return self.value*0
+
+    # ---------------------------------------------------------------------------- #
+    #                                   Diagonal                                   #
+    # ---------------------------------------------------------------------------- #
 
     def is_diag(self, freq=False):
         """Is the lin op diagonal (in the frequency domain)?
@@ -57,6 +55,23 @@ class Constant(LinOp):
         """
         return {}
 
+    # ---------------------------------------------------------------------------- #
+    #                                   Property                                   #
+    # ---------------------------------------------------------------------------- #
+
+    @property
+    def variables(self):
+        return []
+
+    @property
+    def constants(self):
+        return [self]
+    
+    @property
+    def value(self):
+        return self._value.to(self.device)
+    
+    
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.
 
@@ -71,3 +86,10 @@ class Constant(LinOp):
             Magnitude of outputs.
         """
         return 0.0
+
+    # ---------------------------------------------------------------------------- #
+    #                                 Python Magic                                 #
+    # ---------------------------------------------------------------------------- #
+    
+    def __repr__(self):
+        return f'Constant(value={self._value})'

@@ -87,8 +87,7 @@ class conv_doe(LinOp):
         self.psf = nn.parameter.Parameter(psf)
         self.circular = circular
 
-    def forward(self, inputs):
-        img = inputs
+    def forward(self, img):
         psf = self.unwrap(self.psf).to(img.device)
 
         if not self.circular:
@@ -109,8 +108,7 @@ class conv_doe(LinOp):
 
         return output
 
-    def adjoint(self, inputs):
-        img = inputs
+    def adjoint(self, img):
         psf = self.unwrap(self.psf).to(img.device)
 
         if not self.circular:

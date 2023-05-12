@@ -10,19 +10,29 @@ class vstack(LinOp):
     def __init__(self, input_nodes):
         super(vstack, self).__init__(input_nodes)
 
-    def forward(self, inputs):
+    # ---------------------------------------------------------------------------- #
+    #                                  Computation                                 #
+    # ---------------------------------------------------------------------------- #
+
+    def forward(self, *inputs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
-        return inputs
+        if len(inputs) == 1: return inputs[0]
+        return LinOp.MultOutput(inputs)
 
-    def adjoint(self, inputs):
+    def adjoint(self, *inputs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
         """
-        return inputs
+        if len(inputs) == 1: return inputs[0]
+        return LinOp.MultOutput(inputs)
+
+    # ---------------------------------------------------------------------------- #
+    #                                   Diagonal                                   #
+    # ---------------------------------------------------------------------------- #
 
     def is_gram_diag(self, freq=False):
         """Is the lin op's Gram matrix diagonal (in the frequency domain)?
@@ -50,6 +60,10 @@ class vstack(LinOp):
         for var in self.variables():
             var_diags[var] = np.sqrt(var_diags[var])
         return var_diags
+    
+    # ---------------------------------------------------------------------------- #
+    #                                   Property                                   #
+    # ---------------------------------------------------------------------------- #
 
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.
@@ -74,19 +88,19 @@ class split(vstack):
         self.input_nodes = []
         super(split, self).__init__(output_nodes)
 
-    def forward(self, inputs):
+    def forward(self, *inputs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
-        return super(split, self).adjoint(inputs)
+        return super(split, self).adjoint(*inputs)
 
-    def adjoint(self, inputs):
+    def adjoint(self, *inputs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
         """
-        return super(split, self).forward(inputs)
+        return super(split, self).forward(*inputs)
 
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.

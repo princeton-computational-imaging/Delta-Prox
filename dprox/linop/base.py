@@ -19,6 +19,8 @@ class LinOp(nn.Module):
     """Represents a linear operator.
     """
 
+    class MultOutput(list): pass
+
     instanceCnt = 0
 
     def __init__(self, input_nodes=[]):
@@ -94,7 +96,7 @@ class LinOp(nn.Module):
         """
         vars_ = []
         for arg in self.input_nodes:
-            vars_ += arg.variables()
+            vars_ += arg.variables
         unordered = list(set(vars_))  # Make unique, order by uuid.
         return sorted(unordered, key=lambda x: x.uuid)
 
@@ -104,7 +106,7 @@ class LinOp(nn.Module):
         """
         consts = []
         for arg in self.input_nodes:
-            consts += arg.constants()
+            consts += arg.constants
         return consts
 
     def is_constant(self):
@@ -117,8 +119,37 @@ class LinOp(nn.Module):
         inputs = []
         for node in self.input_nodes:
             inputs.append(node.value)
-        output = self.forward(inputs)[0]
+        output = self.forward(*inputs)
         return output
+
+    @property
+    def offset(self):
+        """Get the constant offset.
+        """
+        old_vals = {}
+        for var in self.variables:
+            old_vals[var] = var.value
+            var.value = torch.zeros_like(var.value)
+        offset = self.value
+        # Restore old variable values.
+        for var in self.variables:
+            var.value = old_vals[var]
+        return offset
+
+    def norm_bound(self, input_mags):
+        """Gives an upper bound on the magnitudes of the outputs given inputs.
+
+        Parameters
+        ----------
+        input_mags : list
+            List of magnitudes of inputs.
+
+        Returns
+        -------
+        float
+            Magnitude of outputs.
+        """
+        return NotImplemented
 
     # ---------------------------------------------------------------------------- #
     #                                     Util                                     #
@@ -146,34 +177,6 @@ class LinOp(nn.Module):
         if isinstance(value, Placeholder):
             return value.value
         return to_torch_tensor(value, batch=True)
-
-    def get_offset(self):
-        """Get the constant offset.
-        """
-        old_vals = {}
-        for var in self.variables():
-            old_vals[var] = var.value
-            var.value = torch.zeros_like(var.value)
-        offset = self.value
-        # Restore old variable values.
-        for var in self.variables():
-            var.value = old_vals[var]
-        return offset
-
-    def norm_bound(self, input_mags):
-        """Gives an upper bound on the magnitudes of the outputs given inputs.
-
-        Parameters
-        ----------
-        input_mags : list
-            List of magnitudes of inputs.
-
-        Returns
-        -------
-        float
-            Magnitude of outputs.
-        """
-        return NotImplemented
 
     # ---------------------------------------------------------------------------- #
     #                                 Python Magic                                 #

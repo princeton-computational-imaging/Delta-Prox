@@ -10,21 +10,20 @@ class sum(LinOp):
     def __init__(self, input_nodes):
         super(sum, self).__init__(input_nodes)
 
-    def forward(self, inputs):
+    def forward(self, *inputs):
         """ Just sum all the inputs, all inputs should have the same shape
         """
         output = torch.zeros_like(inputs[0])
         for input in inputs:
             output += input.to(output.device)
-        return [output]
+        return output
 
-    def adjoint(self, inputs):
+    def adjoint(self, input):
         """ The adjoint of sum spread of the input to all its child
         """
-        assert len(inputs) == 1
-        outputs = []
+        outputs = LinOp.MultOutput()
         for _ in self.input_nodes:
-            outputs.append(inputs[0])
+            outputs.append(input)
         return outputs
 
     def is_diag(self, freq=False):
@@ -85,12 +84,12 @@ class copy(sum):
         """
         return super(copy, self).adjoint(inputs)
 
-    def adjoint(self, inputs):
+    def adjoint(self, *inputs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
         """
-        return super(copy, self).forward(inputs)
+        return super(copy, self).forward(*inputs)
 
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.

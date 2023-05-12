@@ -11,6 +11,25 @@ class mosaic(LinOp):
         super(mosaic, self).__init__([arg])
         self.cache = {}
 
+    # ---------------------------------------------------------------------------- #
+    #                                  Computation                                 #
+    # ---------------------------------------------------------------------------- #
+
+    def forward(self, input):
+        """The forward operator.
+
+        Reads from inputs and writes to outputs.
+        """
+        mask = self._mask(input.shape).to(input.device)
+        return mask * input
+
+    def adjoint(self, input):
+        """The adjoint operator.
+
+        Reads from inputs and writes to outputs.
+        """
+        return self.forward(input)
+
     @staticmethod
     def masks_CFA_Bayer(shape):
         pattern = 'RGGB'
@@ -27,21 +46,9 @@ class mosaic(LinOp):
             self.cache[shape] = to_nn_parameter(to_torch_tensor(mask.astype('float32'), batch=True))
         return self.cache[shape]
 
-    def forward(self, inputs):
-        """The forward operator.
-
-        Reads from inputs and writes to outputs.
-        """
-        input = inputs[0]
-        mask = self._mask(input.shape).to(input.device)
-        return [mask * input]
-
-    def adjoint(self, inputs):
-        """The adjoint operator.
-
-        Reads from inputs and writes to outputs.
-        """
-        return self.forward(inputs)
+    # ---------------------------------------------------------------------------- #
+    #                                   Diagonal                                   #
+    # ---------------------------------------------------------------------------- #
 
     def is_gram_diag(self, freq=False):
         """Is the lin op's Gram matrix diagonal (in the frequency domain)?
@@ -71,6 +78,10 @@ class mosaic(LinOp):
         # for var in var_diags.keys():
         #     var_diags[var] = var_diags[var] * self_diag.ravel()
         return self._mask(x.shape).to(self.device)
+
+    # ---------------------------------------------------------------------------- #
+    #                                   Property                                   #
+    # ---------------------------------------------------------------------------- #
 
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.

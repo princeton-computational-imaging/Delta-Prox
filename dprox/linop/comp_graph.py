@@ -10,6 +10,7 @@ from .edge import Edge
 from .sum import copy
 from .variable import Variable
 from .vstack import split, vstack
+from .base import LinOp
 
 
 class CompGraph:
@@ -108,7 +109,7 @@ class CompGraph:
                 self.input_edges[ns] = newinedges
 
         # Make copy node for each variable.
-        old_vars = self.end.variables()
+        old_vars = self.end.variables
         id2copy = {}
         copy_nodes = []
         self.var_info = {}
@@ -172,25 +173,32 @@ class CompGraph:
     def write_outputs(self, node, outputs):
         """Returns the output data for a node.
         """
+        if not isinstance(outputs, list):
+            outputs = [outputs]
         for e, output in zip(self.output_edges[node], outputs):
             e.data = output
 
     def write_inputs(self, node, inputs):
         """Returns the input data for a node.
         """
+        if not isinstance(inputs, list):
+            inputs = [inputs]
         for e, input in zip(self.input_edges[node], inputs):
             e.data = input
 
-    def forward(self, x):
+    def forward(self, *values):
         """Evaluates the forward composition.
         """
         global y
         y = None
 
         def forward_eval(node):
-            if node == self.start: inputs = x
+            if node == self.start: inputs = list(values)
             else: inputs = self.get_inputs(node)
-            outputs = node.forward(inputs)
+            if isinstance(inputs, list):
+                outputs = node.forward(*inputs)
+            else:
+                outputs = node.forward(inputs)
             if node == self.end: global y; y = outputs
             else: self.write_outputs(node, outputs)
 
@@ -198,16 +206,19 @@ class CompGraph:
 
         return y
 
-    def adjoint(self, x):
+    def adjoint(self, *values):
         """Evaluates the adjoint composition.
         """
         global y
         y = None
 
         def adjoint_eval(node):
-            if node == self.end: outputs = x
+            if node == self.end: outputs = list(values)
             else: outputs = self.get_outputs(node)
-            inputs = node.adjoint(outputs)
+            if isinstance(outputs, list):
+                inputs = node.adjoint(*outputs)
+            else:
+                inputs = node.adjoint(outputs)
             if node == self.start: global y; y = inputs
             else: self.write_inputs(node, inputs)
 
@@ -314,29 +325,43 @@ class CompGraph:
     def sanity_check(self, eps=1e-5):
         """ Perform dot product test to check the sanity of this linear operator
         """
-        import torch
         from scipy.misc import face
         m = torch.from_numpy(face().copy()).float().cuda() / 255
         m = m.permute(2, 0, 1).unsqueeze(0)
-        d = self.forward([m])[0]
-        d2 = torch.rand_like(d)
-        m2 = self.adjoint([d2])[0]
-        diff = torch.abs(torch.sum(m * m2) - torch.sum(d * d2))
-        rel_diff = torch.abs((torch.sum(m * m2) - torch.sum(d * d2)) / torch.sum(m * m2))
+        d = self.forward(m)
+
+        if isinstance(d, LinOp.MultOutput):
+            d2 = [torch.rand_like(e) for e in d]
+            m2 = self.adjoint(*d2)
+            sum_m = torch.sum(m * m2)
+            sum_d = sum([torch.sum(e1 * e2) for e1, e2 in zip(d, d2)])
+            diff = torch.abs(sum_m - sum_d)
+            rel_diff = torch.abs((sum_m - sum_d) / sum_m)
+        else:
+            d2 = torch.rand_like(d)
+            m2 = self.adjoint(d2)
+
+            sum_m = torch.sum(m * m2)
+            sum_d = torch.sum(d * d2)
+            diff = torch.abs(sum_m - sum_d)
+            rel_diff = torch.abs((sum_m - sum_d) / sum_m)
+
         if rel_diff < eps:
             print(f'Sanity check passed, diff={diff} rel_diff={rel_diff}')
+            return True
         else:
             print(f'Sanity check failed, diff={diff} rel_diff={rel_diff}')
+            return False
 
     def update_vars(self, val):
         """Map sections of val to variables.
         """
-        for i, var in enumerate(self.end.variables()):
+        for i, var in enumerate(self.end.variables):
             var.value = val[i]
 
     def x0(self):
         res = []
-        for var in self.end.variables():
+        for var in self.end.variables:
             res += [torch.zeros(var.shape)]
         return res
 

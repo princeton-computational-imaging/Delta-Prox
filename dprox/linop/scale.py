@@ -13,19 +13,27 @@ class scale(LinOp):
         self.scalar = scalar
         super(scale, self).__init__([arg])
 
-    def forward(self, inputs):
+    # ---------------------------------------------------------------------------- #
+    #                                  Computation                                 #
+    # ---------------------------------------------------------------------------- #
+
+    def forward(self, input):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
-        return [inputs[0]* self.scalar]
+        return input * self.scalar
 
-    def adjoint(self, inputs):
+    def adjoint(self, input):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
         """
-        return self.forward(inputs)
+        return self.forward(input)
+
+    # ---------------------------------------------------------------------------- #
+    #                                   Diagonal                                   #
+    # ---------------------------------------------------------------------------- #
 
     def is_gram_diag(self, freq=False):
         """Is the lin  Gram diagonal (in the frequency domain)?
@@ -51,6 +59,10 @@ class scale(LinOp):
         """
         var_diags = self.input_nodes[0].get_diag(ref, freq) * self.scalar
         return var_diags * torch.conj(var_diags)
+
+    # ---------------------------------------------------------------------------- #
+    #                                   Property                                   #
+    # ---------------------------------------------------------------------------- #
 
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.

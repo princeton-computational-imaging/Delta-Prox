@@ -17,6 +17,10 @@ class Variable(LinOp):
         self.varname = name
         self.initval = None
 
+    # ---------------------------------------------------------------------------- #
+    #                                  Computation                                 #
+    # ---------------------------------------------------------------------------- #
+    
     def forward(self, inputs):
         """The forward operator.
 
@@ -31,8 +35,9 @@ class Variable(LinOp):
         """
         return inputs
 
-    def variables(self):
-        return [self]
+    # ---------------------------------------------------------------------------- #
+    #                                   Diagonal                                   #
+    # ---------------------------------------------------------------------------- #
 
     def is_diag(self, freq=False):
         """Is the lin op diagonal (in the frequency domain)?
@@ -53,6 +58,16 @@ class Variable(LinOp):
         """
         return torch.ones(ref.shape)
 
+
+    # ---------------------------------------------------------------------------- #
+    #                                   Property                                   #
+    # ---------------------------------------------------------------------------- #
+
+
+    @property
+    def variables(self):
+        return [self]
+    
     @property
     def value(self):
         return self._value.to(self.device)
@@ -77,3 +92,10 @@ class Variable(LinOp):
             Magnitude of outputs.
         """
         return 1.0
+
+    # ---------------------------------------------------------------------------- #
+    #                                 Python Magic                                 #
+    # ---------------------------------------------------------------------------- #
+    
+    def __repr__(self):
+        return f'Variable(id={self.uuid}, shape={self.shape}, value={self._value})'
