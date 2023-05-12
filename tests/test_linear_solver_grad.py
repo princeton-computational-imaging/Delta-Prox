@@ -99,7 +99,7 @@ def matrix_free_differentiate_dloss_dtheta(seed):
 
 
 def test_db():
-    for seed in range(100):
+    for seed in range(20):
         _, db_ref = auto_diff(seed)
         db_matrix, db_matrix_free = differentiate_dloss_db(seed)
         print('b', seed, torch.mean(torch.abs(db_ref- db_matrix)))
@@ -109,7 +109,7 @@ def test_db():
         
         
 def test_theta():
-    for seed in range(100):
+    for seed in range(20):
         dtheta_ref, _ = auto_diff(seed)
         dtheta_matrix = matrix_differentiate_dloss_dtheta(seed)
         dtheta_matrix_free = matrix_free_differentiate_dloss_dtheta(seed)

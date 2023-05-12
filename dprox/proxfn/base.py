@@ -41,8 +41,8 @@ class ProxFn(nn.Module):
         self.dag = CompGraph(linop, zero_out_constant=True)
 
     @property
-    def b(self):
-        return -self.linop.get_offset()
+    def offset(self):
+        return -self.linop.offset
 
     def unwrap(self, value):
         if isinstance(value, Placeholder):

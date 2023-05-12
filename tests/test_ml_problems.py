@@ -17,10 +17,10 @@ def test_lsq2():
     kernel = np.array([[1,1],[1,1]]) / 4
     prob = dp.Problem(dp.sum_squares(dp.conv(x, kernel) - rhs))
     prob.solve('admm', x0=np.zeros((3,3)))
-    out = dp.eval(dp.conv(x, kernel)-rhs, inputs=[x.value], zero_out_constant=False)
+    out = dp.eval(dp.conv(x, kernel)-rhs, x.value, zero_out_constant=False)
     print(x.value)
     print(out)
-    assert (out[0] - 0 < 1e-5).all()
+    assert (out < 1e-5).all()
     
     
 def test_lsq3():

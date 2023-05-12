@@ -21,14 +21,14 @@ class sum_squares(ProxFn):
     def b(self):
         if self._b is not None:
             return self.unwrap(self._b)
-        return super().b
+        return super().offset
 
     def _prox(self, v, lam):
         return v / (1 + 2 * lam)
 
     def grad(self, x):
-        tmp = eval(self.linop, [x])[0] - self.b
-        out = adjoint(self.linop, [tmp])[0]
+        tmp = eval(self.linop, x) - self.b
+        out = adjoint(self.linop, tmp)
         return out
 
 
@@ -64,7 +64,7 @@ class weighted_sum_squares(sum_squares):
 
     @property
     def Ktb(self):
-        return adjoint(self.weight, [self.unwrap(self._b)])[0]
+        return adjoint(self.weight, self.unwrap(self._b))
 
     def prox(self, v, lam):
         return self._prox_fn(v, lam)
@@ -122,12 +122,12 @@ class least_squares(ProxFn):
         device = rho.device
         Ktb = 0
         for fn in self.quad_fns:
-            Ktb += fn.dag.adjoint([fn.b])[0]
+            Ktb += fn.dag.adjoint(fn.b)
         for i, fn in enumerate(self.other_fns):
-            Ktb += rho * fn.dag.adjoint([b[i]])[0]
+            Ktb += rho * fn.dag.adjoint(b[i])
         if v is not None:
             Ktb += rho * v
-        
+
         def get_diag(fn: ProxFn):
             # TODO: hack for derain, don't forgot change it back, Ktb -> Ktb.shape
             return fn.linop.get_diag(Ktb, freq=self.freq_diagonalizable)
@@ -139,7 +139,7 @@ class least_squares(ProxFn):
             diag = diag + rho * get_diag(fn).to(device)
         if v is not None:
             diag = diag + rho
-        
+
         if self.freq_diagonalizable:
             Ktb = torch.fft.fftn(Ktb, dim=[-2, -1])
             out = torch.real(torch.fft.ifftn((Ktb + eps) / (diag + eps), dim=[-2, -1]))
@@ -168,7 +168,7 @@ class least_squares(ProxFn):
             Ktb += rho * fn.dag.adjoint([b[i]])[0]
         if v is not None:
             Ktb += rho * v
-            
+
         init_with_last_pred = kwargs.pop('init_with_last_pred', False)
         lin_solver_type = kwargs.pop('lin_solver_type', 'cg2')
         lin_solver = LINEAR_SOLVER[lin_solver_type]

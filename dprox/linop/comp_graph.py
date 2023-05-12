@@ -406,14 +406,17 @@ def est_CompGraph_norm(K, tol=1e-3, try_fast_norm=True):
     return np.float(Knorm)
 
 
-def eval(linop, inputs, zero_out_constant=True):
-    return CompGraph(linop, zero_out_constant).forward(inputs)
+def eval(linop, *inputs, zero_out_constant=True):
+    return CompGraph(linop, zero_out_constant).forward(*inputs)
 
 
-def adjoint(linop, inputs, zero_out_constant=True):
-    return CompGraph(linop, zero_out_constant).adjoint(inputs)
+def adjoint(linop, *inputs, zero_out_constant=True):
+    return CompGraph(linop, zero_out_constant).adjoint(*inputs)
 
 
-def gram(linop, inputs, zero_out_constant=True):
+def gram(linop, *inputs, zero_out_constant=True):
     K = CompGraph(linop, zero_out_constant)
-    return K.adjoint(K.forward(inputs))
+    outputs = K.forward(*inputs)
+    if isinstance(outputs, LinOp.MultOutput):
+        return K.adjoint(*outputs)
+    return K.adjoint(outputs)

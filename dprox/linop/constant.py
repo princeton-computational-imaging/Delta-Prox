@@ -25,7 +25,7 @@ class Constant(LinOp):
         """
         return self.value
 
-    def adjoint(self):
+    def adjoint(self, value):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
