@@ -10,7 +10,7 @@ class Constant(LinOp):
 
     def __init__(self, value):
         super(Constant, self).__init__([])
-        if not isinstance(value, torch.Tensor):
+        if value and not isinstance(value, torch.Tensor):
             value = torch.tensor(value)
         self._value = value
 

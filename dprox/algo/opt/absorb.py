@@ -29,7 +29,7 @@ def absorb_linop(prox_fn):
        a separable function's prox.
     """
     if isinstance(prox_fn.linop, mosaic) and isinstance(prox_fn, sum_squares):
-        new_fn = weighted_sum_squares(prox_fn.linop.input_nodes[0], prox_fn.linop, prox_fn.b)
+        new_fn = weighted_sum_squares(prox_fn.linop.input_nodes[0], prox_fn.linop, prox_fn.offset)
         return [new_fn]
     
     # Fold scalar into the function.

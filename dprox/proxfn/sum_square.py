@@ -18,7 +18,7 @@ class sum_squares(ProxFn):
         self._b = b
 
     @property
-    def b(self):
+    def offset(self):
         if self._b is not None:
             return self.unwrap(self._b)
         return super().offset
@@ -27,7 +27,7 @@ class sum_squares(ProxFn):
         return v / (1 + 2 * lam)
 
     def grad(self, x):
-        tmp = eval(self.linop, x) - self.b
+        tmp = eval(self.linop, x) - self.offset
         out = adjoint(self.linop, tmp)
         return out
 

@@ -60,7 +60,7 @@ class ProxFn(nn.Module):
         fn = self._prox
         fn = prox_scaled(fn, self.alpha)
         fn = prox_affine(fn, self.beta)
-        fn = prox_translated(fn, self.b)
+        fn = prox_translated(fn, self.offset)
         return fn(v, lam)
 
     def convex_conjugate_prox(self, v, lam):

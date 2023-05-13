@@ -8,11 +8,11 @@ from dprox.utils.misc import to_nn_parameter, to_torch_tensor
 class misr(ext_sum_squares):
     def __init__(self, linop, b, srf, eps=1e-7):
         super().__init__(linop, b, eps)
-        self.b = self.to_parameter(b)
+        self.offset = self.to_parameter(b)
         self.srf = srf
 
     def _reload(self, shape):
-        b = self.b.value
+        b = self.offset.value
         srf = self.srf
 
         srf = to_torch_tensor(srf).float()  # C*3
