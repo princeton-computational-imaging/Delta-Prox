@@ -24,3 +24,21 @@ def test_csmri():
 
     print(psnr(out, gt)) # 36.11
     assert abs(psnr(out, gt) - 42.6) < 0.1
+    
+    
+def test_deconv():
+    img = examples.sample('face')
+    psf = examples.point_spread_function(15, 5)
+    b = examples.blurring(img, psf)
+
+    x = Variable()
+    data_term = sum_squares(conv(x, psf) - b)
+    reg_term = deep_prior(x, denoiser='ffdnet_color')
+    reg2 = nonneg(x)
+    prob = Problem(data_term + reg_term + reg2)
+
+    out = prob.solve(method='admm', x0=b, pbar=True)
+
+    print(psnr(out, img)) 
+    assert abs(psnr(out, img) - 31.9) < 0.1
+    

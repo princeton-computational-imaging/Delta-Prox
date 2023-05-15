@@ -49,7 +49,7 @@ class ADMM(Algorithm):
         b = [v[i] - u[i] for i in range(len(self.psi_fns))]
         x = self.least_square.solve(b, rho)
 
-        Kx = self.K.forward([x])  # cache Kx
+        Kx = self.K.forward(x)  # cache Kx
         for i, fn in enumerate(self.psi_fns):
             v[i] = fn.prox(Kx[i] + u[i], lam=lam[fn])
             u[i] = u[i] + Kx[i] - v[i]
@@ -59,7 +59,7 @@ class ADMM(Algorithm):
     def initialize(self, x0):
         x = x0
         v = self.K.forward(x)
-        if v is None: v = [] # in case there is no psi fns
+        if v is None: v = []  # in case there is no psi fns
         u = [torch.zeros_like(e) for e in v]
         return x, v, u
 
@@ -100,16 +100,17 @@ class LinearizedADMM(ADMM):
 class ADMM_vxu(ADMM):
     """ update x,v,u in v,x,u order
     """
+
     def _iter(self, state, rho, lam):
         z, x, u = state
 
         Kz = self.K.forward(z)  # cache Kx
         for i, fn in enumerate(self.psi_fns):
             x[i] = fn.prox(Kz[i] - u[i], lam=lam[fn])
-            
+
         b = [x[i] + u[i] for i in range(len(self.psi_fns))]
         z = self.least_square.solve(b, rho)
-        
+
         for i, fn in enumerate(self.psi_fns):
             u[i] = u[i] + x[i] - z
 

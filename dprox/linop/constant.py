@@ -10,7 +10,7 @@ class Constant(LinOp):
 
     def __init__(self, value):
         super(Constant, self).__init__([])
-        if value and not isinstance(value, torch.Tensor):
+        if value is not None and not isinstance(value, torch.Tensor):
             value = torch.tensor(value)
         self._value = value
 
@@ -18,7 +18,7 @@ class Constant(LinOp):
     #                                  Computation                                 #
     # ---------------------------------------------------------------------------- #
 
-    def forward(self):
+    def forward(self, *value):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
@@ -92,4 +92,6 @@ class Constant(LinOp):
     # ---------------------------------------------------------------------------- #
     
     def __repr__(self):
-        return f'Constant(value={self._value})'
+        if self._value is not None:
+            return 'Constant(value=somevalue)'
+        return 'Constant(value=None)'

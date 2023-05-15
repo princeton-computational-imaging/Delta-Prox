@@ -190,7 +190,7 @@ def test_linear_solver_torch_backward_dtheta2():
 def test_linear_solver_torch_forward_dconv_doe():
     torch.manual_seed(seed)
     x = dprox.Variable((1,1,10,10))
-    psf = torch.randn((5,5))
+    psf = torch.randn((1,5,5))
     KtK = dprox.conv_doe(x, psf=psf).gram
     
     x = torch.randn(1,1,10,10)
@@ -208,7 +208,7 @@ def test_linear_solver_torch_forward_dconv_doe():
 def test_linear_solver_torch_backward_dconv_doe():
     torch.manual_seed(seed)
     x = dprox.Variable((1,1,10,10))
-    psf = torch.randn((5,5))
+    psf = torch.randn((1,5,5))
     KtK = dprox.conv_doe(x, psf=psf).gram
     
     x = torch.randn(1,1,10,10)
@@ -226,7 +226,7 @@ def test_linear_solver_torch_backward_dconv_doe():
     
     torch.manual_seed(seed)
     x = dprox.Variable((1,1,10,10))
-    psf = torch.randn((5,5))
+    psf = torch.randn((1,5,5))
     KtK = dprox.conv_doe(x, psf=psf).gram
     
     x = torch.randn(1,1,10,10)
@@ -249,7 +249,7 @@ def test_linear_solver_torch_backward_dconv_doe():
 def test_linear_solver_torch_backward_dconv_doe_ktk():
     torch.manual_seed(seed)
     x = dprox.Variable((1,1,10,10))
-    psf = torch.randn((5,5))
+    psf = torch.randn((1,5,5))
     KtK = dprox.conv_doe(x, psf=psf).gram
     
     x = torch.randn(1,1,10,10)

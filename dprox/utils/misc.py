@@ -20,15 +20,20 @@ def batchify(out):
 
 
 def to_torch_tensor(x, batch=False):
+    # we don't add batch dim to dp.tensor, as it is assumed to be batched.
+    if isinstance(x, dp.tensor):
+        return x
+    
     if isinstance(x, torch.Tensor):
         out = x
     elif isinstance(x, np.ndarray):
-        out = torch.from_numpy(x.copy())
+        out = dp.tensor(x.copy())
     else:
-        out = torch.tensor(x)
-
+        out = dp.tensor(x)
     if batch:
-        out = batchify(out)
+        if len(out.shape) == 3 and (out.shape[2] == 1 or out.shape[2] == 3):
+            out = out.permute(2, 0, 1)
+        out = out.unsqueeze(0)
     return out
 
 

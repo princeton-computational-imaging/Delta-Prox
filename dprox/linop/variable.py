@@ -98,4 +98,4 @@ class Variable(LinOp):
     # ---------------------------------------------------------------------------- #
     
     def __repr__(self):
-        return f'Variable(id={self.uuid}, shape={self.shape}, value={self._value})'
+        return f'Variable(id={self.uuid}, shape={self.shape}, value={"None" if self._value is None else "somevalue"})'

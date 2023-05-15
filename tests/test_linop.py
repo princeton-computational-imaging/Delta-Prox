@@ -100,3 +100,17 @@ def test_vstack():
     inputs = K.adjoint(outputs)
     print(inputs.shape)
     K.sanity_check()
+    
+def test_complex():
+    from dprox.utils import examples
+
+    img = examples.sample('face')
+    psf = examples.point_spread_function(15, 5)
+    b = examples.blurring(img, psf)
+
+    x = dp.Variable()
+    data_term = dp.sum_squares(dp.conv(x, psf) - b)
+    reg_term = dp.deep_prior(x, denoiser='ffdnet_color')
+    reg2 = dp.nonneg(x)
+    K = dp.CompGraph(dp.vstack([fn.linop for fn in [data_term, reg_term, reg2]]))
+    K.forward(b)

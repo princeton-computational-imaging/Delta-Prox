@@ -88,18 +88,25 @@ class CompGraph:
 
         # replace the split nodes with copy nodes
         for n in self.split_nodes.keys():
+            # find out the outputs by traverse the outputs of original node
             outedges = self.output_edges[n]
             outnodes = [e.end for e in outedges]
             copy_node = copy(n)
-            copy_node.input_nodes += [n]  # we actually can have more than two input nodes
+
+
+            # link split(copy) node with its original node, link in two direction, forward and adjoint
             self.output_edges[n] = [Edge(n, copy_node)]
             self.input_edges[copy_node] = self.output_edges[n]
+
+            # ---- link the output of copy node to its outputs. ---- #
             self.output_edges[copy_node] = []
+            # modify the input edge of the outputs node
             self.nodes.append(copy_node)
             for ns in outnodes:
                 inedges = self.input_edges[ns]
                 newinedges = []
                 for e in inedges:
+                    # if input edges's start is original node, replace it with the new copy node.
                     if e.start is n:
                         e = Edge(copy_node, e.end)
                         newinedges.append(e)
@@ -107,6 +114,9 @@ class CompGraph:
                     else:
                         newinedges.append(e)
                 self.input_edges[ns] = newinedges
+
+            # we actually can have more than two input nodes
+            copy_node.input_nodes += [n] * (len(self.output_edges[copy_node])-1)
 
         # Make copy node for each variable.
         old_vars = self.end.variables
@@ -173,7 +183,7 @@ class CompGraph:
     def write_outputs(self, node, outputs):
         """Returns the output data for a node.
         """
-        if not isinstance(outputs, list):
+        if not isinstance(outputs, LinOp.MultOutput):
             outputs = [outputs]
         for e, output in zip(self.output_edges[node], outputs):
             e.data = output
@@ -181,7 +191,7 @@ class CompGraph:
     def write_inputs(self, node, inputs):
         """Returns the input data for a node.
         """
-        if not isinstance(inputs, list):
+        if not isinstance(inputs, LinOp.MultOutput):
             inputs = [inputs]
         for e, input in zip(self.input_edges[node], inputs):
             e.data = input
@@ -195,10 +205,12 @@ class CompGraph:
         def forward_eval(node):
             if node == self.start: inputs = list(values)
             else: inputs = self.get_inputs(node)
-            if isinstance(inputs, list):
+            if len(inputs) > 1:
                 outputs = node.forward(*inputs)
+            elif len(inputs) == 1:
+                outputs = node.forward(inputs[0])
             else:
-                outputs = node.forward(inputs)
+                outputs = node.forward()
             if node == self.end: global y; y = outputs
             else: self.write_outputs(node, outputs)
 
@@ -215,10 +227,12 @@ class CompGraph:
         def adjoint_eval(node):
             if node == self.end: outputs = list(values)
             else: outputs = self.get_outputs(node)
-            if isinstance(outputs, list):
+            if len(outputs) > 1:
                 inputs = node.adjoint(*outputs)
+            elif len(outputs) == 1:
+                inputs = node.adjoint(outputs[0])
             else:
-                inputs = node.adjoint(outputs)
+                inputs = node.adjoint()
             if node == self.start: global y; y = inputs
             else: self.write_inputs(node, inputs)
 
@@ -317,7 +331,7 @@ class CompGraph:
                 Q.put(e.start)
         for node in nodes.keys():
             for e in self.input_edges.get(node, []):
-                dot.edge(node_name(e.end), node_name(e.start))
+                dot.edge(node_name(e.start), node_name(e.end))
 
         if save_path is None:
             display(dot)

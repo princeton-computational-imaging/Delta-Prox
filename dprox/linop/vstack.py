@@ -19,17 +19,19 @@ class vstack(LinOp):
 
         Reads from inputs and writes to outputs.
         """
-        if len(inputs) == 1: return inputs[0]
-        return LinOp.MultOutput(inputs)
+        if len(inputs) > 1:
+            return LinOp.MultOutput(inputs)
+        return inputs[0]
 
     def adjoint(self, *inputs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
         """
-        if len(inputs) == 1: return inputs[0]
-        return LinOp.MultOutput(inputs)
-
+        if len(inputs) > 1:
+            return LinOp.MultOutput(inputs)
+        return inputs[0]
+    
     # ---------------------------------------------------------------------------- #
     #                                   Diagonal                                   #
     # ---------------------------------------------------------------------------- #

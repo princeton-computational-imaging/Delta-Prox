@@ -122,7 +122,12 @@ class least_squares(ProxFn):
         device = rho.device
         Ktb = 0
         for fn in self.quad_fns:
-            Ktb += fn.dag.adjoint(fn.b)
+            # TODO: ideally, we should rewrite the dag to remove offset, 
+            # then we don't need to specially process sum's adjoint.
+            out = fn.dag.adjoint(fn.offset)
+            if isinstance(out, LinOp.MultOutput):
+                out = out[0]
+            Ktb += out
         for i, fn in enumerate(self.other_fns):
             Ktb += rho * fn.dag.adjoint(b[i])
         if v is not None:
