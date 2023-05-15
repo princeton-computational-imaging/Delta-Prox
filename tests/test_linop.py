@@ -70,12 +70,13 @@ def test_sum():
     outputs = K.forward(v1, v2)
 
     print(outputs)
-    assert torch.allclose(outputs, v1+v2)
-    
+    assert torch.allclose(outputs, v1 + v2)
+
     loss = torch.mean(outputs)
     loss.backward()
     print(v1.grad)
-    assert torch.allclose(v1.grad, torch.full_like(v1.grad, 1/16))
+    assert torch.allclose(v1.grad, torch.full_like(v1.grad, 1 / 16))
+
 
 def test_variable():
     x = dp.Variable()
@@ -95,12 +96,13 @@ def test_vstack():
 
     img = to_torch_tensor(face(), batch=True)
     print(img.shape)
-    
+
     outputs = K.forward(img)
     inputs = K.adjoint(outputs)
     print(inputs.shape)
     K.sanity_check()
-    
+
+
 def test_complex():
     from dprox.utils import examples
 

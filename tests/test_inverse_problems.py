@@ -22,7 +22,7 @@ def test_csmri():
     )
     out = x.value.real
 
-    print(psnr(out, gt)) # 36.11
+    print(psnr(out, gt)) 
     assert abs(psnr(out, gt) - 42.6) < 0.1
     
     

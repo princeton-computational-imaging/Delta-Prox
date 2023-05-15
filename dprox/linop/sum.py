@@ -24,8 +24,10 @@ class sum(LinOp):
         outputs = LinOp.MultOutput()
         for _ in self.input_nodes:
             outputs.append(input)
-        return outputs
-
+        if len(outputs) > 1:
+            return outputs
+        return outputs[0]
+    
     def is_diag(self, freq=False):
         """Is the lin op diagonal (in the frequency domain)?
         """

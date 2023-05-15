@@ -114,4 +114,4 @@ class ADMM_vxu(ADMM):
         for i, fn in enumerate(self.psi_fns):
             u[i] = u[i] + x[i] - z
 
-        return x[0], [z], u
+        return z, x, u
