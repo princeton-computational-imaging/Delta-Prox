@@ -85,3 +85,13 @@ class Problem:
 
     def visuliaze(self, savepath):
         pass
+
+
+class LPProblem:
+    def __init__(
+        self,
+        objective,
+        constraints,
+    ):
+        self.obj = objective
+        

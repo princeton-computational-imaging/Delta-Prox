@@ -241,7 +241,15 @@ class LinOp(nn.Module):
         """The negation of the Lin Op.
         """
         return -1 * self
-
+    
+    def __rmatmul__(self, other):
+        # other @ self
+        from .constaints import matmul
+        from .variable import Variable
+        if not isinstance(self, Variable):
+            print('only support variable')
+        return matmul(self, other)
+    
     def __str__(self):
         """Default to string is name of class.
         """

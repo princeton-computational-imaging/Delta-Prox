@@ -203,48 +203,7 @@ def test_lp_general_sparse():
     logging.info('test simple_cep_model_20220916...\n')
     c, A_ub, A_eq, b_ub, b_eq = load_simple_cep_model()
     
-    # problem = 'progress_model_incl_dprox_export_20230123'
-    # mat = io.loadmat('progress_model_incl_dprox_export_20230115/model.mat'); rho = 1e-1 ; reltol = 1e-4    
-    # mat = io.loadmat('progress_model_20221006/model.mat')
-    # mat = io.loadmat(join(problem, 'model.mat'))
-    # A_ub = mat['A_ub']
-    # b_ub = mat['b_ub'].squeeze()
-    # A_eq = mat['A_eq']
-    # b_eq = mat['b_eq'].squeeze()
-    # c = mat['c'].squeeze()
-
-    # with open("./progress_model_incl_dprox_export_20230120/instance_dict.pkl", "rb") as f:
-    #     instance_dict = pickle.load(f)
-
-    # with open("./progress_model_incl_dprox_export_20230120/gurobi_results.pkl", "rb") as f:
-    #     gurobi_results = pickle.load(f)
-    
     key = (2011, 0)
-    # key = (2010, 0)
-    # key = (2009, 0)
-    # key = (2008, 0)
-    # key = (2011, 7)
-    # key = (2011, 28)
-    # key = (2011, 357)
-     
-    # (c, A_ub, b_ub, A_eq, b_eq) = instance_dict[key]
-    # print('Gurobi Solution:', gurobi_results[key])
-    
-    # x = cvxpy.Variable(shape=c.shape)
-    # p = cvxpy.Problem(cvxpy.Minimize(c.T @ x), [x >= 0, A_eq @ x == b_eq, A_ub @ x <= b_ub])
-    # start = time.time()
-    # # p.solve(solver=cvxpy.GUROBI, verbose=True, Presolve=0, Crossover=1)
-    # p.solve(solver=cvxpy.SCIPY, verbose=True)
-    # # p.solve(solver=cvxpy.SCS, verbose=True)
-    # end = time.time()
-    # print(f"Time Elapse (CVXPY): {end-start:.4f}s\n")
-
-    # start = time.time()
-    # res = sop.linprog(c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=(0, None), 
-    #                   method="highs", options={"maxiter": 250000, "disp": True, "presolve": True})
-    # print(res.fun, res.success, res.status)
-    # end = time.time()
-    # print(f"Time Elapse (SCIPY highs): {end-start:.4f}s\n")
 
     max_iters = 200000
     abstol = 1e-3
@@ -262,17 +221,6 @@ def test_lp_general_sparse():
     criterion = LPConvergenceLoss()
 
     print(lpadmm)
-    # start = time.time()
-    # with torch.no_grad():
-    #     x, history, res = lpadmm.solve(lpproblem, residual_balance=False)
-    
-    # print(res[0])
-    # print(torch.linalg.vector_norm(lpproblem.A_eq @ x - lpproblem.b_eq) / torch.linalg.vector_norm(lpproblem.b_eq))
-    # print(x.min())
-    # torch.cuda.current_stream().synchronize()
-    # end = time.time()    
-    # logging.info(f"Time Elapse (DProx): {end-start:.4f}s\n")
-
     
     start = time.time()
     loss_log = []
@@ -282,7 +230,8 @@ def test_lp_general_sparse():
     for k in range(num_iters):
         # adjust_lr_cosine(optimizer, k, num_iters, base_lr=base_lr, min_lr=1e-3)
         optimizer.zero_grad()
-        objval, r_norm, s_norm, eps_primal, eps_dual = lpadmm.unrolled_forward(lpproblem, max_iters=10)
+        _, _, res = lpadmm.solve(lpproblem, max_iters=10)
+        objval, r_norm, s_norm, eps_primal, eps_dual = res
         
         # define loss
         loss = criterion(r_norm, s_norm, eps_primal, eps_dual)
@@ -296,15 +245,12 @@ def test_lp_general_sparse():
         
         print(loss.item())
         print(lpadmm)
-
-    # lpadmm.load_state_dict(best_state_dict)
-    # plt.plot(loss_log)
-    # plt.show()
     
     print(lpadmm)
     end1 = time.time()
 
     with torch.no_grad():
+        lpadmm.eval()
         # x, history, res = lpadmm.solve(lpproblem, rho=1e-1, sigma=1e-6, alpha=1.6)
         x, history, res = lpadmm.solve(lpproblem, residual_balance=True)
     

@@ -118,17 +118,8 @@ class LPSolverADMM(nn.Module):
             self.d_mul_log = nn.Parameter(torch.zeros(1, n, dtype=self.dtype))
             self.e_mul_log = nn.Parameter(torch.zeros(m, 1, dtype=self.dtype))
 
-    def unrolled_forward(self, lpproblem, max_iters=10):
-        self.training = True        
-        _, _, res = self._solve_precond(lpproblem, max_iters=max_iters)
-        return res
-        
-    def solve(self, lpproblem, **kwargs):
-        self.training = False
-        x, history, res = self._solve_precond(lpproblem, **kwargs)
-        return x, history, res
-    
-    def _solve_precond(self, lpproblem, rho=None, sigma=None, alpha=None, max_iters=None, eval_freq=25, residual_balance=False):
+
+    def solve(self, lpproblem, rho=None, sigma=None, alpha=None, max_iters=None, eval_freq=25, residual_balance=False):
         if max_iters is None: max_iters = self.max_iters
         vector_norm = partial(torch.linalg.vector_norm, ord=self.norm_ord)
         d, e, gamma_c, gamma_b, A, AT, Acnorm, ub, lb, c = lpproblem.get_data()

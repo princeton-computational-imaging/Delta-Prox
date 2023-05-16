@@ -1,42 +1,15 @@
-20:27:41,839 root INFO test simple_cep_model_20220916...
+83428.37178836174 192.83599045801876 0.004145761957515302 200.82662689180205 0.5693421632258725 30.304130603249398
+tensor([[83428.3718]], device='cuda:0', dtype=torch.float64)
+tensor(1.1154e-05, device='cuda:0', dtype=torch.float64)
+tensor(-192.8360, device='cuda:0', dtype=torch.float64)09:52:25,952 root INFO test simple_cep_model_20220916...
 
-20:41:55,309 root INFO test simple_cep_model_20220916...
+09:53:37,331 root INFO Time Elapse (DProx train stage): 26.8934s
 
-20:42:28,279 root INFO Time Elapse (DProx train stage): 27.2241s
+09:53:37,331 root INFO Time Elapse (DProx ft): 66.5087s
 
-20:42:28,280 root INFO Time Elapse (DProx ft): 27.9128s
+10:25:22,661 root INFO test simple_cep_model_20220916...
 
-20:43:06,816 root INFO test simple_cep_model_20220916...
+10:26:40,579 root INFO Time Elapse (DProx train stage): 26.9035s
 
-20:43:39,903 root INFO Time Elapse (DProx train stage): 26.7283s
-
-20:43:39,903 root INFO Time Elapse (DProx ft): 28.3788s
-
-20:46:16,858 root INFO test simple_cep_model_20220916...
-
-20:46:59,347 root INFO test simple_cep_model_20220916...
-
-21:02:45,427 root INFO test simple_cep_model_20220916...
-
-21:05:05,278 root INFO Time Elapse (DProx train stage): 40.6558s
-
-21:05:05,278 root INFO Time Elapse (DProx ft): 135.0468s
-
-21:10:54,677 root INFO Time Elapse (DProx train stage): 26.6490s
-
-21:10:54,677 root INFO Time Elapse (DProx ft): 1430.5845s
-
-17:13:30,96 root INFO test simple_cep_model_20220916...
-
-17:15:14,459 root INFO test simple_cep_model_20220916...
-
-22:12:56,3 root INFO test simple_cep_model_20220916...
-
-22:13:12,104 root INFO test simple_cep_model_20220916...
-
-22:13:26,745 root INFO test simple_cep_model_20220916...
-
-22:14:38,646 root INFO Time Elapse (DProx train stage): 27.3017s
-
-22:14:38,646 root INFO Time Elapse (DProx ft): 66.8232s
+10:26:40,579 root INFO Time Elapse (DProx ft): 73.1478s
 
