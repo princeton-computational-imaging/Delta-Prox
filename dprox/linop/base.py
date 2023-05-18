@@ -254,3 +254,5 @@ class LinOp(nn.Module):
         """Default to string is name of class.
         """
         return self.__class__.__name__
+    
+    __array_priority__ = 10000

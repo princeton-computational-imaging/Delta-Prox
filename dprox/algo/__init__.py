@@ -1,4 +1,4 @@
-from .problem import Problem, compile, specialize
+from .problem import Problem, LPProblem, compile, specialize
 from .admm import ADMM, ADMM_vxu, LinearizedADMM
 from .hqs import HQS
 from .pc import PockChambolle
