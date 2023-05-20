@@ -7,14 +7,14 @@ class PockChambolle(ADMM):
     def initialize(self, x0):
         x = x0
         xbar = x.clone()
-        z = self.K.forward(x)
+        z = self.K.forward(x, return_list=True)
         return x, z, xbar
 
     def _iter(self, state, rho, lam):
         x, z, xbar = state
 
         # update z
-        Kxbar = self.K.forward(xbar)
+        Kxbar = self.K.forward(xbar, return_list=True)
         for i, fn in enumerate(self.psi_fns):
             r = expand(lam[fn])
             z[i] = z[i] + r * Kxbar[i]

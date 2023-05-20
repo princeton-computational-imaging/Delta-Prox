@@ -14,9 +14,7 @@ class csmri(ext_sum_squares):
         if len(lam.shape) == 1:
             lam = lam.view(lam.shape[0], 1, 1, 1)
         y = self.unwrap(self.y)
-        mask = self.unwrap(self.mask)
-        
-        mask = mask.expand(v.shape)
+        mask = self.unwrap(self.mask).bool()
 
         z = fft2(v)
         temp = ((lam * z.clone()) + y) / (1 + lam * num_psi)

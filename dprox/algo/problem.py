@@ -63,6 +63,7 @@ class Problem:
         try_freq_diagonalize=True,
         lin_solver_kwargs={},
     ):
+        self.prob = None
         if isinstance(prox_fns, matmul):
             self.prob = LPProblem(prox_fns, constraints)
             return 
@@ -85,10 +86,12 @@ class Problem:
         return self.prox_fns
 
     def solve(self, method='admm', device='cuda', **kwargs):
-        if getattr(self, 'prob'):
+        if self.prob is not None:
             return self.prob.solve()
         
-        prox_fns = optimize(self.prox_fns, merge=self.merge, absorb=self.absorb)
+        # TODO: optimize has bug when scale is absorbed in test_ml_problems
+        # prox_fns = optimize(self.prox_fns, merge=self.merge, absorb=self.absorb)
+        prox_fns = self.prox_fns
         solver = compile(prox_fns, method=method, device=device, **self.solver_args)
         results = solver.solve(**kwargs)
         return results

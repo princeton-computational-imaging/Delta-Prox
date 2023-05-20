@@ -1,12 +1,11 @@
-import os
 import numpy as np
 from scipy import io
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+from dprox.utils.io import get_path
 
 
 def load_simple_cep_model():
-    model_components = io.loadmat(os.path.join(CURRENT_DIR, "simple_cep_model_20220916/output/esm_instance.mat"))
+    model_components = io.loadmat(get_path("data/energy_system/simple_cep_model_20220916/esm_instance.mat"))
     n_con, n_var = model_components["A"].shape
     print("Number of linear constraints (w/o bound constraints):", n_con)
     print("Number of decision variables:", n_var)

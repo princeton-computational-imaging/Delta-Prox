@@ -1,57 +1,37 @@
 import copy
-import os
-from os.path import join
 
 import torch
 import torch.nn as nn
 
-from dprox.utils.io import download_url
+from dprox.utils.io import get_path
 
 from ..base import ProxFn
 from .denoisers import (DRUNetDenoiser, FFDNetColorDenoiser, FFDNetDenoiser,
                         GRUNetDenoiser, IRCNNDenoiser, UNetDenoiser)
-from .denoisers.base import Denoiser
 from .denoisers.composite import Augment
-
-CURRENT_DIR = os.path.join(os.path.expanduser('~'), 'model_zoo')
-CHECKPOINT_DIR = os.environ.get('DPROX_MODEL_ZOO', CURRENT_DIR)
-
-
-
-
-def download_if_not_exist(name):
-    model_path = join(CHECKPOINT_DIR, name)
-    if not os.path.exists(model_path):
-        url = f"https://huggingface.co/aaronb/DeltaProx/resolve/main/denoiser/{name}"
-        print(f'{name} not found')
-        print('Try to download from huggingface: ', url)
-        os.makedirs(CHECKPOINT_DIR, exist_ok=True)
-        download_url(url, os.path.join(CHECKPOINT_DIR, name))
-        print('Downloaded to ', model_path)
-    return model_path
 
 
 def get_denoiser(type):
     if type == 'ffdnet':
-        model_path = download_if_not_exist('ffdnet_gray.pth')
+        model_path = get_path('denoiser/ffdnet_gray.pth')
         return FFDNetDenoiser(model_path)
     if type == 'ffdnet_color':
-        model_path = download_if_not_exist('ffdnet_color.pth')
+        model_path = get_path('denoiser/ffdnet_color.pth')
         return FFDNetColorDenoiser(model_path)
     if type == 'drunet_color':
-        model_path = download_if_not_exist('drunet_color.pth')
+        model_path = get_path('denoiser/drunet_color.pth')
         return DRUNetDenoiser(3, model_path)
     if type == 'drunet':
-        model_path = download_if_not_exist('drunet_gray.pth')
+        model_path = get_path('denoiser/drunet_gray.pth')
         return DRUNetDenoiser(1, model_path)
     if type == 'ircnn':
-        model_path = download_if_not_exist('ircnn_gray.pth')
+        model_path = get_path('denoiser/ircnn_gray.pth')
         return IRCNNDenoiser(1, model_path)
     if type == 'grunet':
-        model_path = download_if_not_exist('unet_qrnn3d.pth')
+        model_path = get_path('denoiser/unet_qrnn3d.pth')
         return GRUNetDenoiser(model_path)
     if type == 'unet':
-        model_path = download_if_not_exist('unet-nm.pt')
+        model_path = get_path('denoiser/unet-nm.pt')
         return UNetDenoiser(model_path)
 
 
@@ -91,15 +71,19 @@ class deep_prior(ProxFn):
         raise NotImplementedError('deep prior cannot be explictly evaluated')
 
     def _prox(self, v: torch.Tensor, lam: torch.Tensor):
-        """ v: [N, C, H, W]
+        """ v: [N, C, H, W] or [N, H, W]
             lam: [1]
         """
         if self.sqrt: lam = lam.sqrt()
         if self.clamp: v = v.clamp(0, 1)
         if torch.is_complex(v): v = v.real
-        if self.unroll: out = self.denoisers[self.step].denoise(v, lam)
-        else: out = self.denoiser.denoise(v, lam)
-        return out.type_as(v)
+        if len(v.shape) == 3: input = v.unsqueeze(1)
+        else: input = v
+        if self.unroll: out = self.denoisers[self.step].denoise(input, lam)
+        else: out = self.denoiser.denoise(input, lam)
+        out = out.type_as(v)
+        out = out.reshape(*v.shape)
+        return out
 
     def __repr__(self):
         return f'deep_prior(denoiser="{self.name}")'

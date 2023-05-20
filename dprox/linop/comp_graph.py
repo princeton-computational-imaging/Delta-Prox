@@ -93,7 +93,6 @@ class CompGraph:
             outnodes = [e.end for e in outedges]
             copy_node = copy(n)
 
-
             # link split(copy) node with its original node, link in two direction, forward and adjoint
             self.output_edges[n] = [Edge(n, copy_node)]
             self.input_edges[copy_node] = self.output_edges[n]
@@ -116,7 +115,7 @@ class CompGraph:
                 self.input_edges[ns] = newinedges
 
             # we actually can have more than two input nodes
-            copy_node.input_nodes += [n] * (len(self.output_edges[copy_node])-1)
+            copy_node.input_nodes += [n] * (len(self.output_edges[copy_node]) - 1)
 
         # Make copy node for each variable.
         old_vars = self.end.variables
@@ -196,7 +195,7 @@ class CompGraph:
         for e, input in zip(self.input_edges[node], inputs):
             e.data = input
 
-    def forward(self, *values):
+    def forward(self, *values, return_list=False):
         """Evaluates the forward composition.
         """
         global y
@@ -216,9 +215,11 @@ class CompGraph:
 
         self.traverse_graph(forward_eval, forward=True)
 
+        if return_list and y is not None and not isinstance(y, LinOp.MultOutput):
+            y = [y]
         return y
 
-    def adjoint(self, *values):
+    def adjoint(self, *values, return_list=False):
         """Evaluates the adjoint composition.
         """
         global y
@@ -238,6 +239,8 @@ class CompGraph:
 
         self.traverse_graph(adjoint_eval, forward=False)
 
+        if return_list and y is not None and not isinstance(y, LinOp.MultOutput):
+            y = [y]
         return y
 
     def traverse_graph(self, node_fn, forward):

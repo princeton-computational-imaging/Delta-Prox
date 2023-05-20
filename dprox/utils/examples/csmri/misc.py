@@ -9,9 +9,7 @@ from scipy.io import loadmat
 from torchlight.data import SingleImageDataset
 
 from dprox.utils import to_torch_tensor
-
-
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+from dprox.utils.io import get_path
 
 
 def fft2(x):
@@ -29,12 +27,10 @@ def ifft2(x):
 
 
 def sample(name='Bust.jpg'):
-    base_dir = Path(os.path.join(CURRENT_DIR, 'data'))
-
-    mask = loadmat(base_dir / 'masks/radial_128_2.mat').get('mask')
+    mask = loadmat(get_path('data/csmri/masks/radial_128_2.mat')).get('mask')
     mask = mask.astype('bool')
 
-    imgpath = base_dir / 'Medical_128' / name
+    imgpath = get_path(os.path.join('data/csmri/Medical_128', name))
     target = Image.open(imgpath).convert('L')
     target = np.array(target, dtype=np.float32) / 255.0
 
@@ -60,9 +56,7 @@ def sample(name='Bust.jpg'):
 class Dataset(SingleImageDataset):
     def __init__(self, root):
         super().__init__(root, mode='gray')
-        base_dir = Path(os.path.join(CURRENT_DIR, 'data'))
-
-        mask = loadmat(base_dir / 'masks/radial_128_2.mat').get('mask')
+        mask = loadmat(get_path('data/csmri/masks/radial_128_2.mat')).get('mask')
         mask = mask.astype('bool')
 
         self.mask = mask

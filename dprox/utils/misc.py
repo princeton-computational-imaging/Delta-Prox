@@ -25,6 +25,7 @@ def to_torch_tensor(x, batch=False):
         return x
     
     if isinstance(x, torch.Tensor):
+        # out = dp.tensor(x.detach().cpu().numpy())
         out = x
     elif isinstance(x, np.ndarray):
         out = dp.tensor(x.copy())

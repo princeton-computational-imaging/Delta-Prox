@@ -67,6 +67,7 @@ class Algorithm(nn.Module):
         self.psi_fns = nn.ModuleList(psi_fns)
         self.omega_fns = nn.ModuleList(omega_fns)
         self.K = CompGraph(vstack([fn.linop for fn in psi_fns]))
+        self.Kall = CompGraph(vstack([fn.linop for fn in psi_fns + omega_fns]))
 
     @property
     def device(self):
@@ -107,9 +108,9 @@ class Algorithm(nn.Module):
             recursive_set_step(op, step)
 
     def iter(self, state, rho, lam):
-        self.K.update_vars([state[0]])
+        self.Kall.update_vars([state[0]])
         state = self._iter(state, rho, lam)
-        self.K.update_vars([state[0]])
+        self.Kall.update_vars([state[0]])
         return state
 
     @abc.abstractmethod

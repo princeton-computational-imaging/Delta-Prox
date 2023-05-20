@@ -1,3 +1,4 @@
+import os
 import urllib.request
 
 import imageio
@@ -53,6 +54,20 @@ class DownloadProgressBar(tqdm):
         if tsize is not None:
             self.total = tsize
         self.update(b * bsize - self.n)
+
+
+def get_path(base_path):
+    DPROX_DIR = os.path.join(os.path.expanduser('~'), '.cache/dprox')
+
+    save_path = os.path.join(DPROX_DIR, base_path)
+    if not os.path.exists(save_path):
+        url = f"https://huggingface.co/aaronb/DeltaProx/resolve/main/{base_path}"
+        print(f'{base_path} not found')
+        print('Try to download from huggingface: ', url)
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        download_url(url, save_path)
+        print('Downloaded to ', save_path)
+    return save_path
 
 
 def download_url(url, output_path):
