@@ -1,6 +1,7 @@
+torch
 cvxpy
 torchlights
 termcolor
-git+https://github.com/Vandermode/TFPnP.git
+tfpnp
 matplotlib
 tensorboardX
