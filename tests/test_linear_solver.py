@@ -9,7 +9,7 @@ mu = 0.01
 A = P.T @ P + mu * I
 x = np.random.rand(5)
 offset = A @ x
-rtol = 1e-6
+rtol = 1e-8
 
 
 class MatrixLinOp(dp.LinOp):
@@ -58,7 +58,7 @@ def test_cg():
     x2 = torch.from_numpy(x)
     b2 = torch.from_numpy(offset)
     
-    xhat1 = dp.proxfn.linalg.solve.conjugate_gradient(K, b2)
+    xhat1 = dp.linalg.solve.conjugate_gradient(K, b2)
     # xhat2 = dp.proxfn.linalg.solve.conjugate_gradient2(K, b2)
     xhat3 = dp.linalg.solve.PCG(K, b2)
     

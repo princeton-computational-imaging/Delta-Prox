@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from dprox.linalg.solve import PCG
 from .utils import *
-from dprox.linalg.solve import PCG
+
 
 class LPConvergenceLoss(nn.Module):
     def __init__(self) -> None:
@@ -249,7 +249,7 @@ class LPSolverADMM(nn.Module):
             tmp = torch.linalg.solve_triangular(L, right, upper=False)
             xtilde = torch.linalg.solve_triangular(L.T, tmp, upper=True)
         else:
-            xtilde = PCG(ATAop, right, Minv, x0=xtilde.detach(), rtol=rtol, num_iters=200, verbose=False)
+            xtilde = PCG(ATAop, right, Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
         ztilde = A @ (xtilde)
         x = alpha * xtilde + (1 - alpha) * x
 
