@@ -1,6 +1,6 @@
 # Merge proximal operators together.
 
-from proximal.prox_fns import sum_squares, zero_prox
+# from proximal.prox_fns import sum_squares, zero_prox
 import numpy as np
 
 

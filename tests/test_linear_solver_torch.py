@@ -32,20 +32,26 @@ class SymmetricLinOp(dprox.LinOp):
 
 def test_linear_solver_torch_forward():
     torch.manual_seed(seed)
-
-    P = torch.randn(5, 5)
-    A = P.T @ P
-    x = torch.randn(5)
+    
+    dtype = torch.float64
+    P = torch.randn(5, 5, dtype=dtype)
+    I = torch.eye(5, dtype=dtype)
+    mu = 0.5
+    A = P.T @ P + mu * I
+    x = torch.randn(5, dtype=dtype)
     b = A @ x
     b = b.clone().detach().requires_grad_(True)
 
     A = LinOp(A)
-    xhat = dprox.proxfn.linalg.linear_solve(A, b)
+    # xhat = dprox.linalg.linear_solve(A, b)
+    # xhat = dprox.linalg.solve.conjugate_gradient(A, b, max_iters=100)
+    xhat = dprox.linalg.solve.PCG(A, b, max_iters=100)    
 
+    print(xhat.dtype)
     print(torch.mean(torch.abs(xhat - x)))
     print(x)
     print(xhat)
-    assert torch.allclose(x, xhat, rtol=1e-3)
+    assert torch.allclose(x, xhat, rtol=1e-6)
 
 
 def test_linear_solver_torch_backward_db():
@@ -60,7 +66,7 @@ def test_linear_solver_torch_backward_db():
 
     A = LinOp(A)
 
-    xhat = dprox.proxfn.linalg.linear_solve(A, b)
+    xhat = dprox.linalg.linear_solve(A, b)
 
     xhat.mean().backward()
 
@@ -77,7 +83,7 @@ def test_linear_solver_torch_backward_db():
 
     A = LinOp(A)
 
-    xhat = dprox.proxfn.linalg.solve.conjugate_gradient(A, b)
+    xhat = dprox.linalg.solve.conjugate_gradient(A, b)
 
     xhat.mean().backward()
 
@@ -101,7 +107,7 @@ def test_linear_solver_torch_backward_dtheta():
         b = A(x)
     b = b.clone().detach().requires_grad_(True)
 
-    xhat = dprox.proxfn.linalg.linear_solve(A, b)
+    xhat = dprox.linalg.linear_solve(A, b)
     xhat.mean().backward()
     grad1 = A.P.grad
 
@@ -116,7 +122,7 @@ def test_linear_solver_torch_backward_dtheta():
         b = A(x)
     b = b.clone().detach().requires_grad_(True)
 
-    xhat = dprox.proxfn.linalg.solve.conjugate_gradient(A, b)
+    xhat = dprox.linalg.solve.conjugate_gradient(A, b)
     xhat.mean().backward()
     grad2 = A.P.grad
 
@@ -133,15 +139,18 @@ def test_linear_solver_torch_backward_dtheta2():
     # gradient with implicit differentiation
     torch.manual_seed(seed)
 
-    P = torch.randn(5, 5)
-    A = LinOp(P @ P.T)
+    dtype = torch.float64
+    P = torch.randn(5, 5, dtype=dtype)
+    I = torch.eye(5, dtype=dtype)
+    mu = 0.5
+    A = LinOp(P @ P.T + mu * I)
 
-    x = torch.randn(5)
+    x = torch.randn(5, dtype=dtype)
     with torch.no_grad():
         b = A(x)
     b = b.clone().detach().requires_grad_(True)
 
-    xhat = dprox.proxfn.linalg.linear_solve(A, b)
+    xhat = dprox.linalg.linear_solve(A, b)
     xhat.mean().backward()
     grad1 = A.A.grad
 
@@ -149,25 +158,26 @@ def test_linear_solver_torch_backward_dtheta2():
     # warning:
     torch.manual_seed(seed)
 
-    P = torch.randn(5, 5)
-    A = LinOp(P @ P.T)
+    P = torch.randn(5, 5, dtype=dtype)
+    A = LinOp(P @ P.T + mu * I)
 
-    x = torch.randn(5)
+    x = torch.randn(5, dtype=dtype)
     with torch.no_grad():
         b = A(x)
     b = b.clone().detach().requires_grad_(True)
 
-    xhat = dprox.proxfn.linalg.solve.conjugate_gradient(A, b)
+    # xhat = dprox.linalg.solve.conjugate_gradient(A, b)
+    xhat = dprox.linalg.solve.PCG(A, b, btol=1e-10, max_iters=1000, verbose=True)
     xhat.mean().backward()
     grad2 = A.A.grad  # grad2 is only correct at the diagonal items.
 
     # explicit solve
     torch.manual_seed(seed)
 
-    P = torch.randn(5, 5).requires_grad_(True)
-    A = P @ P.T
+    P = torch.randn(5, 5, dtype=dtype).requires_grad_(True)
+    A = P @ P.T + mu * I
     A.retain_grad()
-    x = torch.randn(5)
+    x = torch.randn(5, dtype=dtype)
     with torch.no_grad():
         b = A @ x
     b = b.clone().detach().requires_grad_(True)
@@ -196,7 +206,7 @@ def test_linear_solver_torch_forward_dconv_doe():
     x = torch.randn(1,1,10,10)
     b = KtK(x)
     
-    xhat = dprox.proxfn.linalg.linear_solve(KtK, b)
+    xhat = dprox.linalg.linear_solve(KtK, b)
     
     print(x.squeeze()[0])
     print(xhat.squeeze()[0])
@@ -214,7 +224,7 @@ def test_linear_solver_torch_backward_dconv_doe():
     x = torch.randn(1,1,10,10)
     b = KtK(x)
     
-    xhat = dprox.proxfn.linalg.linear_solve(KtK, b)
+    xhat = dprox.linalg.linear_solve(KtK, b)
     
     xhat.mean().backward()
     
@@ -232,7 +242,7 @@ def test_linear_solver_torch_backward_dconv_doe():
     x = torch.randn(1,1,10,10)
     b = KtK(x)
     
-    xhat = dprox.proxfn.linalg.solve.conjugate_gradient(KtK, b)
+    xhat = dprox.linalg.solve.conjugate_gradient(KtK, b)
     
     xhat.mean().backward()
     
@@ -255,7 +265,7 @@ def test_linear_solver_torch_backward_dconv_doe_ktk():
     x = torch.randn(1,1,10,10)
     b = KtK(x)
     
-    xhat = dprox.proxfn.linalg.linear_solve(KtK, b)
+    xhat = dprox.linalg.linear_solve(KtK, b)
     
     xhat.mean().backward()
     

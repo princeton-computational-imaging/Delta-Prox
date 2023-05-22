@@ -6,7 +6,7 @@ import numpy as np
 
 def conjugate_gradient(
     A, b, 
-    x0=None, tol=1e-6, max_iters=100, verbose=False
+    x0=None, rtol=1e-6, max_iters=100, verbose=False
 ):
 
     # Temp vars
@@ -23,7 +23,7 @@ def conjugate_gradient(
     r *= -1.0
     r += b
 
-    cg_tol = tol * torch.linalg.norm(b.ravel(), 2)  # Relative tol
+    cg_tol = rtol * torch.linalg.norm(b.ravel(), 2)  # Relative tolerence
 
     # CG iteration
     gamma_1 = p = None
@@ -67,7 +67,7 @@ def conjugate_gradient(
 
 def conjugate_gradient2(
     A, b, 
-    x0=None, tol=1e-5, max_iters=500, verbose=False
+    x0=None, rtol=1e-6, max_iters=500, verbose=False
 ):
     # Solves A x = b
     x = torch.ones_like(b)
@@ -89,8 +89,8 @@ def conjugate_gradient2(
         beta = rnorm2 / rnorm
         rnorm = rnorm2
         d = r + beta * d
-        if rnorm2 < tol:
-            if verbose: print(f'converge at iter={iter}, tol={tol}')
+        if rnorm2 < rtol:
+            if verbose: print(f'converge at iter={iter}, rtol={rtol}')
             break
 
     res = b - A(x)
@@ -98,8 +98,46 @@ def conjugate_gradient2(
     return x
 
 
+def PCG(
+    A, b, 
+    Minv=None, x0=None, rtol=1e-6, max_iters=100, verbose=False
+):
+    """Preconditioned Conjugate Gradient Method"""
+    if Minv is None:
+        Minv = lambda x: x
 
-def cg_batch(A_bmm, B, M_bmm=None, X0=None, rtol=1e-5, atol=0., maxiter=None, verbose=False):
+    if x0 is not None:
+        x = x0
+    else:
+        x = torch.ones_like(b)
+        
+    r = A(x) - b
+    y = Minv(r)
+    p = - y
+
+    bnorm = torch.linalg.vector_norm(b.ravel())
+    
+    for iter in range(max_iters):
+        Ap = A(p)
+        ry = r.ravel() @ y.ravel()
+        alpha = ry / (p.ravel() @ Ap.ravel())
+        x = x + alpha * p
+        r = r + alpha * Ap
+        y = Minv(r)
+        # y = r
+        beta = (r.ravel() @ y.ravel()) / ry
+        p = - y + beta * p
+        rnorm = torch.linalg.vector_norm(r.ravel())
+        
+        if rnorm < rtol * bnorm:
+            break
+    
+    if verbose:
+        print('#IT:', iter + 1)
+    return x
+
+
+def cg_batch(A_bmm, B, M_bmm=None, X0=None, rtol=1e-6, atol=0., maxiter=None, verbose=False):
     """Solves a batch of PD matrix linear systems using the preconditioned CG algorithm.
     This function solves a batch of matrix linear systems of the form
         A_i X_i = B_i,  i=1,...,K,

@@ -92,4 +92,5 @@ def PLSS(x0, A, b, atol=1e-6, btol=1e-6, maxiter=500, ord=2):
     
     # print(k + 1)
     # print(rk_norm / b_norm)
-    return xk, rk_norm
+    # return xk, rk_norm
+    return xk
