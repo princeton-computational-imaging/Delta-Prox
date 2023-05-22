@@ -7,7 +7,7 @@ import torch.nn as nn
 from tqdm import tqdm
 
 from .utils import *
-
+from dprox.linalg.solve import PCG
 
 class LPConvergenceLoss(nn.Module):
     def __init__(self) -> None:
@@ -166,7 +166,7 @@ class LPSolverADMM(nn.Module):
         y = torch.zeros(m, 1, dtype=dtype, device=device)
         xtilde = torch.zeros_like(x)
     
-        btols = torch.logspace(-6, -10, 10000)
+        rtols = torch.logspace(-6, -10, 10000)
         history = defaultdict(lambda : [])
 
         # K = (AT @ A).to_dense() * rho + sigma * torch.eye(n, device=device, dtype=dtype)
@@ -181,9 +181,9 @@ class LPSolverADMM(nn.Module):
         Minv = lambda x: x / M
         
         for k in tqdm(range(max_iters)):
-            btol = 1e-10 if k >= 10000 else btols[k]
+            rtol = 1e-10 if k >= 10000 else rtols[k]
             variables = x, z, y, xtilde
-            x, z, y, xtilde = self._solve_one_iter_precond(variables, c, A, AT, ATAop, Minv, lb, ub, btol, rho, sigma, alpha, L=L)
+            x, z, y, xtilde = self._solve_one_iter_precond(variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, alpha, L=L)
                 
             if k % eval_freq == 0:
                 objval, r_norm, s_norm, eps_primal, eps_dual = self.eval_result(c, A, AT, d, e, gamma_c, gamma_b, x, z, y)                                
@@ -239,7 +239,7 @@ class LPSolverADMM(nn.Module):
         results = objval, r_norm, s_norm, eps_primal, eps_dual
         return x * d / gamma_b, history, results
         
-    def _solve_one_iter_precond(self, variables, c, A, AT, ATAop, Minv, lb, ub, btol, rho, sigma, alpha, L=None):
+    def _solve_one_iter_precond(self, variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, alpha, L=None):
         x, z, y, xtilde = variables
 
         # x-update
@@ -248,7 +248,7 @@ class LPSolverADMM(nn.Module):
             tmp = torch.linalg.solve_triangular(L, right, upper=False)
             xtilde = torch.linalg.solve_triangular(L.T, tmp, upper=True)
         else:
-            xtilde = PCG(ATAop, right, Minv, x_init=xtilde.detach(), btol=btol, num_iters=200, verbose=False)
+            xtilde = PCG(ATAop, right, Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
         ztilde = A @ (xtilde)
         x = alpha * xtilde + (1 - alpha) * x
 

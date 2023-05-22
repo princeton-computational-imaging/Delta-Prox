@@ -9,7 +9,7 @@ from .solve import SOLVERS
 
 @dataclass
 class LinearSolveConfig:
-    tol: float = 1e-5
+    rtol: float = 1e-6
     max_iters: int = 100
     verbose: bool = False
     solver_type: str = 'cg'
@@ -19,7 +19,7 @@ class LinearSolveConfig:
 def build_solver(config: LinearSolveConfig):
     solve_fn = SOLVERS[config.solver_type]
     solve_fn = partial(solve_fn,
-                       tol=config.tol,
+                       rtol=config.rtol,
                        max_iters=config.max_iters,
                        verbose=config.verbose,
                        **config.solver_kwargs)

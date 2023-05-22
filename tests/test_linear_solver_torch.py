@@ -167,7 +167,7 @@ def test_linear_solver_torch_backward_dtheta2():
     b = b.clone().detach().requires_grad_(True)
 
     # xhat = dprox.linalg.solve.conjugate_gradient(A, b)
-    xhat = dprox.linalg.solve.PCG(A, b, btol=1e-10, max_iters=1000, verbose=True)
+    xhat = dprox.linalg.solve.PCG(A, b, rtol=1e-10, max_iters=1000, verbose=True)
     xhat.mean().backward()
     grad2 = A.A.grad  # grad2 is only correct at the diagonal items.
 
