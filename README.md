@@ -18,18 +18,17 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 pip install dprox
 ```
 
-## Introduction
-
-$\nabla$-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. Departing from handwriting these solvers and differentiating via autograd, $\nabla$-Prox requires only a few lines of code to define a solver that can be *specialized based on user requirements w.r.t memory constraints or training budget* by optimized algorithm unrolling, deep equilibrium learning, and deep reinforcement learning. $\nabla$-Prox makes it easier to prototype different learning-based bi-level optimization problems for a diverse range of applications. We compare our framework against existing methods with naive implementations. $\nabla$-Prox is significantly more compact in terms of lines of code and compares favorably in memory consumption in applications across domains.
+> $\nabla$-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. Departing from handwriting these solvers and differentiating via autograd, $\nabla$-Prox requires only a few lines of code to define a solver that can be *specialized based on user requirements w.r.t memory constraints or training budget* by optimized algorithm unrolling, deep equilibrium learning, and deep reinforcement learning. $\nabla$-Prox makes it easier to prototype different learning-based bi-level optimization problems for a diverse range of applications. We compare our framework against existing methods with naive implementations. $\nabla$-Prox is significantly more compact in terms of lines of code and compares favorably in memory consumption in applications across domains.
 
 ## News
  
- > 🚧 The code is still under construction, more features would be migrated from our dev code.
+**[Jan 21 2023]**  Release preview code.
 
-- **[Jan 21 2023]**  Release preview code.
-
+> 🚧 The code is still under construction, more features would be migrated from our dev code.
 
 ## Getting Started
+
+### Solver construction
 
 Consider a simple image deconvlution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
 
@@ -59,6 +58,12 @@ out = prob.solve(method='admm', x0=b)
 Here is what we got,
 
 <img src="docs/source/_static/example_deconv.png" width="500" />
+
+### Solver Specialization
+
+```python
+
+```
 
 
 Please refer to the [documentation]() site for more instructions on the efficient differentiation of proximal algorithm with ∇-Prox.
