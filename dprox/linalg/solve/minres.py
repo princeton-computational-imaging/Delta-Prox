@@ -1,15 +1,7 @@
 # MIT-licensed code imported from https://github.com/cornellius-gp/linear_operator
 # Minor modifications for torchsparsegradutils to remove dependencies
-
 import torch
-from typing import NamedTuple
-
-
-class MINRESSettings(NamedTuple):
-    max_cg_iterations: int = 1000  # The maximum number of conjugate gradient iterations to perform (when computing
-    # matrix solves). A higher value rarely results in more accurate solves -- instead, lower the CG tolerance.
-    minres_tolerance: float = 1e-4  # Relative update term tolerance to use for terminating MINRES.
-    verbose_linalg: bool = False  # Print out information whenever running an expensive linear algebra routine
+from dprox import LinOp
 
 
 def _pad_with_singletons(obj, num_singletons_before=0, num_singletons_after=0):
@@ -24,15 +16,17 @@ def _pad_with_singletons(obj, num_singletons_before=0, num_singletons_after=0):
     return obj.view(*new_shape)
 
 
+# NOTE: MINRES solver does not support Unrolling mode 
 def MINRES(
-    A,
+    A: LinOp,
     b,
     eps=1e-25,
     shifts=None,
     value=None,
-    max_iters=None,
-    preconditioner=None,
-    settings: MINRESSettings = MINRESSettings(),
+    rtol=1e-6,
+    max_iters=100,
+    preconditioner=None,    
+    verbose=False,
 ):
     r"""
     Perform MINRES to find solutions to :math:`(\mathbf K + \alpha \sigma \mathbf I) \mathbf x = \mathbf b`.
@@ -44,15 +38,11 @@ def MINRES(
         then :math:`\sigma=0`.
     :param float value: (default None) The multiplicative constant :math:`\alpha`. If set to None,
         then :math:`\alpha=0`.
-    :param int max_iters: (default None) The maximum number of minres iterations. If set to None, then
-        uses the constant stored in :obj:`linear_operator.settings.max_cg_iterations`.
+    :param int max_iters: (default None) The maximum number of minres iterations. 
     :rtype: torch.Tensor
     :return: The solves :math:`\mathbf x`. The shape will correspond to the size of `b` and `shifts`.
     """
-    # Default values
-    if torch.is_tensor(A):
-        A = A.matmul
-    mm_ = A
+    # Default values    
     if preconditioner is None:
         preconditioner = lambda x: x.clone()
 
@@ -71,15 +61,13 @@ def MINRES(
     b = b.div(rhs_norm)
 
     # Use the right number of iterations
-    if max_iters is None:
-        max_iters = settings.max_cg_iterations
     max_iters = min(max_iters, b.size(-2) + 1)
 
     # Epsilon (to prevent nans)
     eps = torch.tensor(eps, dtype=b.dtype, device=b.device)
 
     # Create space for matmul product, solution
-    prod = mm_(b)
+    prod = A(b)
     if value is not None:
         prod.mul_(value)
 
@@ -134,18 +122,17 @@ def MINRES(
     search_update_norm = torch.zeros_like(solution_norm)
 
     # Maybe log
-    if settings.verbose_linalg:
-        # settings.verbose_linalg.logger.debug(
+    if verbose:        
         print(
-            f"Running MINRES on a {b.shape} RHS for {max_iters} iterations (tol={settings.minres_tolerance.value()}). "
+            f"Running MINRES on a {b.shape} RHS for {max_iters} iterations (rtol={rtol}). "
             f"Output: {solution.shape}."
         )
 
-    bnorm = torch.linalg.norm(b)
+    bnorm = torch.linalg.vector_norm(b)
     # Perform iterations
     for i in range(max_iters + 2):
         # Perform matmul
-        prod = mm_(qvec_prev1)
+        prod = A(qvec_prev1)
         if value is not None:
             prod.mul_(value)
 
@@ -197,15 +184,9 @@ def MINRES(
 
         # Check convergence criterion
         if (i + 1) % 10 == 0:
-            # torch.norm(search_update, dim=-2, out=search_update_norm)
-            # torch.norm(solution, dim=-2, out=solution_norm)
-            # conv = search_update_norm.div_(solution_norm).mean().item()
-            # if conv < settings.minres_tolerance:
-            #     break
-
-            r = mm_(solution[0]) - b
-            rnorm = torch.linalg.norm(r)
-            if rnorm <= settings.minres_tolerance * bnorm:
+            r = A(solution[0]) - b
+            rnorm = torch.linalg.vector_norm(r)
+            if rnorm <= rtol * bnorm:
                 break
 
         # Update terms for next iteration

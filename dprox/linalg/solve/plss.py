@@ -2,11 +2,12 @@
 For general linear system Ax = b with arbitrary matrix shape (supporting m = n; m > n; m < n)
 PLSS and PLSSW are good at solving well-conditioned and ill-conditioned systems respectively.
 See https://epubs.siam.org/doi/10.1137/22M1509783"""
-from dprox import LinOp
 import torch
+from dprox import LinOp
 
 
-def PLSS(A: LinOp, b, x0, rtol=1e-6, max_iters=500, verbose=False):
+def PLSS(A: LinOp, b, x0=None, rtol=1e-6, max_iters=500, verbose=False):
+    if x0 is None: x0 = torch.zeros_like(b)
     x_min = xk = x0
     b_norm = torch.linalg.vector_norm(b)
     rk = A(xk) - b
@@ -58,7 +59,7 @@ def PLSS(A: LinOp, b, x0, rtol=1e-6, max_iters=500, verbose=False):
     
     if verbose:
         print(k + 1)
-    return xk, rk_norm
+    return xk#, rk_norm
 
 
 def PLSSW(A: LinOp, b, x0, Wh, rtol=1e-6, max_iters=500, verbose=False):
@@ -133,4 +134,4 @@ def PLSSW(A: LinOp, b, x0, Wh, rtol=1e-6, max_iters=500, verbose=False):
     
     if verbose:                    
         print(k + 1)
-    return  xk, nck
+    return  xk#, nck

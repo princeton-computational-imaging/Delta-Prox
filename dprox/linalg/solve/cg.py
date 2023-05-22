@@ -2,11 +2,13 @@ import torch
 import numpy as np
 
 # TODO: standardize the stopping criterion
+RTOL = 1e-6
+MAX_ITERS = 100
 
 
 def conjugate_gradient(
     A, b, 
-    x0=None, rtol=1e-6, max_iters=100, verbose=False
+    x0=None, rtol=RTOL, max_iters=MAX_ITERS, verbose=False
 ):
 
     # Temp vars
@@ -20,7 +22,7 @@ def conjugate_gradient(
 
     # Compute residual
     r = A(x)
-    r *= -1.0
+    r *= - 1.0
     r += b
 
     cg_tol = rtol * torch.linalg.norm(b.ravel(), 2)  # Relative tolerence
@@ -67,7 +69,7 @@ def conjugate_gradient(
 
 def conjugate_gradient2(
     A, b, 
-    x0=None, rtol=1e-6, max_iters=500, verbose=False
+    x0=None, rtol=RTOL, max_iters=500, verbose=False
 ):
     # Solves A x = b
     x = torch.ones_like(b)
@@ -100,7 +102,7 @@ def conjugate_gradient2(
 
 def PCG(
     A, b, 
-    Minv=None, x0=None, rtol=1e-6, max_iters=100, verbose=False
+    Minv=None, x0=None, rtol=RTOL, max_iters=MAX_ITERS, verbose=False
 ):
     """Preconditioned Conjugate Gradient Method"""
     if Minv is None:
@@ -137,7 +139,7 @@ def PCG(
     return x
 
 
-def cg_batch(A_bmm, B, M_bmm=None, X0=None, rtol=1e-6, atol=0., maxiter=None, verbose=False):
+def cg_batch(A_bmm, B, M_bmm=None, X0=None, rtol=RTOL, atol=0., maxiter=None, verbose=False):
     """Solves a batch of PD matrix linear systems using the preconditioned CG algorithm.
     This function solves a batch of matrix linear systems of the form
         A_i X_i = B_i,  i=1,...,K,
@@ -233,10 +235,10 @@ def cg_batch(A_bmm, B, M_bmm=None, X0=None, rtol=1e-6, atol=0., maxiter=None, ve
     if verbose:
         if optimal:
             print("Terminated in %d steps (reached maxiter). Took %.3f ms." %
-                  (k, (end - start) * 1000))
+                  (k, (end - start) * MAX_ITERS0))
         else:
             print("Terminated in %d steps (optimal). Took %.3f ms." %
-                  (k, (end - start) * 1000))
+                  (k, (end - start) * MAX_ITERS0))
 
 
     info = {
