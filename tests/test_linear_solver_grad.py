@@ -16,7 +16,7 @@ def auto_diff(seed):
     theta = torch.randn((32,32), requires_grad=True)
     K = theta * 2
     x = torch.randn((32))
-    b = K@x
+    b = K @ x
     b = b.clone().detach().requires_grad_(True)
 
     xhat = torch.linalg.solve(K, b)
@@ -32,7 +32,7 @@ def differentiate_dloss_db(seed):
     theta = torch.randn((32,32), requires_grad=True)
     K = theta * 2
     x = torch.randn((32))
-    b = K@x
+    b = K @ x
     b = b.clone().detach().requires_grad_(True)
 
     xhat = torch.linalg.solve(K, b)
@@ -52,7 +52,7 @@ def matrix_differentiate_dloss_dtheta(seed):
     theta = torch.randn((32,32), requires_grad=True)
     K = theta * 2
     x = torch.randn((32))
-    b = K@x
+    b = K @ x
     b = b.clone().detach().requires_grad_(True)
 
     xhat = torch.linalg.solve(K, b)
@@ -78,7 +78,7 @@ def matrix_free_differentiate_dloss_dtheta(seed):
     theta = torch.randn((32,32), requires_grad=True)
     K = theta * 2
     x = torch.randn((32))
-    b = K@x
+    b = K @ x
     b = b.clone().detach().requires_grad_(True)
 
     xhat = torch.linalg.solve(K, b)

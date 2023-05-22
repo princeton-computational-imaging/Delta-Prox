@@ -18,7 +18,7 @@ deps = [
 
 setup(
     name='dprox',
-    description='A domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers.',
+    description='A domain-specific language and compiler that transforms optimization problems into differentiable proximal solvers.',
     url='https://github.com/princeton-computational-imaging/Delta-Prox',
     author='Zeqiang Lai',
     author_email='laizeqiang@outlook.com',

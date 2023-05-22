@@ -6,4 +6,3 @@ from .norm import norm1, norm2
 from .fast import *
 from .nlm import patch_nlm
 from .unrolling import unrolled_prior
-from . import linalg
