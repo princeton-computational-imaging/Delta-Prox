@@ -3,6 +3,7 @@ import cv2
 import torch
 import torch.nn as nn
 
+
 def uint2tensor4(img):
     if img.ndim == 2:
         img = np.expand_dims(img, axis=2)

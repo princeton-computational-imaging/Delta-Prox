@@ -17,6 +17,13 @@ def expand(r):
 
 
 def auto_convert_to_tensor(names, batchify):
+    """
+    A decorator that automatically converts specified arguments to PyTorch tensors.
+    
+    :param names: A list of strings representing the names of the arguments that should be converted to tensors
+    :param batchify: A list of names of arguments that should be batched together when converting to a tensor
+    :return: a decorator function `outter_wrapper`.
+    """
     def outter_wrapper(fn):
         def wrapper(*args, **kwargs):
             for k, v in kwargs.items():
@@ -49,6 +56,8 @@ def isscalar(x):
     return np.isscalar(x) or (isinstance(x, torch.Tensor) and len(x.shape) == 0)
 
 
+# The Algorithm class is an abstract class that defines methods and properties for solving
+# optimization problems using proximal algorithms.
 class Algorithm(nn.Module):
     # class method
 
@@ -75,6 +84,23 @@ class Algorithm(nn.Module):
 
     @auto_convert_to_tensor(['x0', 'rhos', 'lams'], batchify=['x0'])
     def solve(self, x0=None, rhos=None, lams=None, max_iter=24, pbar=False):
+        """
+        This function solves a problem using an iterative algorithm with given parameters and returns
+        the solution.
+        
+        :param x0: initial guess for the solution
+        :param rhos: A list of penalty parameters for each constraint in the optimization problem
+        :param lams: lams is a list of regularization parameters used in the optimization algorithm.
+        These parameters control the trade-off between fitting the data and keeping the model simple. A
+        higher value of lambda will result in a simpler model with less overfitting, while a lower value
+        of lambda will result in a more complex model
+        :param max_iter: The maximum number of iterations to run the optimization algorithm for,
+        defaults to 24 (optional)
+        :param pbar: A boolean flag indicating whether or not to display a progress bar during the
+        optimization process, defaults to False (optional)
+        :return: the first element of the state tuple, which is the solution to the optimization
+        problem.
+        """
         x0, rhos, lams, max_iter = self.defaults(x0, rhos, lams, max_iter)
         x0, rhos, lams = move(x0, rhos, lams, device=self.device)
 
@@ -118,6 +144,11 @@ class Algorithm(nn.Module):
         return NotImplementedError
 
     def _notify_all_op_current_step(self, step):
+        """
+        This function sets the step attribute for various functions and their associated linear operators.
+        
+        :param step: an integer representing the current step in a process or algorithm
+        """
         for fn in self.psi_fns:
             fn.step = step
         for fn in self.omega_fns:

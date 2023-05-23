@@ -9,6 +9,15 @@ import numpy as np
 
 
 def psf2otf(psf, outsize):
+    """
+    convert a point spread function (PSF) to an optical transfer function (OTF)
+    using fast Fourier transform (FFT).
+    
+    :param psf: a 2D or 3D array representing the point spread function
+    :param outsize: The desired output size of the optical transfer function (OTF)
+    :return: the optical transfer function (OTF) of a point spread function (PSF) after padding and
+    circularly shifting it.
+    """
     psf, psfsize, outsize = _process_args(psf, outsize)
     if not np.all(psf == 0):
         padsize = outsize - psfsize
@@ -46,6 +55,18 @@ def _process_args(psf, outsize):
 
 
 def padarray(array, padsize, direction='post'):
+    """
+    pad an array with zeros in a specified direction and size.
+    
+    :param array: The input array to be padded
+    :param padsize: The amount of padding to add to the array in each dimension
+    :param direction: The direction parameter specifies where the padding should be added in relation to
+    the input array. It can take three possible values: 'post' (padding is added at the end of the
+    array), 'pre' (padding is added at the beginning of the array), or 'both' (padding is added,
+    defaults to post (optional)
+    :return: a numpy array with padding added to the input array based on the specified padsize and
+    direction.
+    """
     pad_width = []
     for size in padsize:
         if direction == 'post':
@@ -61,6 +82,17 @@ def padarray(array, padsize, direction='post'):
 
 
 def circshift(array, shift):
+    """
+    shift the elements of a numpy array along one or more axes by a specified
+    number of positions.
+    
+    :param array: The input array that needs to be circularly shifted
+    :param shift: shift is a list of integers that specifies the number of positions by which the
+    elements of the input array should be shifted along each axis. The length of the shift list should
+    be equal to the number of dimensions of the input array
+    :return: The function `circshift` returns the input array after performing circular shifts along
+    each axis specified by the `shift` parameter.
+    """
     for axis, s in enumerate(shift):
         array = np.roll(array, s, axis=axis)
     return array
