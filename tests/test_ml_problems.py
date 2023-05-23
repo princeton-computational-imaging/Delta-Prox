@@ -1,6 +1,7 @@
 import numpy as np
 import dprox as dp
 
+
 def test_lsq():
     x = dp.Variable((3,3))
     rhs = np.array([[1, 2, 3],[4,5,6],[7,8,9]])
@@ -10,6 +11,7 @@ def test_lsq():
 
     assert (x.value.cpu().numpy() == rhs / 2).all()
     
+
 def test_lsq1():
     x = dp.Variable((3,3))
     rhs = np.array([[1, 2, 3],[4,5,6],[7,8,9]])

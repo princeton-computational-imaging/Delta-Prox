@@ -104,7 +104,7 @@ def test_minres():
     with torch.no_grad():
         xhat1 = dp.linalg.solve.MINRES(K, b2)
     
-    print('PLSS')
+    print('MINRES')
     print(torch.mean(torch.abs(xhat1-x2)).item())
     print(xhat1.detach().numpy())
     assert torch.allclose(xhat1, x2, rtol=rtol)

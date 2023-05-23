@@ -18,7 +18,7 @@ def imread_rgb(path):
     return np.asarray(img)
 
 
-def imshow(*imgs, maxcol=3, gray=False):
+def imshow(*imgs, maxcol=3, gray=False, titles=None):
     import matplotlib.pyplot as plt
     if len(imgs) != 1:
         plt.figure(figsize=(10, 5))
@@ -31,6 +31,7 @@ def imshow(*imgs, maxcol=3, gray=False):
         if gray or len(img.shape) == 2: plt.gray()
         plt.subplot(row, col, idx + 1)
         plt.imshow(img)
+        if titles is not None: plt.title(titles[idx])
     plt.show()
 
 
