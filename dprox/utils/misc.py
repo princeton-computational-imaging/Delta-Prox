@@ -3,6 +3,9 @@ import numpy as np
 
 import dprox as dp
 
+from .containar import is_dp_tensor
+
+
 def to_nn_parameter(*tensor, requires_grad=False):
     if(len(tensor) == 1):
         return torch.nn.Parameter(tensor[0], requires_grad=requires_grad)
@@ -11,7 +14,7 @@ def to_nn_parameter(*tensor, requires_grad=False):
 
 
 def batchify(out):
-    if isinstance(out, dp.tensor):
+    if is_dp_tensor(out):
         return out
     if len(out.shape) == 3 and (out.shape[2] == 1 or out.shape[2] == 3):
         out = out.permute(2, 0, 1)
@@ -21,20 +24,22 @@ def batchify(out):
 
 def to_torch_tensor(x, batch=False):
     # we don't add batch dim to dp.tensor, as it is assumed to be batched.
-    if isinstance(x, dp.tensor):
+    if is_dp_tensor(x):
         return x
-    
+
     if isinstance(x, torch.Tensor):
-        # out = dp.tensor(x.detach().cpu().numpy())
         out = x
     elif isinstance(x, np.ndarray):
         out = dp.tensor(x.copy())
     else:
         out = dp.tensor(x)
+
     if batch:
         if len(out.shape) == 3 and (out.shape[2] == 1 or out.shape[2] == 3):
             out = out.permute(2, 0, 1)
         out = out.unsqueeze(0)
+
+    out.is_dp_tensor = True
     return out
 
 

@@ -1,3 +1,5 @@
+import numpy as np
+
 from dprox import *
 from dprox.utils import *
 from dprox.utils import examples
@@ -22,10 +24,10 @@ def test_csmri():
     )
     out = x.value.real
 
-    print(psnr(out, gt)) 
+    print(psnr(out, gt))
     assert abs(psnr(out, gt) - 42.6) < 0.1
-    
-    
+
+
 def test_deconv():
     img = examples.sample('face')
     psf = examples.point_spread_function(15, 5)
@@ -39,6 +41,22 @@ def test_deconv():
 
     out = prob.solve(method='admm', x0=b, pbar=True)
 
-    print(psnr(out, img)) 
+    print(psnr(out, img))
     assert abs(psnr(out, img) - 31.9) < 0.1
-    
+
+
+def test_deconv2():
+    img = examples.sample('face')
+    psf = examples.point_spread_function(ksize=15, sigma=5)
+    # TODO: this still has bug
+    y = examples.blurring(img, psf) + np.random.randn(*img.shape).astype('float32') * 5 / 255.0
+    print(img.shape, y.shape)
+
+    x = Variable()
+    data_term = sum_squares(conv(x, psf) - y)
+    prior_term = deep_prior(x, 'ffdnet_color')
+    reg_term = nonneg(x)
+    objective = data_term + prior_term + reg_term
+    p = Problem(objective)
+    out = p.solve(method='admm', x0=y, pbar=True)
+    print(psnr(out, img))

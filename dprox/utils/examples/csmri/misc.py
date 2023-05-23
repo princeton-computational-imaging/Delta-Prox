@@ -42,6 +42,7 @@ def sample(name='Bust.jpg'):
     y0[:, ~mask] = 0
     Aty0 = ifft2(y0)
 
+    # TODO: all sample should return [1, C, H, W] tensor, or [H, W, C] numpy
     y0 = y0.squeeze()  # [1, H, W] -> [H, W]
     Aty0 = Aty0.squeeze()
     target = target.squeeze()
@@ -49,7 +50,7 @@ def sample(name='Bust.jpg'):
     Aty0 = to_torch_tensor(Aty0, batch=True)
     y0 = to_torch_tensor(y0, batch=True)
     target = to_torch_tensor(target, batch=True)
-    mask = to_torch_tensor(mask, batch=True)
+    mask = to_torch_tensor(mask.unsqueeze(0), batch=True)
     return Aty0.real, y0, target, mask
 
 
