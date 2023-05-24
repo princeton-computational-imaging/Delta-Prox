@@ -23,7 +23,7 @@ setup(
     author='Zeqiang Lai',
     author_email='laizeqiang@outlook.com',
     packages=find_packages(),
-    version='0.1.0',
+    version='0.1.1',
     include_package_data=True,
     install_requires=deps,
 )
