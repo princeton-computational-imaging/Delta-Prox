@@ -10,7 +10,7 @@ class sum(LinOp):
     def __init__(self, input_nodes):
         super(sum, self).__init__(input_nodes)
 
-    def forward(self, *inputs):
+    def forward(self, *inputs, **kwargs):
         """ Just sum all the inputs, all inputs should have the same shape
         """
         output = torch.zeros_like(inputs[0])
@@ -18,7 +18,7 @@ class sum(LinOp):
             output += input.to(output.device)
         return output
 
-    def adjoint(self, input):
+    def adjoint(self, input, **kwargs):
         """ The adjoint of sum spread of the input to all its child
         """
         outputs = LinOp.MultOutput()
@@ -79,19 +79,19 @@ class copy(sum):
     def __init__(self, arg):
         super(copy, self).__init__([arg])
 
-    def forward(self, inputs):
+    def forward(self, inputs, **kwargs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
-        return super(copy, self).adjoint(inputs)
+        return super(copy, self).adjoint(inputs, **kwargs)
 
-    def adjoint(self, *inputs):
+    def adjoint(self, *inputs, **kwargs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
         """
-        return super(copy, self).forward(*inputs)
+        return super(copy, self).forward(*inputs, **kwargs)
 
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.

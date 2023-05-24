@@ -50,6 +50,7 @@ def test_deconv2():
     psf = examples.point_spread_function(ksize=15, sigma=5)
     # TODO: this still has bug
     y = examples.blurring(img, psf) + np.random.randn(*img.shape).astype('float32') * 5 / 255.0
+    y.squeeze(0)
     print(img.shape, y.shape)
 
     x = Variable()

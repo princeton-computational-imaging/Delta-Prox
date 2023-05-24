@@ -17,8 +17,8 @@ def LinOpFactory(forward, adjoint, diag=None, norm_bound=None):
     norm_bound : float, optional
         An upper bound on the spectral norm of the operator.
     """
-    def get_black_box(arg):
-        return BlackBox(arg, forward, adjoint, diag, norm_bound)
+    def get_black_box(*args):
+        return BlackBox(*args, forward=forward, adjoint=adjoint, diag=diag, norm_bound=norm_bound)
     return get_black_box
 
 
@@ -26,26 +26,30 @@ class BlackBox(LinOp):
     """A black-box lin op specified by the user.
     """
 
-    def __init__(self, arg, forward, adjoint, diag=None, norm_bound=None):
+    def __init__(self, *args, forward=None, adjoint=None, diag=None, norm_bound=None):
         self._forward = forward
         self._adjoint = adjoint
         self._norm_bound = norm_bound
         self._diag = diag
-        super(BlackBox, self).__init__([arg])
+        super(BlackBox, self).__init__(args)
 
-    def forward(self, inputs):
+    def forward(self, *inputs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
-        return self._forward(inputs, self.step)
+        if len(inputs) == 1:
+            return self._forward(inputs[0], step=self.step)
+        return self._forward(*inputs, step=self.step)
 
-    def adjoint(self, inputs):
+    def adjoint(self, *inputs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
         """
-        return self._adjoint(inputs, self.step)
+        if len(inputs) == 1:
+            return self._adjoint(inputs[0], step=self.step)
+        return self._adjoint(*inputs, step=self.step)
 
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.

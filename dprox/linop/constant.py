@@ -18,14 +18,14 @@ class Constant(LinOp):
     #                                  Computation                                 #
     # ---------------------------------------------------------------------------- #
 
-    def forward(self, *value):
+    def forward(self, *value, **kwargs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
         return self.value
 
-    def adjoint(self, value):
+    def adjoint(self, value, **kwargs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.

@@ -15,7 +15,7 @@ class mosaic(LinOp):
     #                                  Computation                                 #
     # ---------------------------------------------------------------------------- #
 
-    def forward(self, input):
+    def forward(self, input, **kwargs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
@@ -23,7 +23,7 @@ class mosaic(LinOp):
         mask = self._mask(input.shape).to(input.device)
         return mask * input
 
-    def adjoint(self, input):
+    def adjoint(self, input, **kwargs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.

@@ -21,14 +21,14 @@ class Variable(LinOp):
     #                                  Computation                                 #
     # ---------------------------------------------------------------------------- #
     
-    def forward(self, inputs):
+    def forward(self, inputs, **kwargs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
         return inputs
 
-    def adjoint(self, inputs):
+    def adjoint(self, inputs, **kwargs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.

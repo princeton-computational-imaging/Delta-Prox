@@ -4,6 +4,7 @@ import torch
 
 from dprox.proxfn import ProxFn, sum_squares, ext_sum_squares
 from dprox.linop import eval, adjoint
+from dprox.linalg import LinearSolveConfig
 
 from .base import Algorithm, expand
 from .invert import get_least_square_solver
@@ -39,10 +40,10 @@ class ADMM(Algorithm):
         omega_fns: List[ProxFn],
         try_diagonalize=True,
         try_freq_diagonalize=True,
-        lin_solver_kwargs={}
+        linear_solve_config=LinearSolveConfig()
     ):
         super().__init__(psi_fns, omega_fns)
-        self.least_square = get_least_square_solver(psi_fns, omega_fns, try_diagonalize, try_freq_diagonalize, lin_solver_kwargs)
+        self.least_square = get_least_square_solver(psi_fns, omega_fns, try_diagonalize, try_freq_diagonalize, linear_solve_config)
 
     def _iter(self, state, rho, lam):
         x, v, u = state

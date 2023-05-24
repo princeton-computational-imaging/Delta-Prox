@@ -1,12 +1,15 @@
+from typing import Union
+
 import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
 
-from dprox.utils.misc import batchify, to_ndarray
+from dprox.utils.misc import batchify, to_ndarray, to_torch_tensor
 from dprox.utils.psf2otf import psf2otf
 
 from .base import LinOp
+from .placeholder import Placeholder
 
 
 class conv(LinOp):
@@ -26,13 +29,13 @@ class conv(LinOp):
             self.cache[shape] = FB
         return self.cache[shape]
 
-    def forward(self, input):
+    def forward(self, input, **kwargs):
         FB = self._FB(input.shape).to(input.device)
         Fx = torch.fft.fftn(input, dim=[-2, -1])
         output = torch.real(torch.fft.ifftn(FB * Fx, dim=[-2, -1])).float()
         return output
 
-    def adjoint(self, input):
+    def adjoint(self, input, **kwargs):
         FB = self._FB(input.shape).to(input.device)
         Fx = torch.fft.fftn(input, dim=[-2, -1])
         output = torch.real(torch.fft.ifftn(torch.conj(FB) * Fx, dim=[-2, -1])).float()
@@ -82,13 +85,25 @@ class conv_doe(LinOp):
     """Circular convolution of the input with a kernel.
     """
 
-    def __init__(self, arg, psf, circular=False):
+    def __init__(
+        self,
+        arg: LinOp,
+        psf: Union[Placeholder, torch.Tensor, np.array],
+        circular: bool = False
+    ):
         super().__init__([arg])
-        self.psf = nn.parameter.Parameter(psf)
+        self._psf = psf
         self.circular = circular
 
-    def forward(self, img):
-        psf = self.unwrap(self.psf).to(img.device)
+        if isinstance(psf, Placeholder):
+            def on_change(val):
+                self.psf = nn.parameter.Parameter(val)
+            self._psf.change(on_change)
+        else:
+            self.psf = nn.parameter.Parameter(to_torch_tensor(psf, batch=True))
+
+    def forward(self, img, **kwargs):
+        psf = self.psf.to(img.device)
 
         if not self.circular:
             # linearized conv
@@ -108,7 +123,7 @@ class conv_doe(LinOp):
 
         return output
 
-    def adjoint(self, img):
+    def adjoint(self, img, **kwargs):
         psf = self.unwrap(self.psf).to(img.device)
 
         if not self.circular:

@@ -62,7 +62,7 @@ def imread(path) -> np.ndarray:
     has been read from the file path specified in the input argument. The pixel values of the image are
     normalized to the range [0, 1] by dividing each pixel value by 255.
     """
-    img = imageio.imread(path)
+    img = imageio.imread(get_path(path))
     return np.float32(img) / 255
 
 

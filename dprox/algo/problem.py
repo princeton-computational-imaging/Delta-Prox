@@ -1,12 +1,13 @@
 from dprox.linop.constaints import matmul, less, equality
-from . import lp
 from typing import List, Union
 
 import torch
 
 from dprox.proxfn import ProxFn
+from dprox.linalg import LinearSolveConfig
 
 from . import opt
+from . import lp
 from .admm import ADMM, ADMM_vxu, LinearizedADMM
 from .base import Algorithm
 from .hqs import HQS
@@ -61,13 +62,13 @@ class Problem:
         merge=True,
         try_diagonalize=True,
         try_freq_diagonalize=True,
-        lin_solver_kwargs={},
+        linear_solve_config=LinearSolveConfig(),
     ):
         self.prob = None
         if isinstance(prox_fns, matmul):
             self.prob = LPProblem(prox_fns, constraints)
-            return 
-        
+            return
+
         if isinstance(prox_fns, ProxFn):
             prox_fns = [prox_fns]
         self.prox_fns = prox_fns
@@ -78,7 +79,7 @@ class Problem:
         self.solver_args = dict(
             try_diagonalize=try_diagonalize,
             try_freq_diagonalize=try_freq_diagonalize,
-            lin_solver_kwargs=lin_solver_kwargs,
+            linear_solve_config=linear_solve_config,
         )
 
     @property
@@ -88,7 +89,7 @@ class Problem:
     def solve(self, method='admm', device='cuda', **kwargs):
         if self.prob is not None:
             return self.prob.solve()
-        
+
         # TODO: optimize has bug when scale is absorbed in test_ml_problems
         # prox_fns = optimize(self.prox_fns, merge=self.merge, absorb=self.absorb)
         prox_fns = self.prox_fns

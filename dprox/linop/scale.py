@@ -17,14 +17,14 @@ class scale(LinOp):
     #                                  Computation                                 #
     # ---------------------------------------------------------------------------- #
 
-    def forward(self, input):
+    def forward(self, input, **kwargs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
         return input * self.scalar
 
-    def adjoint(self, input):
+    def adjoint(self, input, **kwargs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.

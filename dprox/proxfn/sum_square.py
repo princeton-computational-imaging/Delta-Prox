@@ -2,8 +2,8 @@ from typing import List
 
 import torch
 
-from dprox.linop import LinOp, vstack, eval, adjoint
-# from .linalg import LINEAR_SOLVER
+from dprox.linop import LinOp, vstack, LinOpFactory, eval, adjoint
+from dprox.linalg import linear_solve, LinearSolveConfig
 
 from . import ProxFn
 
@@ -90,7 +90,7 @@ class least_squares(ProxFn):
         try_diagonalize=True,
         try_freq_diagonalize=True,
         fallback_solver='cg',
-        lin_solver_kwargs={},
+        linear_solve_config=LinearSolveConfig(),
     ):
         self.quad_fns = quad_fns
         self.other_fns = other_fns
@@ -98,7 +98,7 @@ class least_squares(ProxFn):
         self.try_freq_diagonalize = try_freq_diagonalize
         self.try_diagonalize = try_diagonalize
         self.fallback_solver = fallback_solver
-        self.lin_solver_kwargs = lin_solver_kwargs
+        self.linear_solve_config = linear_solve_config
 
         linops = [fn.linop for fn in quad_fns + other_fns]
         stacked = vstack(linops)
@@ -116,13 +116,13 @@ class least_squares(ProxFn):
         if self.diagonalizable or self.freq_diagonalizable:
             return self.solve_direct(b, rho, v, eps)
         else:
-            return self.solve_cg(b, rho, v, **self.lin_solver_kwargs)
+            return self.solve_cg(b, rho, v, self.linear_solve_config)
 
     def solve_direct(self, b, rho, v=None, eps=1e-7):
         device = rho.device
         Ktb = 0
         for fn in self.quad_fns:
-            # TODO: ideally, we should rewrite the dag to remove offset, 
+            # TODO: ideally, we should rewrite the dag to remove offset,
             # then we don't need to specially process sum's adjoint.
             out = fn.dag.adjoint(fn.offset)
             if isinstance(out, LinOp.MultOutput):
@@ -153,34 +153,28 @@ class least_squares(ProxFn):
 
         return out.float()
 
-    def solve_cg(self, b, rho, v=None, **kwargs):
+    def solve_cg(self, b, rho, v=None, linear_solve_config=LinearSolveConfig()):
         # KtKfun being a function that computes the matrix vector product KtK x
 
-        def KtK(x):
+        def KtK(x, **kwargs):
             out = 0
             for fn in self.quad_fns:
-                out += fn.dag.adjoint(fn.dag.forward([x]))[0]
+                out += fn.dag.adjoint(fn.dag.forward(x))
             for fn in self.other_fns:
-                out += rho * fn.dag.adjoint(fn.dag.forward([x]))[0]  # slow when rho is small
+                out += rho * fn.dag.adjoint(fn.dag.forward(x))  # slow when rho is small
             if v is not None:
                 out += rho * x
             return out
 
+        linop = LinOpFactory(KtK, KtK)()
+
         Ktb = 0
         for fn in self.quad_fns:
-            Ktb += fn.dag.adjoint([fn.b])[0]
+            Ktb += fn.dag.adjoint(fn.offset)
         for i, fn in enumerate(self.other_fns):
-            Ktb += rho * fn.dag.adjoint([b[i]])[0]
+            Ktb += rho * fn.dag.adjoint(b[i])
         if v is not None:
             Ktb += rho * v
 
-        init_with_last_pred = kwargs.pop('init_with_last_pred', False)
-        lin_solver_type = kwargs.pop('lin_solver_type', 'cg2')
-        lin_solver = LINEAR_SOLVER[lin_solver_type]
-        if init_with_last_pred:
-            x_init = self.last_x_pred if hasattr(self, 'last_x_pred') else None
-            x_pred = lin_solver(KtK, Ktb, x_init=x_init, **kwargs)
-            self.last_x_pred = x_pred
-        else:
-            x_pred = lin_solver(KtK, Ktb, **kwargs)
+        x_pred = linear_solve(linop, Ktb, config=linear_solve_config)
         return x_pred

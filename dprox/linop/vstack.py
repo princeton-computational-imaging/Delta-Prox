@@ -14,7 +14,7 @@ class vstack(LinOp):
     #                                  Computation                                 #
     # ---------------------------------------------------------------------------- #
 
-    def forward(self, *inputs):
+    def forward(self, *inputs, **kwargs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
@@ -23,7 +23,7 @@ class vstack(LinOp):
             return LinOp.MultOutput(inputs)
         return inputs[0]
 
-    def adjoint(self, *inputs):
+    def adjoint(self, *inputs, **kwargs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
@@ -90,19 +90,19 @@ class split(vstack):
         self.input_nodes = []
         super(split, self).__init__(output_nodes)
 
-    def forward(self, *inputs):
+    def forward(self, *inputs, **kwargs):
         """The forward operator.
 
         Reads from inputs and writes to outputs.
         """
-        return super(split, self).adjoint(*inputs)
+        return super(split, self).adjoint(*inputs, **kwargs)
 
-    def adjoint(self, *inputs):
+    def adjoint(self, *inputs, **kwargs):
         """The adjoint operator.
 
         Reads from inputs and writes to outputs.
         """
-        return super(split, self).forward(*inputs)
+        return super(split, self).forward(*inputs, **kwargs)
 
     def norm_bound(self, input_mags):
         """Gives an upper bound on the magnitudes of the outputs given inputs.

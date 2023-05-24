@@ -71,7 +71,8 @@ def to_torch_tensor(x, batch=False):
     if batch:
         if len(out.shape) == 3 and (out.shape[2] == 1 or out.shape[2] == 3):
             out = out.permute(2, 0, 1)
-        out = out.unsqueeze(0)
+        if len(out.shape) < 4:
+            out = out.unsqueeze(0)
 
     out.is_dp_tensor = True
     return out
