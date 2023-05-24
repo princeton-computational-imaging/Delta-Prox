@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import PIL.Image as Image
 import torch
+from dataclasses import dataclass, field
 from torchlight.data import SingleImageDataset
 
 from dprox import *
@@ -12,22 +13,39 @@ from dprox.utils import *
 
 from .doe_model import RGBCollimator, center_crop, img_psf_conv
 
-circular = True
-aperture_diameter = 3e-3
-sensor_distance = 15e-3  # Distance of sensor to aperture
-refractive_idcs = torch.tensor([1.4648, 1.4599, 1.4568])  # Refractive idcs of the phaseplate
-wave_lengths = torch.tensor([460, 550, 640]) * 1e-9  # Wave lengths to be modeled and optimized for
-num_steps = 10001  # Number of SGD steps
-# patch_size = 1248  # Size of patches to be extracted from images, and resolution of simulated sensor
-patch_size = 748  # Size of patches to be extracted from images, and resolution of simulated sensor
-sample_interval = 2e-6  # Sampling interval (size of one "pixel" in the simulated wavefront)
-wave_resolution = 1496, 1496  # Resolution of the simulated wavefront
-
 
 device = torch.device('cuda')
 
 
+@dataclass
+class DOEModelConfig:
+    circular: bool = True # circular convolution
+    aperture_diameter: float = 3e-3 # aperture diameter
+    sensor_distance: float = 15e-3  # Distance of sensor to aperture
+    refractive_idcs = torch.tensor([1.4648, 1.4599, 1.4568])  # Refractive idcs of the phaseplate
+    wave_lengths = torch.tensor([460, 550, 640]) * 1e-9  # Wave lengths to be modeled and optimized for
+    num_steps: int = 10001  # Number of SGD steps
+    # patch_size = 1248  # Size of patches to be extracted from images, and resolution of simulated sensor
+    patch_size: int = 748  # Size of patches to be extracted from images, and resolution of simulated sensor
+    sample_interval: float = 2e-6  # Sampling interval (size of one "pixel" in the simulated wavefront)
+    wave_resolution = 1496, 1496  # Resolution of the simulated wavefront
+    model_kwargs: dict = field(default_factory=dict)
+
+
 def normalize_psf(psf, range=1, mode='band'):
+    """
+    normalize a given PSF (point spread function) image by scaling its pixel values to a
+    specified range and mode.
+    
+    :param psf: a 3-dimensional numpy array representing a point spread function (PSF) image
+    :param range: The maximum value that the PSF can take after normalization. Any values above this
+    range will be clipped to this maximum value, defaults to 1 (optional)
+    :param mode: The mode parameter determines how the PSF (point spread function) is normalized. If
+    mode is set to 'band', each color band of the PSF is normalized separately. If mode is set to
+    anything else, the entire PSF is normalized as a single entity, defaults to band (optional)
+    :return: the normalized PSF (point spread function) with values clipped between 0 and the specified
+    range.
+    """
     def norm(psf):
         if mode == 'band':
             psf[:,:,0] = (psf[:,:,0]-psf[:,:,0].min()) / (psf[:,:,0].max()-psf[:,:,0].min())
@@ -44,35 +62,64 @@ def normalize_psf(psf, range=1, mode='band'):
 
 
 def crop_center_region(arr, size=150):
+    """
+    crop a center region of a given size from a 2D array.
+    
+    :param arr: a numpy array representing an image
+    :param size: The size of the square region to be cropped from the center of the input array. The
+    default value is 150, defaults to 150 (optional)
+    :return: a cropped version of the input array, where the center region of the array is extracted
+    based on the specified size parameter.
+    """
     # Get the dimensions of the array
     height, width = arr.shape[:2]
 
-    # Calculate the indices for the center 100x100 region
+    # Calculate the indices for the center sizexsize region
     start_row = int((height - size) / 2)
     end_row = start_row + size
     start_col = int((width - size) / 2)
     end_col = start_col + size
 
-    # Crop the array to the center 100x100 region
+    # Crop the array to the center sizexsize region
     cropped_arr = arr[start_row:end_row, start_col:end_col]
 
     # Return the cropped array
     return cropped_arr
 
-def build_doe_model():
-    rgb_collim_model = RGBCollimator(sensor_distance,
-                                     refractive_idcs=refractive_idcs,
-                                     wave_lengths=wave_lengths,
-                                     patch_size=patch_size,
-                                     sample_interval=sample_interval,
-                                     wave_resolution=wave_resolution,
+
+def build_doe_model(config: DOEModelConfig = DOEModelConfig()):
+    """
+    build a DOE (Diffractive Optical Element) model using the input configuration.
+    
+    :param config: DOEModelConfig object that contains the following parameters:
+    :type config: DOEModelConfig
+    :return: The function `build_doe_model` is returning an instance of the `RGBCollimator` class, which
+    is initialized with the parameters passed in the `DOEModelConfig` object `config`.
+    """
+    rgb_collim_model = RGBCollimator(config.sensor_distance,
+                                     refractive_idcs=config.refractive_idcs,
+                                     wave_lengths=config.wave_lengths,
+                                     patch_size=config.patch_size,
+                                     sample_interval=config.sample_interval,
+                                     wave_resolution=config.wave_resolution,
                                      ).to(device)
     return rgb_collim_model
 
 
-def build_baseline_profile(rgb_collim_model):
-    k = 2 * torch.pi / wave_lengths[1]
-    fresnel_phase = - k * ((rgb_collim_model.xx**2 + rgb_collim_model.yy**2)[None][None] / (2 * sensor_distance))
+def build_baseline_profile(rgb_collim_model: RGBCollimator):
+    """
+    build a baseline profile for a given RGB collimator model by calculating the Fresnel
+    phase and height map.
+    
+    :param rgb_collim_model: An instance of the RGBCollimator class, which likely represents a system
+    for collimating light of different wavelengths (red, green, and blue) onto a sensor or detector
+    :type rgb_collim_model: RGBCollimator
+    :return: the fresnel phase profile of the collimator model after applying the fresnel phase shift
+    due to propagation to a sensor distance. The fresnel phase profile is calculated using the height
+    map obtained from the phase-to-height map conversion function.
+    """
+    k = 2 * torch.pi / rgb_collim_model.wave_lengths[1]
+    fresnel_phase = - k * ((rgb_collim_model.xx**2 + rgb_collim_model.yy**2)[None][None] / (2 * rgb_collim_model.sensor_distance))
     fresnel_phase = fresnel_phase % (torch.pi * 2)
     height_map = rgb_collim_model.height_map.phase_to_height_map(fresnel_phase, 1)
     fresnel_phase_c = rgb_collim_model.height_map.get_phase_profile(height_map)
@@ -83,14 +130,29 @@ def load_sample_img(path='./8068.jpg', keep_ratio=True, patch_size=736):
     img = Image.open(path)
     ps = patch_size
     if keep_ratio:
-        ps = min(img.height,img.width)
+        ps = min(img.height, img.width)
     img = center_crop(img, ps, ps)
     img = img.resize((patch_size, patch_size), Image.BICUBIC)
     x = torch.from_numpy(np.array(img).transpose((2, 0, 1)) / 255.)[None].to(device)
     return x
 
 
-def sanity_check(psf):
+def sanity_check(psf, circular=True):
+    """
+    perform a sanity check on the output of `img_psf_conv` and `conv_doe` functions.
+    
+    :param psf: The point spread function (PSF) is a mathematical function that describes how an imaging
+    system blurs a point source of light. It is often used in image processing and analysis to model the
+    effects of image blurring and to deconvolve images
+    :param circular: A boolean parameter that determines whether the PSF should be treated as circular
+    or not during convolution. If set to True, the PSF will be wrapped around the edges of the image to
+    simulate a circular convolution. If set to False, the PSF will be treated as a non-circular
+    convolution and, defaults to True (optional)
+    :return: a tuple containing two elements: the input image x and the output image out, which is the
+    result of convolving x with the given point spread function (psf) using the img_psf_conv function
+    and the conv_doe operator. The function also performs a sanity check to verify if the output image
+    is close enough to the expected result.
+    """
     x = load_sample_img()
 
     output_image = img_psf_conv(x, psf, circular=circular)

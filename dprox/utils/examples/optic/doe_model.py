@@ -6,6 +6,17 @@ import numpy as np
 
 
 def get_coordinate(nx, ny, dx, dy):
+    """
+    return the coordinates of a 2D grid with given dimensions and spacing.
+    
+    :param nx: The number of points in the x-direction
+    :param ny: The number of points along the y-axis in a 2D grid
+    :param dx: The spacing between two adjacent points along the x-axis
+    :param dy: The spacing between the y-coordinates of the grid points. 
+    :return: two tensors `xx` and `yy` which represent the x and y
+    coordinates of a 2D grid. The size of the grid is determined by the input parameters `nx` and `ny`,
+    and the spacing between grid points is determined by `dx` and `dy`.
+    """
     x = (torch.arange(nx) - (nx - 1.) / 2) * dx
     y = (torch.arange(ny) - (ny - 1.) / 2) * dy
     xx, yy = torch.meshgrid(x, y, indexing='ij')
@@ -13,6 +24,17 @@ def get_coordinate(nx, ny, dx, dy):
 
 
 def area_downsampling(input, target_side_length):
+    """
+    downsample an input image to a target side length by averaging the pixel values in
+    each block of pixels.
+    
+    :param input: a 3-dimensional tensor representing an image, with dimensions (channels, height,
+    width)
+    :param target_side_length: The target side length is the desired length of one side of the output
+    image after downsampling
+    :return: the downsampled version of the input image with the target side length using average
+    pooling.
+    """
     if not input.shape[2] % target_side_length:
         factor = int(input.shape[2] / target_side_length)
         output = F.avg_pool2d(input=input, kernel_size=[factor, factor], stride=[factor, factor])
@@ -22,6 +44,20 @@ def area_downsampling(input, target_side_length):
 
 
 def psf2otf(psf, output_size):
+    """
+    take a point spread function and output size as inputs, pad the PSF with zeros to
+    match the output size, circularly shifts the PSF so the center pixel is at 0,0, and returns the
+    optical transfer function.
+    
+    :param psf: The point spread function (PSF) is a 4-dimensional tensor representing the blur kernel
+    used in image processing. It is typically used in image deconvolution to recover the original image
+    from a blurred image
+    :param output_size: The desired size of the output Optical Transfer Function (OTF) after padding the
+    Point Spread Function (PSF) with zeros. It is a tuple of the form (batch_size, num_channels, height,
+    width)
+    :return: the optical transfer function (OTF) of the point spread function (PSF) after padding and
+    circularly shifting the PSF.
+    """
     _, _, fh, fw = psf.shape
 
     # pad out to output_size with zeros
@@ -46,6 +82,22 @@ def psf2otf(psf, output_size):
 
 
 def img_psf_conv(img, psf, circular=False):
+    """
+    perform image convolution with a point spread function (PSF) and can handle both
+    circular and linearized convolutions.
+    
+    :param img: a 4-dimensional tensor representing an image, with dimensions (batch_size, channels,
+    height, width)
+    :param psf: The point spread function (PSF) is a 4-dimensional tensor representing the blur kernel
+    used in image processing. It is typically used in image deconvolution to recover the original image
+    from a blurred image
+    :param circular: A boolean parameter that determines whether the convolution should be circular or
+    linearized. If circular is True, then circular convolution is performed. If circular is False, then
+    linearized convolution is performed, defaults to False (optional)
+    :return: the result of the convolution of the input image with the point spread function (PSF). If
+    the circular parameter is set to False, the function performs a linearized convolution by padding
+    the image and then cropping the result. The output is a tensor representing the convolved image.
+    """
     if not circular:  # linearized conv
         target_side_length = 2 * img.shape[2]
         height_pad = (target_side_length - img.shape[2]) / 2
@@ -77,6 +129,10 @@ class FresnelPropagator(nn.Module):
         self.register_buffer('H', H, persistent=False)
         
     def _setup_H(self):
+        """
+        set up the transfer function H for a Fresnel propagator.
+        :return: the complex-valued transfer function H.
+        """
         _, _, M_orig, N_orig = self.input_shape
         # zero padding.
         Mpad = M_orig // 4
@@ -138,6 +194,13 @@ class HeightMap(nn.Module):
         self.height_map_sqrt = nn.Parameter(height_map_sqrt)
         
     def _fresnel_phase_init(self, idx=1):
+        """
+        calculate the Fresnel lens phase and convert it to a height map.
+        
+        :param idx: idx is an optional parameter that specifies the index of the wavelength to use in
+        the calculation. It is set to 1 by default, defaults to 1 (optional)
+        :return: the square root of the height map calculated from the Fresnel phase.
+        """
         k = 2 * torch.pi / self.wave_lengths[idx]
         fresnel_phase = - k * ((self.xx**2 + self.yy**2)[None][None] / (2*self.sensor_distance))
         fresnel_phase = fresnel_phase % (torch.pi * 2)
@@ -145,6 +208,13 @@ class HeightMap(nn.Module):
         return height_map ** 0.5
         
     def get_phase_profile(self, height_map=None):
+        """
+        calculate the phase profile of a height map using wave numbers and phase delay.
+        
+        :param height_map: A 2D tensor representing the height map of the surface. It is used to
+        calculate the phase delay induced by the height field
+        :return: a complex exponential phase profile calculated from the input height map.
+        """
         if height_map is None:
             height_map = torch.square(self.height_map_sqrt+1e-7)
         # phase delay indiced by height field
@@ -152,6 +222,17 @@ class HeightMap(nn.Module):
         return torch.exp(1j * phi)
 
     def phase_to_height_map(self, phi, wave_length_idx=1):
+        """
+        take in a phase map and return a corresponding height map using the given wave
+        length and refractive index.
+        
+        :param phi: The phase profile of the height map at a specific wavelength associated with `wave_length_idx`
+        :param wave_length_idx: The index of the wavelength in the list of available wavelengths. This
+        is used to retrieve the corresponding `delta_N` value for the given wavelength, defaults to 1
+        (optional)
+        :return: a height map calculated from the input phase and other parameters such as wave length
+        and delta N.
+        """
         wave_length = self.wave_lengths[wave_length_idx]
         delta_n = self.delta_N.view(-1)[wave_length_idx]
         k = 2. * torch.pi / wave_length
@@ -179,6 +260,15 @@ class RGBCollimator(nn.Module):
         self._init_setup()
         
     def get_psf(self, phase_profile=None):
+        """
+        calculate the point spread function (PSF) of an optical system given a phase
+        profile and other parameters.
+        
+        :param phase_profile: A 2D tensor representing the phase profile of the optical system. It is
+        multiplied element-wise with the input field before propagation
+        :return: a PSF (Point Spread Function) which is a 2D tensor representing the intensity
+        distribution of the image formed by a point source after passing through the optical system.
+        """
         if phase_profile is None:
             phase_profile = self.height_map.get_phase_profile()
         field = phase_profile * self.input_field
@@ -247,7 +337,7 @@ def center_crop(im, new_height, new_width):
     # Crop the center of the image
     im = im.crop((left, top, right, bottom))    
     return im
-        
+
 
 if __name__ == '__main__':
     import matplotlib.pylab as plt
