@@ -293,7 +293,7 @@ class RGBCollimator(nn.Module):
                                 self.sample_interval, self.sample_interval)
         self.register_buffer("xx", xx, persistent=False)
         self.register_buffer("yy", yy, persistent=False)
-                
+
         aperture = self._get_circular_aperture(xx, yy)
         self.register_buffer("aperture", aperture, persistent=False)
         

@@ -32,32 +32,49 @@ class DOEModelConfig:
     model_kwargs: dict = field(default_factory=dict)
 
 
-def normalize_psf(psf, range=1, mode='band'):
+def outlier_correct(arr, p=0.01):
     """
-    normalize a given PSF (point spread function) image by scaling its pixel values to a
-    specified range and mode.
+    replace the values in an array that fall below or above a certain
+    percentile with the corresponding percentile value.
     
-    :param psf: a 3-dimensional numpy array representing a point spread function (PSF) image
-    :param range: The maximum value that the PSF can take after normalization. Any values above this
-    range will be clipped to this maximum value, defaults to 1 (optional)
-    :param mode: The mode parameter determines how the PSF (point spread function) is normalized. If
-    mode is set to 'band', each color band of the PSF is normalized separately. If mode is set to
-    anything else, the entire PSF is normalized as a single entity, defaults to band (optional)
-    :return: the normalized PSF (point spread function) with values clipped between 0 and the specified
-    range.
+    :param arr: an array of numerical values
+    :param p: represent the percentage of data that is considered as outliers. In this
+    function, it is used to calculate the lower and upper percentiles of the data that are not
+    considered as outliers. 
+    :return: return the input array `arr` with its outliers corrected.
+    The function replaces the values below the `p` percentile with the `p` percentile value and the
+    values above the `100-p` percentile with the `100-p` percentile value.
     """
-    def norm(psf):
-        if mode == 'band':
-            psf[:,:,0] = (psf[:,:,0]-psf[:,:,0].min()) / (psf[:,:,0].max()-psf[:,:,0].min())
-            psf[:,:,1] = (psf[:,:,1]-psf[:,:,1].min()) / (psf[:,:,1].max()-psf[:,:,1].min())
-            psf[:,:,2] = (psf[:,:,2]-psf[:,:,2].min()) / (psf[:,:,2].max()-psf[:,:,2].min())
-        else:
-            psf = (psf - psf.min()) / (psf.max() - psf.min())
-        return psf
+    percentile = np.percentile(arr, [p, 100-p])    
+    arr[arr < percentile[0]] = percentile[0]
+    arr[arr > percentile[1]] = percentile[1]
+    return arr
+
+
+def normalize_psf(psf: np.ndarray, clip_percentile=0.01, bandwise=False):
+    """
+    normalize a point spread function (PSF) by dividing it by its sum, correcting for
+    outliers, and normalizing the maximum value to 1 for visualization.
     
-    psf = norm(psf)
-    psf = psf.clip(0, range)
-    psf = norm(psf)
+    :param psf: a numpy array representing the point spread function (PSF) of an imaging system
+    :type psf: np.ndarray
+    :param clip_percentile: represent the percentage of data that is considered as outliers. In this
+    function, it is used to calculate the lower and upper percentiles of the data that are not
+    considered as outliers. 
+    :param bandwise: A boolean parameter that specifies whether to normalize the PSF bandwise or not. If
+    set to True, the PSF will be normalized separately for each band. If set to False, the PSF will be
+    normalized across all bands, defaults to False (optional)
+    :return: a normalized and outlier-corrected version of the input PSF (point spread function) array.
+    If `bandwise` is True, the normalization is done separately for each band of the PSF. The
+    normalization involves dividing the PSF by its sum (or sum along each band if `bandwise` is True),
+    then correcting for outliers using the `outlier_correct`
+    """
+    if bandwise:
+        psf = psf / psf.sum(axis=(0, 1), keepdims=True)
+    else:
+        psf = psf / psf.sum()  # sum to 1 
+    psf = outlier_correct(psf, p=clip_percentile)
+    psf = psf / psf.max()  # normalize the max value to 1 for visualization
     return psf
 
 
@@ -221,4 +238,3 @@ def plot3d(data, path):
     plt.show()
     plt.savefig(path)
     plt.close()
-   

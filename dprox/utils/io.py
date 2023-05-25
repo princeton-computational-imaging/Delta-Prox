@@ -23,7 +23,7 @@ def imread_rgb(path) -> np.ndarray:
     return np.asarray(img)
 
 
-def imshow(*imgs, maxcol=3, gray=False, titles=None) -> None:
+def imshow(*imgs, maxcol=3, gray=False, titles=None, off_axis=False) -> None:
     """
     display one or more images in a grid with customizable parameters such as
     maximum number of columns, grayscale, and titles.
@@ -49,6 +49,7 @@ def imshow(*imgs, maxcol=3, gray=False, titles=None) -> None:
         plt.subplot(row, col, idx + 1)
         plt.imshow(img)
         if titles is not None: plt.title(titles[idx])
+        if off_axis: plt.axis('off')
     plt.show()
 
 
