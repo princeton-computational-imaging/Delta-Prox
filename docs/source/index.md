@@ -10,6 +10,7 @@ hide-toc: true
 :hidden: true
 
 install
+tutorial
 ```
 
 
