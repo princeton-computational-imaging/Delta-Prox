@@ -85,7 +85,7 @@ class Algorithm(nn.Module):
     @auto_convert_to_tensor(['x0', 'rhos', 'lams'], batchify=['x0'])
     def solve(self, x0=None, rhos=None, lams=None, max_iter=24, pbar=False):
         """
-        This function solves a problem using an iterative algorithm with given parameters and returns
+        solve a problem using an iterative algorithm with given parameters and return
         the solution.
         
         :param x0: initial guess for the solution
@@ -110,6 +110,23 @@ class Algorithm(nn.Module):
         return state[0]
 
     def iters(self, state, rhos, lams, max_iter, pbar=False):
+        """
+        iterate over a given number of iterations and update the state using the given
+        rhos and lams.
+        
+        :param state: The current state of the optimization algorithm
+        :param rhos: A numpy array of shape (..., max_iter) containing the values of the penalty
+        parameter rho for each iteration
+        :param lams: A dictionary containing the Lagrange multipliers for each constraint in the
+        optimization problem. The keys of the dictionary are the names of the constraints and the values
+        are arrays containing the Lagrange multipliers for each iteration of the optimization algorithm
+        :param max_iter: The maximum number of iterations to run the algorithm for
+        :param pbar: A boolean flag indicating whether to display a progress bar during the iterations.
+        If set to True, a progress bar will be displayed to show the progress of the iterations. If set
+        to False, no progress bar will be displayed, defaults to False (optional)
+        :return: the final state after iterating over the given number of iterations using the `iter`
+        function with the given `rho` and `lam` values.
+        """
         for iter in tqdm(range(max_iter), disable=not pbar):
             rho = rhos[..., iter]
             lam = {k: v[..., iter] for k, v in lams.items()}
@@ -145,7 +162,7 @@ class Algorithm(nn.Module):
 
     def _notify_all_op_current_step(self, step):
         """
-        This function sets the step attribute for various functions and their associated linear operators.
+        set the step attribute for various functions and their associated linear operators.
         
         :param step: an integer representing the current step in a process or algorithm
         """
@@ -180,6 +197,16 @@ class Algorithm(nn.Module):
     # ---------------------------------------------------------------------------- #
 
     def pack(self, state):
+        """
+        take a list of tensors and concatenates them along the second dimension.
+        
+        :param state: a list of tensors or lists of tensors that need to be
+        concatenated along the second dimension. The function first flattens the list of tensors or
+        lists of tensors into a single list, and then concatenates them along the second dimension using
+        PyTorch's "torch.cat"
+        :return: a tensor that is the concatenation of all the tensors in the input state, after
+        flattening any nested lists. The concatenation is done along the second dimension (dim=1).
+        """
         flatten = []
         for s in state:
             if isinstance(s, list): flatten += s

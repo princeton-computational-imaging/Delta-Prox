@@ -45,7 +45,7 @@ def imshow(*imgs, maxcol=3, gray=False, titles=None, off_axis=False) -> None:
         img = to_ndarray(img, debatch=True)
         if img.max() > 2: img = img / 255
         img = img.clip(0, 1)
-        if gray or len(img.shape) == 2: plt.gray()
+        if gray: plt.gray()
         plt.subplot(row, col, idx + 1)
         plt.imshow(img)
         if titles is not None: plt.title(titles[idx])

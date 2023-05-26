@@ -2,6 +2,7 @@ import torch
 import torch.fft
 
 from ..sum_square import ext_sum_squares
+from dprox.utils import fft2, ifft2
 
 
 class csmri(ext_sum_squares):
@@ -22,17 +23,3 @@ class csmri(ext_sum_squares):
         z = ifft2(z)
 
         return z
-
-
-def fft2(x):
-    x = torch.fft.ifftshift(x, dim=(-2, -1))
-    x = torch.fft.fft2(x, norm='ortho')
-    x = torch.fft.fftshift(x, dim=(-2, -1))
-    return x
-
-
-def ifft2(x):
-    x = torch.fft.ifftshift(x, dim=(-2, -1))
-    x = torch.fft.ifft2(x, norm='ortho')
-    x = torch.fft.fftshift(x, dim=(-2, -1))
-    return x

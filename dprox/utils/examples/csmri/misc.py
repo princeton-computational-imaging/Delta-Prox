@@ -8,22 +8,8 @@ from PIL import Image
 from scipy.io import loadmat
 from torchlight.data import SingleImageDataset
 
-from dprox.utils import to_torch_tensor
+from dprox.utils import to_torch_tensor, fft2, ifft2
 from dprox.utils.io import get_path
-
-
-def fft2(x):
-    x = torch.fft.ifftshift(x, dim=(-2, -1))
-    x = torch.fft.fft2(x, norm='ortho')
-    x = torch.fft.fftshift(x, dim=(-2, -1))
-    return x
-
-
-def ifft2(x):
-    x = torch.fft.ifftshift(x, dim=(-2, -1))
-    x = torch.fft.ifft2(x, norm='ortho')
-    x = torch.fft.fftshift(x, dim=(-2, -1))
-    return x
 
 
 def sample(name='Bust.jpg'):

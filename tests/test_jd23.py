@@ -3,6 +3,7 @@ from dprox.utils import *
 from dprox.utils.examples import *
 from dprox.linalg import LinearSolveConfig
 
+
 def test_jd2():
     img = sample('face')
     img = to_torch_tensor(img, batch=True).float()
