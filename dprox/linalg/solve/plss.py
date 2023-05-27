@@ -7,6 +7,25 @@ from dprox import LinOp
 
 
 def PLSS(A: LinOp, b, x0=None, rtol=1e-6, max_iters=500, verbose=False):
+    """
+    PLSS: A PROJECTED LINEAR SYSTEMS SOLVER (for well-conditioned system)
+    
+    :param A: A is a linear operator, which is a function that maps a vector to another vector in a
+    linear space. In this context, it is used to represent a linear system of equations
+    :type A: LinOp
+    :param b: The right-hand side vector in the linear system Ax=b
+    :param x0: Initial guess for the solution vector. If not provided, a vector of zeros with the same
+    shape as b will be used
+    :param rtol: Relative tolerance for convergence criteria. The algorithm stops iterating when the
+    relative residual is below this value
+    :param max_iters: The maximum number of iterations allowed for the algorithm to converge to a
+    solution, defaults to 500 (optional)
+    :param verbose: A boolean parameter that determines whether or not to print the number of iterations
+    taken by the algorithm. If set to True, the function will print the number of iterations taken. If
+    set to False, it will not print anything, defaults to False (optional)
+    :return: the solution xk to the linear system Ax=b, where A is a linear
+    operator and b is a vector, using the Preconditioned Least Squares Stationary iterative method.
+    """
     if x0 is None: x0 = torch.zeros_like(b)
     x_min = xk = x0
     b_norm = torch.linalg.vector_norm(b)
@@ -63,6 +82,25 @@ def PLSS(A: LinOp, b, x0=None, rtol=1e-6, max_iters=500, verbose=False):
 
 
 def PLSSW(A: LinOp, b, x0, Wh, rtol=1e-6, max_iters=500, verbose=False):
+    """
+    PLSS: A PROJECTED LINEAR SYSTEMS SOLVER WEIGHTED (for ill-conditioned system)
+    
+    :param A: A is a linear operator, which is a function that maps one vector space to another. In this
+    case, it is used to represent a linear system of equations
+    :type A: LinOp
+    :param b: The right-hand side vector in the linear system Ax=b
+    :param x0: Initial guess for the solution vector
+    :param Wh: A weight matrix used to adjust the importance of different components in the solution. It
+    is used to compute the diagonal matrix Whi, which is the element-wise inverse of Wh
+    :param rtol: Relative tolerance for convergence criteria. The algorithm stops when the norm of the
+    residual is less than rtol times the norm of the right-hand side vector b
+    :param max_iters: The maximum number of iterations allowed for the algorithm to converge to a
+    solution, defaults to 500 (optional)
+    :param verbose: A boolean parameter that determines whether or not to print out information during
+    the algorithm's execution. If set to True, the algorithm will print out the number of iterations it
+    took to converge. If set to False, it will run silently, defaults to False (optional)
+    :return: the final solution estimate xk.
+    """
     Whi = 1 / Wh
     Whi[torch.isinf(Whi)] = 0
     

@@ -81,4 +81,3 @@ class LearnableDegOp(nn.Module):
             return self.phid_6(x)
         else:
             return self.phid_1(x)
-

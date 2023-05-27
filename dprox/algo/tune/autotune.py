@@ -21,6 +21,7 @@ from torch.utils.data.dataset import Dataset
 from tqdm import tqdm
 
 from dprox.utils import to_torch_tensor
+from dprox.algo import Algorithm
 
 default_config = dict(
     rmsize=480,
@@ -64,6 +65,15 @@ def seed_everything(seed):
 
 
 def complex2channel(x):
+    """
+    convert a complex tensor with shape (N, C, H, W, 2) to a real tensor with shape (N,
+    2C, H, W).
+    
+    :param x: The input tensor to the function `complex2channel`. It is expected to have a shape of `(N,
+    C, H, W, 2)`, where `N` is the batch size, `C` is the number of channels, `H` and `W` are the height
+    :return: a tensor of shape `(N, 2C, H, W)` where the last dimension of `x` has been flattened and moved to the
+    second dimension of the output tensor. 
+    """
     x = torch.view_as_real(x)
     N, C, H, W, _ = x.shape
     # N C H W 2 -> N 2 C H W
@@ -144,11 +154,10 @@ class Env(PnPEnv):
 
 
 class TFPnPSolver(PnPSolver):
-    def __init__(self, solver, solver_params):
+    def __init__(self, solver: Algorithm, solver_params):
         super().__init__(None)
         self.solver = solver
         self.solver_params = solver_params
-
         self.state_dim = solver.state_dim
 
     def forward(self, inputs, parameters, iter_num=None):
@@ -170,6 +179,12 @@ class TFPnPSolver(PnPSolver):
         return self.solver.pack(states)
 
     def reset(self, data):
+        """
+        reset the solver with new data and return the packed states.
+        
+        :param data: a dictionary containing the input data for the function
+        :return: the packed states after initializing the solver with the given data.
+        """
         x0 = data['x0'].clone().detach()  # [B,1,W,H,2]
         for k in self.solver_params:
             self.solver_params[k].value = data['params'][k]
@@ -180,6 +195,15 @@ class TFPnPSolver(PnPSolver):
         return self.solver.unpack(state)[0].real
 
     def filter_hyperparameter(self, action):
+        """
+        filter out the 'idx_stop' and 'rho' keys from the input dictionary and return
+        the remaining keys as weights, along with the value of 'rho'.
+        
+        :param action: a dictionary that contains hyperparameters for a proximal solver. 
+        :return: a tuple containing two values: `rhos` and `weights`. `rhos` is the value of the 'rho'
+        key in the `action` dictionary, and `weights` is a new dictionary that contains all the
+        key-value pairs from `action` except for the 'idx_stop' and 'rho' keys.
+        """
         rhos = action['rho']
         weights = {k: v for k, v in action.items() if k not in ['idx_stop', 'rho']}
         return rhos, weights

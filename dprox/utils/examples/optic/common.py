@@ -32,25 +32,6 @@ class DOEModelConfig:
     model_kwargs: dict = field(default_factory=dict)
 
 
-def outlier_correct(arr, p=0.01):
-    """
-    replace the values in an array that fall below or above a certain
-    percentile with the corresponding percentile value.
-    
-    :param arr: an array of numerical values
-    :param p: represent the percentage of data that is considered as outliers. In this
-    function, it is used to calculate the lower and upper percentiles of the data that are not
-    considered as outliers. 
-    :return: return the input array `arr` with its outliers corrected.
-    The function replaces the values below the `p` percentile with the `p` percentile value and the
-    values above the `100-p` percentile with the `100-p` percentile value.
-    """
-    percentile = np.percentile(arr, [p, 100-p])    
-    arr[arr < percentile[0]] = percentile[0]
-    arr[arr > percentile[1]] = percentile[1]
-    return arr
-
-
 def normalize_psf(psf: np.ndarray, clip_percentile=0.01, bandwise=False):
     """
     normalize a point spread function (PSF) by dividing it by its sum, correcting for
@@ -76,32 +57,6 @@ def normalize_psf(psf: np.ndarray, clip_percentile=0.01, bandwise=False):
     psf = outlier_correct(psf, p=clip_percentile)
     psf = psf / psf.max()  # normalize the max value to 1 for visualization
     return psf
-
-
-def crop_center_region(arr, size=150):
-    """
-    crop a center region of a given size from a 2D array.
-    
-    :param arr: a numpy array representing an image
-    :param size: The size of the square region to be cropped from the center of the input array. The
-    default value is 150, defaults to 150 (optional)
-    :return: a cropped version of the input array, where the center region of the array is extracted
-    based on the specified size parameter.
-    """
-    # Get the dimensions of the array
-    height, width = arr.shape[:2]
-
-    # Calculate the indices for the center sizexsize region
-    start_row = int((height - size) / 2)
-    end_row = start_row + size
-    start_col = int((width - size) / 2)
-    end_col = start_col + size
-
-    # Crop the array to the center sizexsize region
-    cropped_arr = arr[start_row:end_row, start_col:end_col]
-
-    # Return the cropped array
-    return cropped_arr
 
 
 def build_doe_model(config: DOEModelConfig = DOEModelConfig()):

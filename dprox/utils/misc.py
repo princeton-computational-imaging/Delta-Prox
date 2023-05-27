@@ -120,3 +120,77 @@ def to_ndarray(x, debatch=False, squeeze=False):
     if debatch:
         out = debatchify(out, squeeze)
     return out
+
+
+def fft2(x):
+    """
+    perform a 2D Fast Fourier Transform on a tensor using PyTorch.
+    
+    :param x: The input tensor to be transformed using 2D Fast Fourier Transform (FFT)
+    :return: the 2-dimensional Fast Fourier Transform (FFT) of the input
+    tensor `x`. The input tensor is first shifted using `torch.fft.ifftshift` along the last two
+    dimensions (-2 and -1), then the FFT is computed using `torch.fft.fft2` with normalization set to
+    'ortho', and finally the result is shifted back using `torch.fft.fft
+    """
+    x = torch.fft.ifftshift(x, dim=(-2, -1))
+    x = torch.fft.fft2(x, norm='ortho')
+    x = torch.fft.fftshift(x, dim=(-2, -1))
+    return x
+
+
+def ifft2(x):
+    """
+    perform a 2D inverse fast Fourier transform on a tensor using PyTorch.
+    
+    :param x: The input tensor to be transformed using the inverse 2D Fast Fourier Transform (FFT)
+    :return: the inverse 2D Fourier transform of the input tensor `x`.
+    """
+    x = torch.fft.ifftshift(x, dim=(-2, -1))
+    x = torch.fft.ifft2(x, norm='ortho')
+    x = torch.fft.fftshift(x, dim=(-2, -1))
+    return x
+
+
+def outlier_correct(arr, p=0.01):
+    """
+    replace the values in an array that fall below or above a certain
+    percentile with the corresponding percentile value.
+    
+    :param arr: an array of numerical values
+    :param p: represent the percentage of data that is considered as outliers. In this
+    function, it is used to calculate the lower and upper percentiles of the data that are not
+    considered as outliers. 
+    :return: return the input array `arr` with its outliers corrected.
+    The function replaces the values below the `p` percentile with the `p` percentile value and the
+    values above the `100-p` percentile with the `100-p` percentile value.
+    """
+    percentile = np.percentile(arr, [p, 100-p])    
+    arr[arr < percentile[0]] = percentile[0]
+    arr[arr > percentile[1]] = percentile[1]
+    return arr
+
+
+def crop_center_region(arr, size=150):
+    """
+    crop a center region of a given size from a 2D array.
+    
+    :param arr: a numpy array representing an image
+    :param size: The size of the square region to be cropped from the center of the input array. The
+    default value is 150, defaults to 150 (optional)
+    :return: a cropped version of the input array, where the center region of the array is extracted
+    based on the specified size parameter.
+    """
+    # Get the dimensions of the array
+    height, width = arr.shape[:2]
+
+    # Calculate the indices for the center sizexsize region
+    start_row = int((height - size) / 2)
+    end_row = start_row + size
+    start_col = int((width - size) / 2)
+    end_col = start_col + size
+
+    # Crop the array to the center sizexsize region
+    cropped_arr = arr[start_row:end_row, start_col:end_col]
+
+    # Return the cropped array
+    return cropped_arr
