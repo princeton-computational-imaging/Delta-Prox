@@ -1,18 +1,30 @@
-
+<p align="center">
 <a href="https://deltaprox.readthedocs.io/"><img src="https://user-images.githubusercontent.com/26198430/229363778-a546ffce-b43d-4f4a-9869-629208f050cc.svg" alt="" width="30%"></a> &ensp; 
+</p>
 
-
+<p align="center">
 Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
+</p>
 
+<p align="center">
 <a href="https://deltaprox.readthedocs.io/">Docs</a> |
 <a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/tutorials">Tutorials</a> |
 <a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/examples">Examples</a> |
 <a href="#">Paper</a> |
 <a href="https://github.com/Zeqiang-Lai/DeltaProx#citation">Citation</a> 
+</p>
 
-<a href="https://pypi.org/project/dprox/">![Version](https://img.shields.io/pypi/v/dprox)</a>
-  <a href="https://arxiv.org/abs/2207.02849">![arXiv](https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg)</a>
+<p align="center">
+    <a href="[https://github.com/PanQiWei/AutoGPTQ/releases](https://pypi.org/project/dprox/)">
+        <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/v/dprox">
+    </a>
+    <a href="[https://pypi.org/project/auto-gptq/](https://arxiv.org/abs/2207.02849)">
+        <img alt="arXiv" src="https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg">
+    </a>
+</p>
 
+<!-- <a href="https://pypi.org/project/dprox/">![Version](https://img.shields.io/pypi/v/dprox)</a> -->
+<!-- <a href="https://arxiv.org/abs/2207.02849">![arXiv](https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg)</a> -->
 
 ```bash
 pip install dprox
