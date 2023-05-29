@@ -45,7 +45,7 @@ def test_linear_solver_torch_forward():
     A = LinOp(A)
     # xhat = dprox.linalg.linear_solve(A, b)
     # xhat = dprox.linalg.solve.conjugate_gradient(A, b, max_iters=100)
-    xhat = dprox.linalg.solve.PCG(A, b, max_iters=100)    
+    xhat = dprox.linalg.solve.preconditioned_conjugate_gradient(A, b, max_iters=100)    
 
     print(xhat.dtype)
     print(torch.mean(torch.abs(xhat - x)))
@@ -167,7 +167,7 @@ def test_linear_solver_torch_backward_dtheta2():
     b = b.clone().detach().requires_grad_(True)
 
     # xhat = dprox.linalg.solve.conjugate_gradient(A, b)
-    xhat = dprox.linalg.solve.PCG(A, b, rtol=1e-6, max_iters=100, verbose=False)
+    xhat = dprox.linalg.solve.preconditioned_conjugate_gradient(A, b, rtol=1e-6, max_iters=100, verbose=False)
     xhat.mean().backward()
     grad2 = A.A.grad  # grad2 is only correct at the diagonal items.
 

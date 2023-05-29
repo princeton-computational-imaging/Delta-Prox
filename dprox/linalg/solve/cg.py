@@ -48,9 +48,9 @@ def conjugate_gradient(
     Args:
       A (Callable): A is a callable function representing the forward operator A(x) of a matrix free linear operator.
       b (torch.Tensor): The parameter `b` is a tensor representing the right-hand side of the linear
-    system of equations `Ax = b`.
+        system of equations `Ax = b`.
       x0 (torch.Tensor): The initial guess for the solution vector. If not provided, it is initialized
-    to a vector of zeros.
+        to a vector of zeros.
       rtol (float): Relative tolerance for convergence criteria. Default to 1e-6
       max_iters (int): The maximum number of iterations. Defaults to 100
       verbose (bool): Whether to logging intermediate information. Defaults to False
@@ -150,11 +150,34 @@ def conjugate_gradient2(
     return x
 
 
-def PCG(
-    A, b,
-    Minv=None, x0=None, rtol=1e-6, max_iters=500, verbose=False
+def preconditioned_conjugate_gradient(
+    A: Callable,
+    b: torch.Tensor,
+    Minv=None,
+    x0: torch.Tensor = None,
+    rtol: float = 1e-6,
+    max_iters: int = 100,
+    verbose: bool = False
 ):
-    """Preconditioned Conjugate Gradient Method"""
+    """
+    Preconditioned conjugate gradient method for solving a linear system of equations. 
+    The same as :func:conjugate_gradient except it could be preconditioned via `Minv`.
+
+    Args:
+      A (Callable): A is a callable function representing the forward operator A(x) of a matrix free linear operator.
+      b (torch.Tensor): The parameter `b` is a tensor representing the right-hand side of the linear
+        system of equations `Ax = b`.
+      Minv (Callable):  A callable function representing the preconditioner.
+      x0 (torch.Tensor): The initial guess for the solution vector. If not provided, it is initialized
+        to a vector of zeros.
+      rtol (float): Relative tolerance for convergence criteria. Default to 1e-6
+      max_iters (int): The maximum number of iterations. Defaults to 100
+      verbose (bool): Whether to logging intermediate information. Defaults to False
+
+    Returns:
+      The solution `x` to the linear system `Ax=b` using the conjugate gradient method.
+    """
+
     if Minv is None:
         def Minv(x): return x
 

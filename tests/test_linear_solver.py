@@ -60,7 +60,7 @@ def test_cg():
     
     xhat1 = dp.linalg.solve.conjugate_gradient(K, b2)
     # xhat2 = dp.proxfn.linalg.solve.conjugate_gradient2(K, b2)
-    xhat3 = dp.linalg.solve.PCG(K, b2)
+    xhat3 = dp.linalg.solve.preconditioned_conjugate_gradient(K, b2)
     
     
     print('conjugate_gradient')
