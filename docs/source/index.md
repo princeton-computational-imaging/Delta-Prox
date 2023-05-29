@@ -7,18 +7,20 @@ hide-toc: true
 
 ```{toctree}
 :maxdepth: 3
-:hidden: true
+:hidden: 
 
 install
 tutorial
+api/index
 ```
 
 
 ```{toctree}
 :caption: Useful Links
 :hidden:
-PyPI page <https://pypi.org/project/torchlights/>
-GitHub Repository <https://github.com/Zeqiang-Lai/torchlight>
+PyPI Page <https://pypi.org/project/dprox/>
+GitHub Repository <https://github.com/princeton-computational-imaging/Delta-Prox>
+Project Page <https://pypi.org/project/dprox/>
 ```
 
 🎉  ∇-Prox is a differentiable modeling language for proximal algorithms on large-scale optimization

@@ -34,8 +34,9 @@ extensions = [
     'myst_parser',
     'sphinx_copybutton',
     # "sphinx_inline_tabs",
-    "sphinx.ext.intersphinx",
     'sphinx.ext.autodoc',
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.extlinks",
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
@@ -44,6 +45,24 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
 ]
+
+# -- Options for extlinks ----------------------------------------------------
+#
+
+extlinks = {
+    "pypi": ("https://pypi.org/project/%s/", "%s"),
+}
+
+# -- Options for intersphinx -------------------------------------------------
+#
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "sphinx": ("https://www.sphinx-doc.org/en/master", None),
+    'torch': ('https://pytorch.org/docs/master/', None)
+}
+
+napoleon_preprocess_types = True
 
 myst_enable_extensions = [
     "amsmath",
