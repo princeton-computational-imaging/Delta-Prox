@@ -1,18 +1,30 @@
-
+<p align="center">
 <a href="https://deltaprox.readthedocs.io/"><img src="https://user-images.githubusercontent.com/26198430/229363778-a546ffce-b43d-4f4a-9869-629208f050cc.svg" alt="" width="30%"></a> &ensp; 
+</p>
 
-
+<p align="center">
 Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
+</p>
 
+<p align="center">
 <a href="https://deltaprox.readthedocs.io/">Docs</a> |
 <a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/tutorials">Tutorials</a> |
 <a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/examples">Examples</a> |
 <a href="#">Paper</a> |
 <a href="https://github.com/Zeqiang-Lai/DeltaProx#citation">Citation</a> 
+</p>
 
-<a href="https://pypi.org/project/dprox/">![Version](https://img.shields.io/pypi/v/dprox)</a>
-  <a href="https://arxiv.org/abs/2207.02849">![arXiv](https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg)</a>
+<p align="center">
+    <a href="[https://github.com/PanQiWei/AutoGPTQ/releases](https://pypi.org/project/dprox/)">
+        <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/v/dprox">
+    </a>
+    <a href="[https://pypi.org/project/auto-gptq/](https://arxiv.org/abs/2207.02849)">
+        <img alt="arXiv" src="https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg">
+    </a>
+</p>
 
+<!-- <a href="https://pypi.org/project/dprox/">![Version](https://img.shields.io/pypi/v/dprox)</a> -->
+<!-- <a href="https://arxiv.org/abs/2207.02849">![arXiv](https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg)</a> -->
 
 ```bash
 pip install dprox
@@ -21,10 +33,10 @@ pip install dprox
 > $\nabla$-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. Departing from handwriting these solvers and differentiating via autograd, $\nabla$-Prox requires only a few lines of code to define a solver that can be *specialized based on user requirements w.r.t memory constraints or training budget* by optimized algorithm unrolling, deep equilibrium learning, and deep reinforcement learning. $\nabla$-Prox makes it easier to prototype different learning-based bi-level optimization problems for a diverse range of applications. We compare our framework against existing methods with naive implementations. $\nabla$-Prox is significantly more compact in terms of lines of code and compares favorably in memory consumption in applications across domains.
 
 ## News
- 
-**[Jan 21 2023]**  Release preview code.
 
 > 🚧 The code is still under construction, more features would be migrated from our dev code.
+ 
+- **[Jan 21 2023]**  Release preview code.
 
 ## Getting Started
 
@@ -78,3 +90,7 @@ Please refer to the [documentation]() site for more instructions on the efficien
   year={2023},
 }
 ```
+
+## Acknowledgement
+
+[ProxImaL]() 
