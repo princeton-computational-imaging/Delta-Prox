@@ -39,8 +39,8 @@ def load(name='face', return_tensor=True):
 def test_jd2_batched():
     psf = point_spread_function(15, 5)
     
-    img = load('tests/face2.png')
-    # img = sample('face')
+    # img = load('tests/face2.png')
+    img = sample('face')
     img1 = to_torch_tensor(img, batch=True).float()
     b = blurring(img1, psf)
     b1 = mosaicing(b)
