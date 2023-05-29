@@ -3,3 +3,5 @@ sphinx-rtd-theme
 furo
 sphinx-copybutton
 sphinx-inline-tabs
+nbsphinx
+nbsphinx_link

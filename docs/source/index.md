@@ -10,7 +10,7 @@ hide-toc: true
 :hidden: 
 
 install
-tutorial
+tutorial/index
 api/index
 ```
 

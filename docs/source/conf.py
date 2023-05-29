@@ -32,8 +32,12 @@ release = '0.0.1'
 # ones.
 extensions = [
     'myst_parser',
+    'nbsphinx',
+    'nbsphinx_link',
+    # "myst_nb",
     'sphinx_copybutton',
     # "sphinx_inline_tabs",
+    # https://sphinx-codeautolink.readthedocs.io/en/latest/examples.html
     'sphinx.ext.autodoc',
     "sphinx.ext.intersphinx",
     "sphinx.ext.extlinks",
@@ -128,3 +132,11 @@ myst_deflist_enable = True
 myst_heading_anchors = 3
 
 # html_logo = "logo.png"
+
+
+pygments_style = "sphinx"
+pygments_dark_style = "monokai"
+
+html_css_files = [
+    'css/custom.css',
+]
