@@ -33,10 +33,10 @@ pip install dprox
 > $\nabla$-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. Departing from handwriting these solvers and differentiating via autograd, $\nabla$-Prox requires only a few lines of code to define a solver that can be *specialized based on user requirements w.r.t memory constraints or training budget* by optimized algorithm unrolling, deep equilibrium learning, and deep reinforcement learning. $\nabla$-Prox makes it easier to prototype different learning-based bi-level optimization problems for a diverse range of applications. We compare our framework against existing methods with naive implementations. $\nabla$-Prox is significantly more compact in terms of lines of code and compares favorably in memory consumption in applications across domains.
 
 ## News
- 
-**[Jan 21 2023]**  Release preview code.
 
 > 🚧 The code is still under construction, more features would be migrated from our dev code.
+ 
+- **[Jan 21 2023]**  Release preview code.
 
 ## Getting Started
 
@@ -90,3 +90,7 @@ Please refer to the [documentation]() site for more instructions on the efficien
   year={2023},
 }
 ```
+
+## Acknowledgement
+
+[ProxImaL]() 
