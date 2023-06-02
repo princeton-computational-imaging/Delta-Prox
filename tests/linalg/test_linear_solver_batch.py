@@ -30,8 +30,8 @@ def test_cg():
     x2 = torch.from_numpy(x)
     b2 = torch.from_numpy(offset)
 
-    xhat1 = dp.linalg.solve.conjugate_gradient(K, b2)
-    xhat3 = dp.linalg.solve.preconditioned_conjugate_gradient(K, b2)
+    xhat1 = dp.linalg.solve.cg(K, b2)
+    xhat3 = dp.linalg.solve.pcg(K, b2)
 
     print('conjugate_gradient')
     print(torch.mean(torch.abs(xhat1 - x2)).item())

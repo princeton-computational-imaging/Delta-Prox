@@ -11,6 +11,8 @@
 ## Linear Solvers
 
 ```{eval-rst}
-.. autofunction:: dprox.linalg.solve.cg.conjugate_gradient
-.. autofunction:: dprox.linalg.solve.cg.conjugate_gradient
+.. autofunction:: dprox.linalg.solve.cg.cg
+.. autofunction:: dprox.linalg.solve.cg.pcg
+.. autofunction:: dprox.linalg.solve.minres.minres
+.. autofunction:: dprox.linalg.solve.plss.plss
 ```

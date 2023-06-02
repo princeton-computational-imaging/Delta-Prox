@@ -1,22 +1,22 @@
-from .cg import conjugate_gradient, conjugate_gradient2, preconditioned_conjugate_gradient
-from .plss import PLSS, PLSSW
-from .minres import MINRES
+from .cg import cg, cg2, pcg
+from .plss import plss, plssw
+from .minres import minres
 
 
 __all__ = available_solvers = [
-    'conjugate_gradient',
-    'conjugate_gradient2',
-    'preconditioned_conjugate_gradient',
-    'PLSS',
-    'PLSSW',
-    'MINRES',
+    'cg',
+    'cg2',
+    'pcg',
+    'plss',
+    'plssw',
+    'minres',
 ]
 
 SOLVERS = {
-    'cg': conjugate_gradient,
-    'cg2': conjugate_gradient2,
-    'pcg': preconditioned_conjugate_gradient,
-    'plss': PLSS,
-    'plssw': PLSSW,
-    'minres': MINRES,
+    'cg': cg,
+    'cg2': cg2,
+    'pcg': pcg,
+    'plss': plss,
+    'plssw': plssw,
+    'minres': minres,
 }

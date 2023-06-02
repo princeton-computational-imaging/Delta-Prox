@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-from dprox.linalg.solve import preconditioned_conjugate_gradient
+from dprox.linalg.solve import pcg
 from .utils import *
 
 
@@ -249,7 +249,7 @@ class LPSolverADMM(nn.Module):
             tmp = torch.linalg.solve_triangular(L, right, upper=False)
             xtilde = torch.linalg.solve_triangular(L.T, tmp, upper=True)
         else:
-            xtilde = preconditioned_conjugate_gradient(ATAop, right, Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
+            xtilde = pcg(ATAop, right, Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
         ztilde = A @ (xtilde)
         x = alpha * xtilde + (1 - alpha) * x
 

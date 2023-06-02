@@ -1,7 +1,9 @@
 # MIT-licensed code imported from https://github.com/cornellius-gp/linear_operator
 # Minor modifications for torchsparsegradutils to remove dependencies
+from typing import Callable
+
 import torch
-from dprox import LinOp
+from typing import Callable
 
 
 def _pad_with_singletons(obj, num_singletons_before=0, num_singletons_after=0):
@@ -16,35 +18,44 @@ def _pad_with_singletons(obj, num_singletons_before=0, num_singletons_after=0):
     return obj.view(*new_shape)
 
 
-# NOTE: MINRES solver does not support Unrolling mode 
-def MINRES(
-    A: LinOp,
-    b,
-    eps=1e-25,
-    shifts=None,
-    value=None,
-    rtol=1e-6,
-    max_iters=100,
-    preconditioner=None,    
-    verbose=False,
+def minres(
+    A: Callable,
+    b: torch.Tensor,
+    x0: torch.Tensor = None,
+    rtol: float = 1e-6,
+    max_iters: int = 100,
+    verbose: bool = False,
+    Minv: Callable = None,
+    eps: float =1e-25,
+    shifts: torch.Tensor =None,
+    value: float =None,
 ):
     r"""
-    Perform MINRES to find solutions to :math:`(\mathbf K + \alpha \sigma \mathbf I) \mathbf x = \mathbf b`.
+    Perform MINRES to find solutions to :math:`(K + \alpha \sigma  I) x =  b`.
     Will find solutions for multiple shifts :math:`\sigma` at the same time.
 
-    :param callable A: Function to perform matmul with.
-    :param torch.Tensor b: The vector :math:`\mathbf b` to solve against.
-    :param torch.Tensor shifts: (default None) The shift :math:`\sigma` values. If set to None,
-        then :math:`\sigma=0`.
-    :param float value: (default None) The multiplicative constant :math:`\alpha`. If set to None,
-        then :math:`\alpha=0`.
-    :param int max_iters: (default None) The maximum number of minres iterations. 
-    :rtype: torch.Tensor
-    :return: The solves :math:`\mathbf x`. The shape will correspond to the size of `b` and `shifts`.
+    Args:
+      A (Callable): A is a callable function representing the forward operator A(x) of a matrix free linear operator.
+      b (torch.Tensor): The parameter `b` is a tensor representing the right-hand side of the linear
+        system of equations `Ax = b`.
+      x0 (torch.Tensor): The initial guess for the solution vector. If not provided, it is initialized
+        to a vector of zeros.
+      rtol (float): Relative tolerance for convergence criteria. Default to 1e-6
+      max_iters (int): The maximum number of iterations. Defaults to 100
+      verbose (bool): Whether to logging intermediate information. Defaults to False
+      Minv (Callable):  A callable function representing the preconditioner.
+      shifts (torch.Tensor): The shift :math:`\sigma` values. If set to None, then :math:`\sigma=0`.
+      vlaue (float): The multiplicative constant :math:`\alpha`. If set to None, then :math:`\alpha=0`.
+
+    Returns:
+      The solves :math:`x`. The shape will correspond to the size of `b` and `shifts`.
+
+    Note:
+      MINRES solver does not support Unrolling mode
     """
-    # Default values    
-    if preconditioner is None:
-        preconditioner = lambda x: x.clone()
+    # Default values
+    if Minv is None:
+        def Minv(x): return x.clone()
 
     if shifts is None:
         shifts = torch.tensor(0.0, dtype=b.dtype, device=b.device)
@@ -78,7 +89,7 @@ def MINRES(
     # Variables for Lanczos terms
     zvec_prev2 = torch.zeros_like(prod)
     zvec_prev1 = b.clone().expand_as(prod).contiguous()
-    qvec_prev1 = preconditioner(zvec_prev1)
+    qvec_prev1 = Minv(zvec_prev1)
     alpha_curr = torch.empty(prod.shape[:-2] + (1, prod.size(-1)), dtype=b.dtype, device=b.device)
     alpha_shifted_curr = torch.empty(solution.shape[:-2] + (1, prod.size(-1)), dtype=b.dtype, device=b.device)
     beta_prev = (zvec_prev1 * qvec_prev1).sum(dim=-2, keepdim=True).sqrt_()
@@ -122,7 +133,7 @@ def MINRES(
     search_update_norm = torch.zeros_like(solution_norm)
 
     # Maybe log
-    if verbose:        
+    if verbose:
         print(
             f"Running MINRES on a {b.shape} RHS for {max_iters} iterations (rtol={rtol}). "
             f"Output: {solution.shape}."
@@ -143,7 +154,7 @@ def MINRES(
 
         zvec_curr = prod.addcmul_(alpha_curr, zvec_prev1, value=-1).addcmul_(beta_prev, zvec_prev2, value=-1)
 
-        qvec_curr = preconditioner(zvec_curr)
+        qvec_curr = Minv(zvec_curr)
         torch.mul(zvec_curr, qvec_curr, out=tmpvec)
         torch.sum(tmpvec, -2, keepdim=True, out=beta_curr)
         beta_curr.sqrt_()
