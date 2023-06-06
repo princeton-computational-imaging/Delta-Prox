@@ -2,9 +2,13 @@
 
 The following publications discuss the ideas behind Delta-Prox.
 
-- ∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization. Zeqiang Lai, Kaixuan Wei, Ying Fu, Philipp Härtel, and Felix Heide. Proceedings of ACM SIGGRAPH, 2023.
+> **∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization** </br>
+> Zeqiang Lai, Kaixuan Wei, Ying Fu, Philipp Härtel, and Felix Heide.</br>
+> ACM Transactions on Graphics, SIGGRAPH, 2023.
 
-- ProxImaL: Efficient Image Optimization Using Proximal Algorithms. F. Heide, S. Diamond, M. Niessner, J. Ragan-Kelley, W. Heidrich, and G. Wetzstein. Proceedings of ACM SIGGRAPH, 2016.
+> **ProxImaL: Efficient Image Optimization Using Proximal Algorithms** </br>
+> F. Heide, S. Diamond, M. Niessner, J. Ragan-Kelley, W. Heidrich, and G. Wetzstein. </br>
+>  ACM Transactions on Graphics, SIGGRAPH, 2016.
 
 ```bibtex
 @article{deltaprox2023,

@@ -11,8 +11,8 @@
 ## Linear Solvers
 
 ```{eval-rst}
-.. autofunction:: dprox.linalg.solve.cg.cg
-.. autofunction:: dprox.linalg.solve.cg.pcg
-.. autofunction:: dprox.linalg.solve.minres.minres
-.. autofunction:: dprox.linalg.solve.plss.plss
+.. autofunction:: dprox.linalg.solve.solver_cg.cg
+.. autofunction:: dprox.linalg.solve.solver_cg.pcg
+.. autofunction:: dprox.linalg.solve.solver_minres.minres
+.. autofunction:: dprox.linalg.solve.solver_plss.plss
 ```
