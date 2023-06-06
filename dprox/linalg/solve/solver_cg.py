@@ -15,6 +15,10 @@ def bdot(x: torch.Tensor, y: torch.Tensor):
     Returns:
       Batch dot product of the shape [batch_size]
     """
+    if len(x.shape) != len(y.shape):
+        raise ValueError('The input of `bdot` should have the same shape.')
+    if len(x.shape) == 1:
+        return torch.dot(x, y)
     return torch.sum(x.reshape(x.shape[0], -1) * y.reshape(y.shape[0], -1), dim=-1)
 
 
@@ -32,6 +36,21 @@ def expand(x: torch.Tensor, ref: torch.Tensor):
     while len(x.shape) < len(ref.shape):
         x = x.unsqueeze(-1)
     return x
+
+
+def ravel(x: torch.Tensor):
+    """
+    Flatten the tensor if it has more than one dimension, this function treat the first dimmension as batch dimmension.
+
+    Args:
+      x (torch.Tensor): The input tensor of any shape.
+
+    Returns:
+      Flatten tensor with batch dimmension reserved. If the input tensor has only one dimmension, return as it is.
+    """
+    if len(x.shape) == 1:
+        return x
+    return x.reshape(x.shape[0], -1)
 
 
 def cg(
@@ -73,7 +92,7 @@ def cg(
     r *= - 1.0
     r += b
 
-    cg_tol = rtol * torch.linalg.norm(b, 2, dim=(-1, -2))  # Relative tolerence
+    cg_tol = rtol * torch.linalg.norm(ravel(b), 2, dim=-1)  # Relative tolerence
 
     # CG iteration
     gamma_1 = p = None
@@ -81,7 +100,7 @@ def cg(
     for iter in range(cg_iter):
 
         # Check for convergence
-        normr = torch.linalg.norm(r, 2, dim=(-1, -2))
+        normr = torch.linalg.norm(ravel(r), 2)
         if torch.all(normr <= cg_tol):
             if verbose:
                 print("Converged at CG Iter %03d" % iter)

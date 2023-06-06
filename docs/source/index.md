@@ -12,6 +12,7 @@ hide-toc: true
 install
 tutorial/index
 api/index
+citation
 ```
 
 

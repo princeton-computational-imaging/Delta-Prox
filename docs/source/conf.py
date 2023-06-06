@@ -134,8 +134,8 @@ myst_heading_anchors = 3
 # html_logo = "logo.png"
 
 
-pygments_style = "sphinx"
-pygments_dark_style = "monokai"
+pygments_style = "default"
+pygments_dark_style = "github-dark"
 
 html_css_files = [
     'css/custom.css',
