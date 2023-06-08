@@ -98,7 +98,7 @@ def plssw(
     verbose: bool = False,
 ):
     """
-    A Projective Linear Systems Solver Weighted (for well-conditioned system)
+    A Projective Linear Systems Solver Weighted (for ill-conditioned system)
 
     Args:
       A (Callable): A is a callable function representing the forward operator A(x) of a matrix free linear operator.
