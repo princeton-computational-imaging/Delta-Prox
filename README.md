@@ -37,7 +37,7 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 
 ## Installtion
 
-We recommend installing 🎉 $\nabla$-Prox in a virtual environment from PyPi or Conda.
+We recommend installing 🍕 $\nabla$-Prox in a virtual environment from PyPi or Conda.
 
 ```bash
 pip install dprox
@@ -45,17 +45,17 @@ pip install dprox
 
 ## Quickstart
 
-♨️ Here is an example for using  $\nabla$-Prox. For more comprehensive usage, please refer to the [Documentation]().
-
-### Solver Compliation
-
 Consider a simple image deconvlution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
 
 $$
 \arg \min_x { \frac{1}{2} |Dx - y|^2_2 + g(x) }
 $$
 
-where $g(x)$ denotes an implicit plug-and-play denoiser prior. We could solve this problem in ∇-Prox with the following code: 
+where $g(x)$ denotes an implicit plug-and-play denoiser prior. 
+
+### Solver Compliation
+
+We could solve this problem in ∇-Prox with the following code: 
 
 ```python
 from dprox import *
