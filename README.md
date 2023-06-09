@@ -15,12 +15,13 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 <a href="https://deltaprox.readthedocs.io/">Docs</a> |
 <a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/tutorials">Tutorials</a> |
 <a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/examples">Examples</a> |
+<a href="https://light.princeton.edu/publication/delta_prox/">Project Page</a> |
 <a href="#">Paper</a> |
 <a href="https://github.com/Zeqiang-Lai/DeltaProx#citation">Citation</a> 
 </p>
 
 <p align="center">
-    <a href="[https://github.com/PanQiWei/AutoGPTQ/releases](https://pypi.org/project/dprox/)">
+    <a href="[https://pypi.org/project/dprox/](https://pypi.org/project/dprox/)">
         <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/v/dprox">
     </a>
     <a href="[https://pypi.org/project/auto-gptq/](https://arxiv.org/abs/2207.02849)">
