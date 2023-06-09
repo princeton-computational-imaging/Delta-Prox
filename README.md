@@ -26,9 +26,7 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 <!-- <a href="https://pypi.org/project/dprox/">![Version](https://img.shields.io/pypi/v/dprox)</a> -->
 <!-- <a href="https://arxiv.org/abs/2207.02849">![arXiv](https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg)</a> -->
 
-```bash
-pip install dprox
-```
+
 
 > $\nabla$-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. Departing from handwriting these solvers and differentiating via autograd, $\nabla$-Prox requires only a few lines of code to define a solver that can be *specialized based on user requirements w.r.t memory constraints or training budget* by optimized algorithm unrolling, deep equilibrium learning, and deep reinforcement learning. $\nabla$-Prox makes it easier to prototype different learning-based bi-level optimization problems for a diverse range of applications. We compare our framework against existing methods with naive implementations. $\nabla$-Prox is significantly more compact in terms of lines of code and compares favorably in memory consumption in applications across domains.
 
@@ -36,6 +34,12 @@ pip install dprox
 
 
 - **[Jan 21 2023]** :  Release preview code.
+
+## Installtion
+
+```bash
+pip install dprox
+```
 
 ## Getting Started
 
