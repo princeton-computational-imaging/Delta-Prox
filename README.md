@@ -37,11 +37,13 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 
 ## Installtion
 
+We recommend installing 🎉 $\nabla$-Prox in a virtual environment from PyPi or Conda.
+
 ```bash
 pip install dprox
 ```
 
-## Getting Started
+## Quickstart
 
 ♨️ Here is an example for using  $\nabla$-Prox. For more comprehensive usage, please refer to the [Documentation]().
 
