@@ -135,7 +135,7 @@ myst_heading_anchors = 3
 
 
 pygments_style = "default"
-pygments_dark_style = "monokai"
+pygments_dark_style = "github-dark"
 
 html_css_files = [
     'css/custom.css',
