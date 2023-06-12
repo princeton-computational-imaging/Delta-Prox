@@ -5,4 +5,4 @@ from .pc import PockChambolle
 from .pgd import ProximalGradientDescent
 from .base import Algorithm
 from .tune.dpir import log_descent
-from .special import *
+from .special import AutoTuneSolver, DEQSolver, UnrolledSolver

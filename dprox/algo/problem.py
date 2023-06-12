@@ -13,7 +13,7 @@ from .base import Algorithm
 from .hqs import HQS
 from .pc import PockChambolle
 from .pgd import ProximalGradientDescent
-from .special import DEQSolver
+from .special import DEQSolver, UnrolledSolver
 
 SOLVERS = {
     'admm': ADMM,
@@ -25,7 +25,9 @@ SOLVERS = {
 }
 
 SPECAILIZATIONS = {
-    'deq': DEQSolver
+    'deq': DEQSolver,
+    'rl': UnrolledSolver,
+    'unroll': UnrolledSolver,
 }
 
 

@@ -21,7 +21,6 @@ from torch.utils.data.dataset import Dataset
 from tqdm import tqdm
 
 from dprox.utils import to_torch_tensor
-from dprox.algo import Algorithm
 
 default_config = dict(
     rmsize=480,
@@ -68,7 +67,7 @@ def complex2channel(x):
     """
     convert a complex tensor with shape (N, C, H, W, 2) to a real tensor with shape (N,
     2C, H, W).
-    
+
     :param x: The input tensor to the function `complex2channel`. It is expected to have a shape of `(N,
     C, H, W, 2)`, where `N` is the batch size, `C` is the number of channels, `H` and `W` are the height
     :return: a tensor of shape `(N, 2C, H, W)` where the last dimension of `x` has been flattened and moved to the
@@ -154,7 +153,7 @@ class Env(PnPEnv):
 
 
 class TFPnPSolver(PnPSolver):
-    def __init__(self, solver: Algorithm, solver_params):
+    def __init__(self, solver, solver_params):
         super().__init__(None)
         self.solver = solver
         self.solver_params = solver_params
@@ -181,7 +180,7 @@ class TFPnPSolver(PnPSolver):
     def reset(self, data):
         """
         reset the solver with new data and return the packed states.
-        
+
         :param data: a dictionary containing the input data for the function
         :return: the packed states after initializing the solver with the given data.
         """
@@ -198,7 +197,7 @@ class TFPnPSolver(PnPSolver):
         """
         filter out the 'idx_stop' and 'rho' keys from the input dictionary and return
         the remaining keys as weights, along with the value of 'rho'.
-        
+
         :param action: a dictionary that contains hyperparameters for a proximal solver. 
         :return: a tuple containing two values: `rhos` and `weights`. `rhos` is the value of the 'rho'
         key in the `action` dictionary, and `weights` is a new dictionary that contains all the
