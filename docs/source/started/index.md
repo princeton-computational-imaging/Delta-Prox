@@ -15,7 +15,7 @@ $$
 
 where $g(x)$ denotes an implicit plug-and-play denoiser prior. 
 
-### Solver Compliation
+## Solver Compliation
 
 We could solve this problem in ∇-Prox with the following code: 
 
@@ -40,7 +40,7 @@ Here is what we got,
 
 <img src="../_static/image/example_deconv.png" width="500" />
 
-### Solver Specialization
+## Solver Specialization
 
 Conventional imaging systems employ compound refractive lens systems that are typically hand-engineered for image quality in isolation of the downstream camera task. Departing from this design paradigm, a growing body of work in computational photography [Haim et al. 2018; Horstmeyer et al. 2017] has explored the design of specialized lens system with diffractive optical elements (DOEs). 
 

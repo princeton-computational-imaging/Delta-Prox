@@ -10,4 +10,17 @@ linalg
 utils
 ```
 
-This is a small example from Markdown.
+∇-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. 
+
+```{tip}
+🚧 The API documentation is still under construction.
+```
+
+## Indices
+
+- [Proximal Algorithms](algo.md)
+- [Proximal Functions](proxfn.md)
+- [Linear Operators](linop.md)
+- [Linear System Solver](linalg.md)
+- [Utility](utils.md)
+
