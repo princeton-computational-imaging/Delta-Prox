@@ -53,7 +53,8 @@ pip install dprox
 Please refer to the [Installtion]() guide for other options.
 
 ## Quickstart
-![pipeline](https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/544a0972-f911-4976-8228-a5aa6de319c8)
+<!-- ![pipeline](https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/544a0972-f911-4976-8228-a5aa6de319c8) -->
+![pipeline](https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/cef78eb6-e2c4-4c23-92f7-a1ab0ae40462)
 
 
 Consider a simple image deconvlution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
