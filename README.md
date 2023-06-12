@@ -1,6 +1,6 @@
 <p align="center">
 <a href="https://light.princeton.edu/publication/delta_prox/">
-    <img src="https://user-images.githubusercontent.com/26198430/229363778-a546ffce-b43d-4f4a-9869-629208f050cc.svg" alt="" width="30%">
+    <img src="assets/logo.svg" alt="" width="30%">
 <!--     <img src="https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/9c4d10a2-7d15-4f25-83b7-c94b442a8347" alt="" width="30%"> -->
     </a> &ensp; 
 </p>
@@ -48,6 +48,8 @@ We recommend installing 🍕 $\nabla$-Prox in a virtual environment from PyPi or
 ```bash
 pip install dprox
 ```
+
+Please refer to the [Installtion]() guide for other options.
 
 ## Quickstart
 

@@ -16,7 +16,7 @@ def cast_to_const(expr):
 
 
 class LinOp(nn.Module):
-    """Represents a linear operator.
+    """ Abstract class for all linear operator.
     """
 
     class MultOutput(list): pass
@@ -156,20 +156,26 @@ class LinOp(nn.Module):
     # ---------------------------------------------------------------------------- #
 
     @property
-    def T(self):
+    def T(self) -> 'LinOp':
+        """ The transpose :math:`A^T` of this linear operator :math:`A`.
+        """
         op = self.clone()
         op.forward, op.adjoint = op.adjoint, op.forward
         return op
 
     @property
-    def gram(self):
+    def gram(self) -> 'LinOp':
+        """ The gram :math:`A^TA` of this linear operator :math:`A`$`.
+        """
         op = self.clone()
         forward, adjoint = op.forward, op.adjoint
         op.forward = lambda inputs: adjoint(forward(inputs))
         op.adjoint = lambda inputs: forward(adjoint(inputs))
         return op
 
-    def clone(self):
+    def clone(self) -> 'LinOp':
+        """ The deep copy of this linear operator.
+        """
         return copy.deepcopy(self)
 
     def unwrap(self, value):

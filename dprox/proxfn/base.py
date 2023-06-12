@@ -28,7 +28,7 @@ def prox_translated(prox, b):
 
 
 class ProxFn(nn.Module):
-    """ The definition of proximal operator is
+    """ The abstract class for the proximal operator.
         f(x) = argmin_x f(x) + 1/(2*lam) * ||x-v||_2^2 
     """
 
