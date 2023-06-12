@@ -1,3 +1,13 @@
+
+
+.nbsphinx-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 5px;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
 h1 {
     font-size: 2em
 }
@@ -21,4 +31,3 @@ h5 {
 h6 {
     font-size: 1em
 }
-

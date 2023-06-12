@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = '∇-Prox'
+project = '∇-Prox 🎉'
 copyright = '2023'
 author = 'Zeqiang-Lai'
 
@@ -112,12 +112,12 @@ html_title = project
 html_static_path = ['_static']
 
 
-# html_theme_options = {
-#     "light_css_variables": {
-#         "font-stack": "Arial, sans-serif",
-#         "font-stack--monospace": "Courier, monospace",
-#     },
-# }
+html_theme_options = {
+    "light_css_variables": {
+        "font-stack": "Arial,Noto Sans,sans-serif",
+        "font-stack--monospace": "IBM Plex Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace",
+    },
+}
 
 #
 # -- Options for TODOs -------------------------------------------------------

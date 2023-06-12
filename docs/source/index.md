@@ -2,15 +2,21 @@
 hide-toc: true
 ---
 
-# Welcome to ∇-Prox
+<!-- # Welcome to ∇-Prox -->
+<br/>
+<p align="center">
+<a href="https://light.princeton.edu/publication/delta_prox/">
+    <img src="_static/logo.svg" alt="" width="40%">
+</a> 
+</p>
 
 
 ```{toctree}
 :maxdepth: 3
 :hidden: 
 
-install
-tutorial/index
+Get Started <started/index>
+tutorials/index
 api/index
 citation
 ```
@@ -21,68 +27,38 @@ citation
 :hidden:
 PyPI Page <https://pypi.org/project/dprox/>
 GitHub Repository <https://github.com/princeton-computational-imaging/Delta-Prox>
-Project Page <https://pypi.org/project/dprox/>
+Project Page <https://light.princeton.edu/publication/delta_prox/>
+Paper <https://pypi.org/project/dprox/>
 ```
 
-🎉  ∇-Prox is a differentiable modeling language for proximal algorithms on large-scale optimization
+##### ∇-Prox
 
+🎉  ∇-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. 
+<br/>
+🎉  ∇-Prox allows for rapid prototyping of learning-based bi-level optimization problems for a diverse range of applications, by [optimized algorithm unrolling](https://pypi.org/project/dprox/), [deep equilibrium learning](https://pypi.org/project/dprox/), and [deep reinforcement learning](https://pypi.org/project/dprox/). 
 
+The library includes the following major components:
 
-<a href="#/">Docs</a> |
-<a href="#">Tutorials</a> |
-<a href="#">Examples</a> |
-<a href="#">Paper</a> |
-<a href="#">Citation</a> 
+- A library of differentiable [proximal algorithms](https://pypi.org/project/dprox/), [proximal operators](https://pypi.org/project/dprox/), and [linear operators](https://pypi.org/project/dprox/).
+- Interchangeable [specialization](https://pypi.org/project/dprox/) strategies for balancing trade-offs between speed and memory.
+- Out-of-box [training utilities](https://pypi.org/project/dprox/) for learning-based bi-level optimization with a few lines of code.
 
-
-<a href="https://pypi.org/project/dprox/">![Version](https://img.shields.io/pypi/v/dprox)</a>
-![GitHub](https://img.shields.io/github/license/princeton-computational-imaging/Delta-Prox)
-  <a href="https://arxiv.org/abs/2207.02849">![arXiv](https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg)</a>
-
-
-```bash
-pip install dprox
+```{nbgallery}
 ```
 
-**Features**
-
-- ∇-Prox allows users to specify optimization objective functions of unknowns concisely at a high level, and intelligently compiles the problem into compute and memory efficient differentiable solvers.
-
-
-**News**
- 
-- **[Jan 21 2023]**  Release preview code.
-
-
-> 🚧 The code is still under construction, more features would be migrated from our dev code.
-
-## Getting Started
-
-Consider a simple image deconvlution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
-
-$$
-\arg \min_x { \frac{1}{2} |Dx - y|^2_2 + g(x) }
-$$
-
-where $g(x)$ denotes an implicit plug-and-play denoiser prior. We could solve this problem in ∇-Prox with the following code: 
-
-```python
-from dprox import *
-from dprox.utils import *
-from dprox.utils.examples import *
-
-img = sample()
-psf = point_spread_function(15, 5)
-b = blurring(img, psf)
-
-x = Variable()
-data_term = sum_squares(conv(x, psf) - b)
-reg_term = deep_prior(x, denoiser='ffdnet_color')
-prob = Problem(data_term + reg_term)
-
-out = prob.solve(method='admm', x0=b)
-```
-
-Here is what we got,
-
-<img src="_static/example_deconv.png" width="500" />
+<div class="toctree-wrapper compound">
+<div class="nbsphinx-gallery">
+<a class="reference internal" href="started/quicktour.html">
+  <b>Quicktour</b>
+  <p>Learn the fundamental usages. We recommend starting here if you're using 🎉 ∇-Prox for the first time! </p>
+</a>
+<a class="reference internal" href="tutorials/index.html">
+  <b>Tutorials</b>
+  <p>Understand the design of the library and the mathematics behind the code. </p>
+</a>
+<a class="reference internal" href="api/index.html">
+  <b>API Documentation</b>
+  <p>Explore the complete reference guide. Useful if you want to develop programs with ∇-Prox. </p>
+</a>
+</div>
+</div>
