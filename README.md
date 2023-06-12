@@ -81,7 +81,7 @@ out = prob.solve(method='admm', x0=b)
 
 Here is what we got,
 
-<img src="docs/source/_static/example_deconv.png" width="500" />
+<img src="docs/source/_static/image/example_deconv.png" width="500" />
 
 Please refer to the [documentation]() site for more instructions on the efficient differentiation of proximal algorithm with ∇-Prox.
 
