@@ -81,10 +81,6 @@ prob = Problem(data_term + reg_term)
 out = prob.solve(method='admm', x0=b)
 ```
 
-Here is what we got,
-
-<img src="docs/source/_static/image/example_deconv.png" width="500" />
-
 We could also specialize the solver that adapts for learning-based bi-level optimization. 
 For examples, specializing to a RL solver for automatic parameter tuning.
 
