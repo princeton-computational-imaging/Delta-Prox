@@ -3,6 +3,8 @@
 ## Basic
 ```{nbgallery}
 learn_the_basic
+differentiable_linear_solver
+linear_operator
 ```
 
 ## Tasks
@@ -11,4 +13,5 @@ learn_the_basic
 csmri
 optics
 deraining
+image_restoration
 ```
