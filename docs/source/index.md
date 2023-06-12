@@ -50,15 +50,15 @@ The library includes the following major components:
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="started/quicktour.html">
   <b>Quicktour</b>
-  <p style="color:black">Learn the fundamental usages. We recommend starting here if you're using 🎉 ∇-Prox for the first time! </p>
+  <p style="color:var(--color-content-foreground)">Learn the fundamental usages. We recommend starting here if you're using 🎉 ∇-Prox for the first time! </p>
 </a>
 <a class="reference internal" href="tutorials/index.html">
   <b>Tutorials</b>
-  <p style="color:black">Understand the design of the library and the mathematics behind the code. </p>
+  <p style="color:var(--color-content-foreground)">Understand the design of the library and the mathematics behind the code. </p>
 </a>
 <a class="reference internal" href="api/index.html">
   <b>API Documentation</b>
-  <p style="color:black">Explore the complete reference guide. Useful if you want to develop programs with ∇-Prox. </p>
+  <p style="color:var(--color-content-foreground)">Explore the complete reference guide. Useful if you want to develop programs with ∇-Prox. </p>
 </a>
 </div>
 </div>
