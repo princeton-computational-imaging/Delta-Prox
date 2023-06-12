@@ -83,7 +83,29 @@ Here is what we got,
 
 <img src="docs/source/_static/image/example_deconv.png" width="500" />
 
-Please refer to the [documentation]() site for more instructions on the efficient differentiation of proximal algorithm with ∇-Prox.
+We could also specialize the solver that adapts for learning-based bi-level optimization. 
+For examples, specializing to a RL solver for automatic parameter tuning.
+
+```python
+solver = compile(data_term + reg_term, method='admm')
+rl_solver = specialize(solver, method='rl')
+rl_solver = train(rl_solver, dataset)
+```
+
+Or, specializing to a unrolled solver for end-to-end optic optimization.
+
+```python
+x = Variable()
+y = Placeholder()
+PSF = Placeholder()
+data_term = sum_squares(conv_doe(x, PSF, circular=True) - y)
+reg_term = deep_prior(x, denoiser='ffdnet_color')
+solver = compile(data_term + reg_term, method='admm')
+unrolled_solver = specialize(solver, step=10)
+train(unrolled_solver, dataset)
+```
+
+Want to learn more? Check out the [documentation]() or have a look at our [examples]().
 
 ## Citation
 
