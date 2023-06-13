@@ -1,6 +1,6 @@
 # Citation
 
-The following publications discuss the ideas behind Delta-Prox.
+The following publications discuss the ideas behind ∇-Prox.
 
 > **∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization** </br>
 > Zeqiang Lai, Kaixuan Wei, Ying Fu, Philipp Härtel, and Felix Heide.</br>
