@@ -12,7 +12,7 @@ x = Variable()
 data_term = sum_squares(mosaic(conv(x, psf)), offset)
 reg_term = deep_prior(x, denoiser='ffdnet_color')
 prob = Problem(data_term + reg_term,
-               lin_solver_kwargs=dict(
+               linear_solve_config=dict(
                    num_iters=500,
                    verbose=False,
                    lin_solver_type='cg2'
