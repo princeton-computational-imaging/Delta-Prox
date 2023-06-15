@@ -19,7 +19,7 @@ def expand(r):
 def auto_convert_to_tensor(names, batchify):
     """
     A decorator that automatically converts specified arguments to PyTorch tensors.
-    
+
     :param names: A list of strings representing the names of the arguments that should be converted to tensors
     :param batchify: A list of names of arguments that should be batched together when converting to a tensor
     :return: a decorator function `outter_wrapper`.
@@ -56,10 +56,11 @@ def isscalar(x):
     return np.isscalar(x) or (isinstance(x, torch.Tensor) and len(x.shape) == 0)
 
 
-# The Algorithm class is an abstract class that defines methods and properties for solving
-# optimization problems using proximal algorithms.
 class Algorithm(nn.Module):
-    # class method
+    """
+    The Algorithm class is an abstract class that defines methods and properties for solving
+    optimization problems using proximal algorithms.
+    """
 
     @abc.abstractclassmethod
     def partition(cls, prox_fns: List[ProxFn]):
@@ -83,11 +84,11 @@ class Algorithm(nn.Module):
         return next(self.parameters()).device
 
     @auto_convert_to_tensor(['x0', 'rhos', 'lams'], batchify=['x0'])
-    def solve(self, x0=None, rhos=None, lams=None, max_iter=24, pbar=False):
+    def solve(self, x0=None, rhos=None, lams=None, max_iter=24, pbar=False, callback=None):
         """
         solve a problem using an iterative algorithm with given parameters and return
         the solution.
-        
+
         :param x0: initial guess for the solution
         :param rhos: A list of penalty parameters for each constraint in the optimization problem
         :param lams: lams is a list of regularization parameters used in the optimization algorithm.
@@ -105,15 +106,15 @@ class Algorithm(nn.Module):
         x0, rhos, lams = move(x0, rhos, lams, device=self.device)
 
         state = self.initialize(x0)
-        state = self.iters(state, rhos, lams, max_iter, pbar)
+        state = self.iters(state, rhos, lams, max_iter, pbar, callback=callback)
 
         return state[0]
 
-    def iters(self, state, rhos, lams, max_iter, pbar=False):
+    def iters(self, state, rhos, lams, max_iter, pbar=False, callback=None):
         """
         iterate over a given number of iterations and update the state using the given
         rhos and lams.
-        
+
         :param state: The current state of the optimization algorithm
         :param rhos: A numpy array of shape (..., max_iter) containing the values of the penalty
         parameter rho for each iteration
@@ -132,6 +133,8 @@ class Algorithm(nn.Module):
             lam = {k: v[..., iter] for k, v in lams.items()}
             self._notify_all_op_current_step(iter)
             state = self.iter(state, rho, lam)
+            if callback is not None:
+                callback(iter=iter, state=state, rho=rho, lam=lam)
         return state
 
     def _notify_all_op_current_step(self, step):
@@ -163,7 +166,7 @@ class Algorithm(nn.Module):
     def _notify_all_op_current_step(self, step):
         """
         set the step attribute for various functions and their associated linear operators.
-        
+
         :param step: an integer representing the current step in a process or algorithm
         """
         for fn in self.psi_fns:
@@ -199,7 +202,7 @@ class Algorithm(nn.Module):
     def pack(self, state):
         """
         take a list of tensors and concatenates them along the second dimension.
-        
+
         :param state: a list of tensors or lists of tensors that need to be
         concatenated along the second dimension. The function first flattens the list of tensors or
         lists of tensors into a single list, and then concatenates them along the second dimension using
