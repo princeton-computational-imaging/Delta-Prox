@@ -1,9 +1,10 @@
+from dataclasses import dataclass, field
+
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import PIL.Image as Image
 import torch
-from dataclasses import dataclass, field
 from torchlight.data import SingleImageDataset
 
 from dprox import *
@@ -14,13 +15,10 @@ from dprox.utils import *
 from .doe_model import RGBCollimator, center_crop, img_psf_conv
 
 
-device = torch.device('cuda')
-
-
 @dataclass
 class DOEModelConfig:
-    circular: bool = True # circular convolution
-    aperture_diameter: float = 3e-3 # aperture diameter
+    circular: bool = True  # circular convolution
+    aperture_diameter: float = 3e-3  # aperture diameter
     sensor_distance: float = 15e-3  # Distance of sensor to aperture
     refractive_idcs = torch.tensor([1.4648, 1.4599, 1.4568])  # Refractive idcs of the phaseplate
     wave_lengths = torch.tensor([460, 550, 640]) * 1e-9  # Wave lengths to be modeled and optimized for
@@ -36,7 +34,7 @@ def normalize_psf(psf: np.ndarray, clip_percentile=0.01, bandwise=False):
     """
     normalize a point spread function (PSF) by dividing it by its sum, correcting for
     outliers, and normalizing the maximum value to 1 for visualization.
-    
+
     :param psf: a numpy array representing the point spread function (PSF) of an imaging system
     :type psf: np.ndarray
     :param clip_percentile: represent the percentage of data that is considered as outliers. In this
@@ -53,7 +51,7 @@ def normalize_psf(psf: np.ndarray, clip_percentile=0.01, bandwise=False):
     if bandwise:
         psf = psf / psf.sum(axis=(0, 1), keepdims=True)
     else:
-        psf = psf / psf.sum()  # sum to 1 
+        psf = psf / psf.sum()  # sum to 1
     psf = outlier_correct(psf, p=clip_percentile)
     psf = psf / psf.max()  # normalize the max value to 1 for visualization
     return psf
@@ -62,7 +60,7 @@ def normalize_psf(psf: np.ndarray, clip_percentile=0.01, bandwise=False):
 def build_doe_model(config: DOEModelConfig = DOEModelConfig()):
     """
     build a DOE (Diffractive Optical Element) model using the input configuration.
-    
+
     :param config: DOEModelConfig object that contains the following parameters:
     :type config: DOEModelConfig
     :return: The function `build_doe_model` is returning an instance of the `RGBCollimator` class, which
@@ -74,7 +72,7 @@ def build_doe_model(config: DOEModelConfig = DOEModelConfig()):
                                      patch_size=config.patch_size,
                                      sample_interval=config.sample_interval,
                                      wave_resolution=config.wave_resolution,
-                                     ).to(device)
+                                     )
     return rgb_collim_model
 
 
@@ -82,7 +80,7 @@ def build_baseline_profile(rgb_collim_model: RGBCollimator):
     """
     build a baseline profile for a given RGB collimator model by calculating the Fresnel
     phase and height map.
-    
+
     :param rgb_collim_model: An instance of the RGBCollimator class, which likely represents a system
     for collimating light of different wavelengths (red, green, and blue) onto a sensor or detector
     :type rgb_collim_model: RGBCollimator
@@ -98,21 +96,21 @@ def build_baseline_profile(rgb_collim_model: RGBCollimator):
     return fresnel_phase_c
 
 
-def load_sample_img(path='./8068.jpg', keep_ratio=True, patch_size=736):
+def load_sample_img(path='./8068.jpg', keep_ratio=True, patch_size=748):
     img = Image.open(path)
     ps = patch_size
     if keep_ratio:
         ps = min(img.height, img.width)
     img = center_crop(img, ps, ps)
     img = img.resize((patch_size, patch_size), Image.BICUBIC)
-    x = torch.from_numpy(np.array(img).transpose((2, 0, 1)) / 255.)[None].to(device)
+    x = torch.from_numpy(np.array(img).transpose((2, 0, 1)) / 255.)[None]
     return x
 
 
 def sanity_check(psf, circular=True):
     """
     perform a sanity check on the output of `img_psf_conv` and `conv_doe` functions.
-    
+
     :param psf: The point spread function (PSF) is a mathematical function that describes how an imaging
     system blurs a point source of light. It is often used in image processing and analysis to model the
     effects of image blurring and to deconvolve images
@@ -172,8 +170,8 @@ def plot(data, path):
 
 def plot3d(data, path):
     data = data.detach().squeeze().cpu().numpy()
-    data = data[200:400,200:400]
-    H,W = data.shape
+    data = data[200:400, 200:400]
+    H, W = data.shape
     # x = np.floor(np.linspace(0, H, 50)).astype('int') - 1
     # x = np.floor(np.linspace(0, H, 50)).astype('int') - 1
     x = np.linspace(0, H, 50)

@@ -1,7 +1,7 @@
 import torch
 
 from dprox.algo.admm import ADMM
-from dprox.algo.tune import Batch, Env, apply_recursive, complex2channel
+from dprox.algo.special.rl.solver import Batch, Env, apply_recursive, complex2channel
 
 from .dataset import CSMRIDataset, CSMRIEvalDataset
 
@@ -92,3 +92,12 @@ def custom_policy_ob_pack_fn(variables, x0, T, aux_state):
                       T,
                       aux_state['sigma_n'].cuda(),
                       ], dim=1).real
+
+
+def seed_everything(seed):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    random.seed(seed)
+    if torch.cuda.is_available(): torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
