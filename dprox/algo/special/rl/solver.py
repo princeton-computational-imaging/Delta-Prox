@@ -310,12 +310,12 @@ class AutoTuneSolver(nn.Module):
         self.max_episode_step = max_episode_step
         self.custom_policy_ob_pack_fn = custom_policy_ob_pack_fn
 
-    def solve(self, x0, aux_state=None, pbar=False):
+    def solve(self, x0, aux_state=None, pbar=False, callback=None):
         x0 = x0.to(self.solver.device)
         state = self.solver.initialize(x0)
         for i in tqdm(range(self.max_episode_step), disable=not pbar):
             rhos, lams, idx_stop = self.estimate(state, i, x0, aux_state)
-            state = self.solver.iters(state, rhos, lams, self.policy.action_bundle)
+            state = self.solver.iters(state, rhos, lams, self.policy.action_bundle, callback=callback)
         return state[0]
 
     @torch.no_grad()

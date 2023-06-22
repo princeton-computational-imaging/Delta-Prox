@@ -1,16 +1,17 @@
+import argparse
+
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
 from scipy.io import loadmat
 
 from dprox import *
+from dprox.algo.special.deq.solver import DEQ
 from dprox.algo.tune import *
 from dprox.utils import *
-from dprox.algo.special.deq.solver import DEQ
-
-import argparse
-
-from common import TrainDataset, EvalDataset, CustomADMM, CustomEnv, custom_policy_ob_pack_fn
-
+from dprox.utils.examples.csmri.common import (CustomADMM, CustomEnv,
+                                               EvalDataset, TrainDataset,
+                                               custom_policy_ob_pack_fn)
 
 
 class CustomDEQSolver(nn.Module):
@@ -37,7 +38,6 @@ class CustomDEQSolver(nn.Module):
 
 
 def main():
-    seed_everything(1234)
 
     x = Variable()
     y = Placeholder()
@@ -52,6 +52,7 @@ def main():
     # dataset
 
     from pathlib import Path
+
     from tfpnp.utils.noise import GaussianModelD
     data_dir = Path('data')
     mask_dir = Path('data/csmri/masks')
@@ -90,7 +91,7 @@ def main():
                                custom_policy_ob_pack_fn=custom_policy_ob_pack_fn)
     ckpt_path = 'ckpt/custom_admm_pack1-train2/actor_best.pkl'
     tf_solver.load(ckpt_path)
-    tf_solver.eval(ckpt_path, valid_datasets, placeholders, custom_env=CustomEnv)
+    # tf_solver.eval(ckpt_path, valid_datasets, placeholders, custom_env=CustomEnv)
     deq_solver = CustomDEQSolver(solver, tf_solver)
 
     def step_fn(batch):
@@ -110,8 +111,8 @@ def main():
     from tfpnp.utils.metric import psnr_qrnn3d
 
     total_psnr = 0
-    # test_loader = DataLoader(EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'))
-    test_loader = DataLoader(EvalDataset('data/csmri/MICCAI_2020/radial_128_4/5'))
+    test_loader = DataLoader(EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'))
+    # test_loader = DataLoader(EvalDataset('data/csmri/MICCAI_2020/radial_128_4/5'))
     for batch in test_loader:
         with torch.no_grad():
             target, pred = step_fn(batch)

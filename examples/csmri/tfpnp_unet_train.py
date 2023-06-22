@@ -3,8 +3,9 @@ from scipy.io import loadmat
 from dprox import *
 from dprox.algo.tune import *
 from dprox.utils import *
-
-from common import TrainDataset, EvalDataset, CustomADMM, CustomEnv
+from dprox.utils.examples.csmri.common import (CustomADMM, CustomEnv,
+                                               EvalDataset, TrainDataset,
+                                               seed_everything)
 
 
 def build_solver():
@@ -18,7 +19,6 @@ def build_solver():
     return solver, {'y': y, 'mask': mask}
 
 
-
 def main():
     seed_everything(1234)
 
@@ -27,6 +27,7 @@ def main():
     # dataset
 
     from pathlib import Path
+
     from tfpnp.utils.noise import GaussianModelD
     data_dir = Path('data')
     mask_dir = Path('data/csmri/masks')
@@ -39,7 +40,6 @@ def main():
     masks = [loadmat(mask_dir / f'{sampling_mask}.mat').get('mask')
              for sampling_mask in sampling_masks]
     dataset = TrainDataset(train_root, fns=None, masks=masks, noise_model=noise_model)
-
 
     valid_datasets = {
         'Medical7_2020/radial_128_2/15': EvalDataset('data/csmri/Medical7_2020/radial_128_2/15'),
@@ -71,7 +71,6 @@ def main():
     tf_solver.train(dataset, valid_datasets, placeholders, **training_cfg)
     ckpt_path = 'ckpt/tfpnp_unet/actor_best.pkl'
     tf_solver.eval(ckpt_path, valid_datasets, placeholders, custom_env=CustomEnv)
-
 
 
 if __name__ == '__main__':

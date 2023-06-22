@@ -1,18 +1,18 @@
+import os
+
 import torch
+from tfpnp.utils.metric import psnr_qrnn3d
+from torch.utils.data import DataLoader
+from torchlight.logging import Logger
 
 from dprox import *
 from dprox.algo.tune import *
 from dprox.utils import *
+from dprox.utils.examples.csmri.common import CustomADMM, EvalDataset
 
-from tfpnp.utils.metric import psnr_qrnn3d
-from torchlight.logging import Logger
-
-from common import EvalDataset, CustomADMM
 
 
 def main():
-    seed_everything(1234)
-
     x = Variable()
     y = Placeholder()
     mask = Placeholder()
