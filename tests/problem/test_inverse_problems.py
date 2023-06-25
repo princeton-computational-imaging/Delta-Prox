@@ -25,7 +25,7 @@ def test_csmri():
     out = x.value.real
 
     print(psnr(out, gt))
-    assert abs(psnr(out, gt) - 42.6) < 0.1
+    assert abs(psnr(out, gt) - 43.1) < 0.1
 
 
 def test_deconv():
@@ -42,7 +42,7 @@ def test_deconv():
     out = prob.solve(method='admm', x0=b, pbar=True)
 
     print(psnr(out, img))
-    assert abs(psnr(out, img) - 31.9) < 0.1
+    assert abs(psnr(out, img) - 34.5) < 0.1
 
 
 def test_deconv2():

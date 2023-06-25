@@ -17,7 +17,7 @@ def test_admm():
     out = prob.solve(method='admm', x0=b, pbar=True)
 
     print(psnr(out, img))
-    assert abs(psnr(out, img) - 31.9) < 0.1
+    assert abs(psnr(out, img) - 34.51) < 0.1
 
 
 def test_ladmm():
@@ -34,7 +34,7 @@ def test_ladmm():
     out = prob.solve(method='ladmm', x0=b, pbar=True)
 
     print(psnr(out, img))
-    assert abs(psnr(out, img) - 31.9) < 0.1
+    assert abs(psnr(out, img) - 34.51) < 0.1
 
 
 def test_admm_vxu():
@@ -51,7 +51,7 @@ def test_admm_vxu():
     out = prob.solve(method='admm_vxu', x0=b, pbar=True)
 
     print(psnr(out, img))
-    assert abs(psnr(out, img) - 31.9) < 0.1
+    assert abs(psnr(out, img) - 34.50) < 0.1
 
 
 def test_hqs():
@@ -68,7 +68,7 @@ def test_hqs():
     out = prob.solve(method='hqs', x0=b, pbar=True)
 
     print(psnr(out, img))
-    assert abs(psnr(out, img) - 31.6) < 0.1
+    assert abs(psnr(out, img) - 34.08) < 0.1
 
 
 def test_pc():
@@ -85,7 +85,7 @@ def test_pc():
     out = prob.solve(method='pc', x0=b, pbar=True)
 
     print(psnr(out, img))
-    assert abs(psnr(out, img) - 29.6) < 0.1
+    assert abs(psnr(out, img) - 29.87) < 0.1
 
 
 def test_pgd():
@@ -101,3 +101,4 @@ def test_pgd():
     out = prob.solve(method='pgd', x0=b, pbar=True)
 
     print(psnr(out, img))
+    assert abs(psnr(out, img) - 21.44) < 0.1

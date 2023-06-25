@@ -249,7 +249,7 @@ class LPSolverADMM(nn.Module):
             tmp = torch.linalg.solve_triangular(L, right, upper=False)
             xtilde = torch.linalg.solve_triangular(L.T, tmp, upper=True)
         else:
-            xtilde = pcg(ATAop, right, Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
+            xtilde = pcg(ATAop, right, Minv=Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
         ztilde = A @ (xtilde)
         x = alpha * xtilde + (1 - alpha) * x
 

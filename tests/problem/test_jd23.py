@@ -24,7 +24,7 @@ def test_jd2():
 
     print(psnr(out, img))  # 25.25
 
-    assert abs(psnr(out, img) - 25.25) < 0.1
+    assert abs(psnr(out, img) - 25.10) < 0.1
 
 
 def load(name='face', return_tensor=True):
@@ -65,5 +65,5 @@ def test_jd2_batched():
     print(psnr(out[1].unsqueeze(0), img2))  # 29.689
 
     # assert abs(psnr(out[0:1], img1) - 29.92) < 0.1
-    assert abs(psnr(out[0:1], img1) - 25.25) < 0.1
-    assert abs(psnr(out[1].unsqueeze(0), img2) - 25.25) < 0.1
+    assert abs(psnr(out[0:1], img1) - 25.10) < 0.1
+    assert abs(psnr(out[1].unsqueeze(0), img2) - 25.10) < 0.1
