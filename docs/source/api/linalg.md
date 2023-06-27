@@ -4,8 +4,8 @@
 ## Unified Interface
 
 ```{eval-rst}
-.. autofunction:: dprox.linalg.custom.linear_solve
-.. autoclass:: dprox.linalg.custom.LinearSolveConfig
+.. autofunction:: dprox.linalg.linear_solve
+.. autoclass:: dprox.linalg.LinearSolveConfig
 ```
 
 ## Linear Solvers

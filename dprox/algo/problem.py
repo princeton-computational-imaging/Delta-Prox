@@ -1,13 +1,12 @@
-from dprox.linop.constaints import matmul, less, equality
 from typing import List, Union
 
 import torch
 
-from dprox.proxfn import ProxFn
 from dprox.linalg import LinearSolveConfig
+from dprox.linop.constaints import equality, less, matmul
+from dprox.proxfn import ProxFn
 
-from . import opt
-from . import lp
+from . import lp, opt
 from .admm import ADMM, ADMM_vxu, LinearizedADMM
 from .base import Algorithm
 from .hqs import HQS
@@ -31,7 +30,27 @@ SPECAILIZATIONS = {
 }
 
 
-def compile(prox_fns, method='admm', device='cuda', **kwargs):
+def compile(
+    prox_fns: List[ProxFn],
+    method: str = 'admm',
+    device: Union[str, torch.device] = 'cuda',
+    **kwargs
+):
+    """
+    Compile the given objective (in terms of a list of proxable functions) into a proximal solver.
+
+    >>> solver = compile(data_term+reg_term, method='admm')
+    
+    Args:
+      prox_fns (List[ProxFn]): A list or the sum of proxable functions. 
+      method (str): A string that specifies the name of the optimization method to use. Defaults to `admm`.
+        Valid methods include [`admm`, `admm_vxu`, `ladmm`, `hqs`, `pc`, `pgd`]. 
+      device (Union[str, torch.device]): The device (CPU or GPU) on which the solver should run. 
+        It can be either a string ('cpu' or 'cuda') or a `torch.device` object. Defaults to cuda
+
+    Returns:
+      An instance of a solver object that is created using the specified algorithm and proximal functions. The solver object is moved to the specified device (default is 'cuda') and returned.
+    """
     algorithm: Algorithm = SOLVERS[method]
     device = torch.device(device) if isinstance(device, str) else device
 
@@ -41,11 +60,33 @@ def compile(prox_fns, method='admm', device='cuda', **kwargs):
     return solver
 
 
-def specialize(solver, method='deq', **kwargs):
+def specialize(
+    solver: Algorithm,
+    method: str = 'deq',
+    **kwargs
+):
+    """ 
+    Specialize the given solver based on the given method. 
+    
+    >>> deq_solver = specialize(solver, method='deq')
+    >>> rl_solver = specialize(solver, method='rl')
+    >>> unroll_solver = specialize(solver, method='unroll')
+    
+    Args:
+      solver (Algorithm): the proximal solver that need to be specialized.
+      method (str): the strategy for the specialization. Choose from [`deq`, `rl`, `unroll`].
+      
+    Returns:
+      The specialized solver.
+    """
     return SPECAILIZATIONS[method](solver, **kwargs)
 
 
-def optimize(prox_fns, merge=False, absorb=False):
+def optimize(
+    prox_fns: List[ProxFn],
+    merge=False,
+    absorb=False
+):
     if absorb:
         prox_fns = opt.absorb.absorb_all_linops(prox_fns)
     return prox_fns

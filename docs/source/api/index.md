@@ -3,6 +3,7 @@
 ```{toctree}
 :hidden:
 
+primitive
 algo
 linop
 proxfn
