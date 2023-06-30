@@ -96,7 +96,7 @@ def build_baseline_profile(rgb_collim_model: RGBCollimator):
     return fresnel_phase_c
 
 
-def load_sample_img(path='./8068.jpg', keep_ratio=True, patch_size=748):
+def load_sample_img(path, keep_ratio=True, patch_size=748):
     img = Image.open(path)
     ps = patch_size
     if keep_ratio:
