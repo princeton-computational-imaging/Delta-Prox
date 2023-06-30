@@ -339,7 +339,7 @@ class DGUNet(nn.Module):
         
         self.tail = conv(n_feat, 3, kernel_size, bias=bias)
 
-        from restormer import Restormer
+        from .restormer import Restormer
         self.model_restoration = Restormer()
         self.model_restoration.load_state_dict(torch.load('./restormer.pth')['params'])
         

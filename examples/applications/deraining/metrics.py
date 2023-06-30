@@ -78,14 +78,14 @@ if __name__ == '__main__':
     import os
     import cv2
 
-    datasets = ['Rain100H', 'Test1200']
+    datasets = ['Rain100H']
     num_set = len(datasets)
 
     psnr_alldatasets = 0
     ssim_alldatasets = 0
 
     for idx_set in range(num_set):
-        file_path = './results2/DGUNet_restormer2_plus_tune_epoch32-2/' + datasets[idx_set] + '/'
+        file_path = './results2/DGUNet_plus2/' + datasets[idx_set] + '/'
         gt_path = './datasets/test/' + datasets[idx_set] + '/target/'
         path_list = [file for file in os.listdir(file_path) if file.endswith('.jpg') or file.endswith('.png')]
         gt_list = [file for file in os.listdir(gt_path) if file.endswith('.jpg') or file.endswith('.png')]
