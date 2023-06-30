@@ -104,7 +104,7 @@ unrolled_solver = specialize(solver, step=10)
 train(unrolled_solver, dataset)
 ```
 
-Want to learn more? Check out the [documentation]() or have a look at our [examples]().
+Want to learn more? Check out the [documentation]() or have a look at our [tutorials]().
 
 ## Citation
 

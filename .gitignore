@@ -1,4 +1,10 @@
 *.pth
+simple_cep_model_20220916
+data
+abc
+datasets
+upload.sh
+*.png
 # *.mat
 # Byte-compiled / optimized / DLL files
 __pycache__/
