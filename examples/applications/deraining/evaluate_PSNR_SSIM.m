@@ -1,12 +1,12 @@
 clc;close all;clear all;addpath(genpath('./'));
 
-datasets = {'Test100'};
+datasets = {'Rain100H'};
 num_set = length(datasets);
 
 psnr_alldatasets = 0;
 ssim_alldatasets = 0;
 for idx_set = 1:num_set
-    file_path = strcat('./results/DGUNet_restormer2_plus_tune_epoch32-2/', datasets{idx_set}, '/');
+    file_path = strcat('./results2/DGUNet_restormer2_plus_tune_epoch32-2/', datasets{idx_set}, '/');
     gt_path = strcat('./datasets/test/', datasets{idx_set}, '/target/');
     path_list = [dir(strcat(file_path,'*.jpg')); dir(strcat(file_path,'*.png'))];
     gt_list = [dir(strcat(gt_path,'*.jpg')); dir(strcat(gt_path,'*.png'))];

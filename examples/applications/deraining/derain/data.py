@@ -1,5 +1,5 @@
 import os
-from dataset_RGB import DataLoaderTrain, DataLoaderVal, DataLoaderTest, DataLoaderTest_fine
+from .dataset import DataLoaderTrain, DataLoaderVal, DataLoaderTest, DataLoaderTest_fine
 
 def get_training_data(rgb_dir, img_options):
     assert os.path.exists(rgb_dir)
