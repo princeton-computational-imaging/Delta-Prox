@@ -74,7 +74,7 @@ class DEQSolver(nn.Module):
         self.lams = lams
 
     def forward(
-        self, 
+        self,
         x0: Union[torch.Tensor, np.ndarray] = None,
         rhos: Union[float, torch.Tensor, np.ndarray] = None,
         lams: Union[float, torch.Tensor, np.ndarray, dict] = None,
@@ -95,7 +95,13 @@ class DEQSolver(nn.Module):
         state = self.internal.unpack(state)
         return state[0]
 
-    def solve(self, x0, rhos, lams, **kwargs):
+    def solve(
+        self,
+        x0: Union[torch.Tensor, np.ndarray] = None,
+        rhos: Union[float, torch.Tensor, np.ndarray] = None,
+        lams: Union[float, torch.Tensor, np.ndarray, dict] = None,
+        **kwargs
+    ):
         return self.forward(x0, rhos, lams, **kwargs)
 
     def load(self, state_dict, strict=True):

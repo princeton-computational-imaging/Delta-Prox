@@ -33,7 +33,7 @@ SPECAILIZATIONS = {
 def compile(
     prox_fns: List[ProxFn],
     method: str = 'admm',
-    device: Union[str, torch.device] = 'cuda',
+    device: Union[str, torch.device] = 'cpu',
     **kwargs
 ):
     """
