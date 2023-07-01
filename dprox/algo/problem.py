@@ -40,16 +40,16 @@ def compile(
     Compile the given objective (in terms of a list of proxable functions) into a proximal solver.
 
     >>> solver = compile(data_term+reg_term, method='admm')
-    
+
     Args:
       prox_fns (List[ProxFn]): A list or the sum of proxable functions. 
       method (str): A string that specifies the name of the optimization method to use. Defaults to `admm`.
         Valid methods include [`admm`, `admm_vxu`, `ladmm`, `hqs`, `pc`, `pgd`]. 
       device (Union[str, torch.device]): The device (CPU or GPU) on which the solver should run. 
-        It can be either a string ('cpu' or 'cuda') or a `torch.device` object. Defaults to cuda
+        It can be either a string ('cpu' or 'cuda') or a `torch.device` object. Defaults to cpu
 
     Returns:
-      An instance of a solver object that is created using the specified algorithm and proximal functions. The solver object is moved to the specified device (default is 'cuda') and returned.
+      An instance of a solver object that is created using the specified algorithm and proximal functions. 
     """
     algorithm: Algorithm = SOLVERS[method]
     device = torch.device(device) if isinstance(device, str) else device
@@ -63,23 +63,29 @@ def compile(
 def specialize(
     solver: Algorithm,
     method: str = 'deq',
+    device: Union[str, torch.device] = 'cpu',
     **kwargs
 ):
     """ 
     Specialize the given solver based on the given method. 
-    
+
     >>> deq_solver = specialize(solver, method='deq')
     >>> rl_solver = specialize(solver, method='rl')
     >>> unroll_solver = specialize(solver, method='unroll')
-    
+
     Args:
       solver (Algorithm): the proximal solver that need to be specialized.
       method (str): the strategy for the specialization. Choose from [`deq`, `rl`, `unroll`].
-      
+      device (Union[str, torch.device]): The device (CPU or GPU) on which the solver should run. 
+        It can be either a string ('cpu' or 'cuda') or a `torch.device` object. Defaults to cuda
+
     Returns:
       The specialized solver.
     """
-    return SPECAILIZATIONS[method](solver, **kwargs)
+    solver = SPECAILIZATIONS[method](solver, **kwargs)
+    device = torch.device(device) if isinstance(device, str) else device
+    solver = solver.to(device)
+    return solver
 
 
 def optimize(

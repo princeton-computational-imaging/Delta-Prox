@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 
 from . import to_ndarray
 
+DPROX_DIR = os.path.join(os.path.expanduser('~'), '.cache/dprox')
+
 
 def imread_rgb(path: str) -> np.ndarray:
     """
@@ -127,8 +129,6 @@ def get_path(base_path: str) -> str:
     """
     if os.path.exists(base_path):
         return base_path
-
-    DPROX_DIR = os.path.join(os.path.expanduser('~'), '.cache/dprox')
 
     save_path = os.path.join(DPROX_DIR, base_path)
     if not os.path.exists(save_path):

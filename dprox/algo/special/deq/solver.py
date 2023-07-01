@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from dprox.algo.base import Algorithm
+from dprox.algo.base import Algorithm, move
 from dprox.utils import to_torch_tensor
 
 from .utils.solvers import anderson
@@ -81,9 +81,10 @@ class DEQSolver(nn.Module):
         **kwargs
     ):
         x0, rhos, lams, _ = self.internal.defaults(x0, rhos, lams, 1)
-
-        # lam = {k: to_torch_tensor(v)[..., 0].to(x0.device) for k, v in lams.items()}
-        # rho = to_torch_tensor(rhos)[..., 0].to(x0.device)
+        x0, rhos, lams = move(x0, rhos, lams, device=self.internal.device)
+        
+        lam = {k: to_torch_tensor(v)[..., 0].to(x0.device) for k, v in lams.items()}
+        rho = to_torch_tensor(rhos)[..., 0].to(x0.device)
 
         if self.learned_params:
             rho = self.r * rho
