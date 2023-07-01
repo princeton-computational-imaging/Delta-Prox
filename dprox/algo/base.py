@@ -2,7 +2,7 @@ import abc
 import torch
 import torch.nn as nn
 import numpy as np
-from typing import List
+from typing import List, Callable, Union, Iterable
 from tqdm import tqdm
 
 from dprox.proxfn import ProxFn
@@ -16,13 +16,8 @@ def expand(r):
     return r
 
 
-def auto_convert_to_tensor(names, batchify):
-    """
-    A decorator that automatically converts specified arguments to PyTorch tensors.
-
-    :param names: A list of strings representing the names of the arguments that should be converted to tensors
-    :param batchify: A list of names of arguments that should be batched together when converting to a tensor
-    :return: a decorator function `outter_wrapper`.
+def auto_convert_to_tensor(names: List[str], batchify: bool):
+    """ A decorator that automatically converts specified arguments to PyTorch tensors.
     """
     def outter_wrapper(fn):
         def wrapper(*args, **kwargs):
@@ -84,24 +79,35 @@ class Algorithm(nn.Module):
         return next(self.parameters()).device
 
     @auto_convert_to_tensor(['x0', 'rhos', 'lams'], batchify=['x0'])
-    def solve(self, x0=None, rhos=None, lams=None, max_iter=24, pbar=False, callback=None):
+    def solve(
+        self,
+        x0: Union[torch.Tensor, np.ndarray] = None,
+        rhos: Union[float, Iterable[float]] = None,
+        lams: Union[float, Iterable[float], dict] = None,
+        max_iter: int = 24,
+        pbar: bool = False,
+        callback: Callable = None
+    ) -> torch.Tensor:
         """
-        solve a problem using an iterative algorithm with given parameters and return
+        Solve a problem using an iterative algorithm with given parameters and return
         the solution.
 
-        :param x0: initial guess for the solution
-        :param rhos: A list of penalty parameters for each constraint in the optimization problem
-        :param lams: lams is a list of regularization parameters used in the optimization algorithm.
-        These parameters control the trade-off between fitting the data and keeping the model simple. A
-        higher value of lambda will result in a simpler model with less overfitting, while a lower value
-        of lambda will result in a more complex model
-        :param max_iter: The maximum number of iterations to run the optimization algorithm for,
-        defaults to 24 (optional)
-        :param pbar: A boolean flag indicating whether or not to display a progress bar during the
-        optimization process, defaults to False (optional)
-        :return: the first element of the state tuple, which is the solution to the optimization
-        problem.
+        Args:
+          x0: initial guess for the solution
+          rhos: A list of penalty parameters for each constraint in the optimization problem
+          lams: lams is a list of regularization parameters used in the optimization algorithm.
+            These parameters control the trade-off between fitting the data and keeping the model simple. A
+            higher value of lambda will result in a simpler model with less overfitting, while a lower value
+            of lambda will result in a more complex model
+          max_iter: The maximum number of iterations to run the optimization algorithm for,
+            defaults to 24 (optional)
+          pbar: A boolean flag indicating whether or not to display a progress bar during the
+            optimization process, defaults to False (optional)
+
+        Return:
+          the first element of the state tuple, which is the solution to the optimization problem.
         """
+
         x0, rhos, lams, max_iter = self.defaults(x0, rhos, lams, max_iter)
         x0, rhos, lams = move(x0, rhos, lams, device=self.device)
 
@@ -110,23 +116,34 @@ class Algorithm(nn.Module):
 
         return state[0]
 
-    def iters(self, state, rhos, lams, max_iter, pbar=False, callback=None):
+    def iters(
+        self,
+        state,
+        rhos,
+        lams,
+        max_iter,
+        pbar=False,
+        callback=None
+    ):
         """
-        iterate over a given number of iterations and update the state using the given
+        Iterate over a given number of iterations and update the state using the given
         rhos and lams.
 
-        :param state: The current state of the optimization algorithm
-        :param rhos: A numpy array of shape (..., max_iter) containing the values of the penalty
-        parameter rho for each iteration
-        :param lams: A dictionary containing the Lagrange multipliers for each constraint in the
-        optimization problem. The keys of the dictionary are the names of the constraints and the values
-        are arrays containing the Lagrange multipliers for each iteration of the optimization algorithm
-        :param max_iter: The maximum number of iterations to run the algorithm for
-        :param pbar: A boolean flag indicating whether to display a progress bar during the iterations.
-        If set to True, a progress bar will be displayed to show the progress of the iterations. If set
-        to False, no progress bar will be displayed, defaults to False (optional)
-        :return: the final state after iterating over the given number of iterations using the `iter`
-        function with the given `rho` and `lam` values.
+        Args:
+          state: The current state of the optimization algorithm
+          rhos: A numpy array of shape (..., max_iter) containing the values of the penalty
+            parameter rho for each iteration
+          lams: A dictionary containing the Lagrange multipliers for each constraint in the
+            optimization problem. The keys of the dictionary are the names of the constraints and the values
+            are arrays containing the Lagrange multipliers for each iteration of the optimization algorithm
+          max_iter: The maximum number of iterations to run the algorithm for
+          pbar: A boolean flag indicating whether to display a progress bar during the iterations.
+            If set to True, a progress bar will be displayed to show the progress of the iterations. If set
+            to False, no progress bar will be displayed, defaults to False (optional)
+
+        Return:
+          the final state after iterating over the given number of iterations using the `iter` 
+          function with the given `rho` and `lam` values.
         """
         for iter in tqdm(range(max_iter), disable=not pbar):
             rho = rhos[..., iter]

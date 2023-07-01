@@ -85,7 +85,7 @@ if __name__ == '__main__':
     ssim_alldatasets = 0
 
     for idx_set in range(num_set):
-        file_path = './results2/DGUNet_plus2/' + datasets[idx_set] + '/'
+        file_path = './results/DGUNet_plus_conv/' + datasets[idx_set] + '/'
         gt_path = './datasets/test/' + datasets[idx_set] + '/target/'
         path_list = [file for file in os.listdir(file_path) if file.endswith('.jpg') or file.endswith('.png')]
         gt_list = [file for file in os.listdir(gt_path) if file.endswith('.jpg') or file.endswith('.png')]

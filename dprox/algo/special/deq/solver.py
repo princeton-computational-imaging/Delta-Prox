@@ -1,6 +1,8 @@
+from typing import Union
+
 import torch
 import torch.nn as nn
-
+import numpy as np
 
 from dprox.algo.base import Algorithm
 from dprox.utils import to_torch_tensor
@@ -17,7 +19,6 @@ class DEQ(nn.Module):
         self.b_thres = b_thres
 
         self.solver = anderson
-        # self.solver = broyden
 
     def forward(self, x, *args, **kwargs):
         f_thres = kwargs.get('f_thres', self.f_thres)
@@ -72,9 +73,17 @@ class DEQSolver(nn.Module):
         self.rhos = rhos
         self.lams = lams
 
-    def forward(self, x0, rhos, lams, **kwargs):
-        lam = {k: to_torch_tensor(v)[..., 0].to(x0.device) for k, v in lams.items()}
-        rho = to_torch_tensor(rhos)[..., 0].to(x0.device)
+    def forward(
+        self, 
+        x0: Union[torch.Tensor, np.ndarray] = None,
+        rhos: Union[float, torch.Tensor, np.ndarray] = None,
+        lams: Union[float, torch.Tensor, np.ndarray, dict] = None,
+        **kwargs
+    ):
+        x0, rhos, lams, _ = self.internal.defaults(x0, rhos, lams, 1)
+
+        # lam = {k: to_torch_tensor(v)[..., 0].to(x0.device) for k, v in lams.items()}
+        # rho = to_torch_tensor(rhos)[..., 0].to(x0.device)
 
         if self.learned_params:
             rho = self.r * rho

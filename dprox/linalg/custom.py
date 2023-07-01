@@ -67,8 +67,7 @@ class LinearSolve(torch.autograd.Function):
 
 
 def linear_solve(A: torch.nn.Module, b: torch.Tensor, config: LinearSolveConfig = LinearSolveConfig()):
-    """
-    Solves a linear system of equations with analytic gradient.
+    """ Solves a linear system of equations with analytic gradient.
 
     Args:
       A (torch.nn.Module): A is a torch.nn.Module object, it should be callable as A(x) for forward operator 

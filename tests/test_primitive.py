@@ -6,3 +6,4 @@ def test():
     dp.specialize()
     dp.optimize()
     dp.visualize()
+    dp.validate()

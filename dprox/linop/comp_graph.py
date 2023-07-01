@@ -343,7 +343,7 @@ class CompGraph:
         """ Perform dot product test to check the sanity of this linear operator
         """
         from scipy.misc import face
-        m = torch.from_numpy(face().copy()).float().cuda() / 255
+        m = torch.from_numpy(face().copy()).float() / 255
         m = m.permute(2, 0, 1).unsqueeze(0)
         d = self.forward(m)
 
@@ -421,6 +421,13 @@ def est_CompGraph_norm(K, tol=1e-3, try_fast_norm=True):
 
     Knorm = np.sqrt(eigs(A, k=1, M=None, sigma=None, which='LM', tol=tol)[0].real)
     return np.float(Knorm)
+
+
+def validate(linop: LinOp) -> bool:
+    """ Validate the implementation of the linear operator via dot-product test.
+    """
+    K = CompGraph(linop)
+    return K.sanity_check()
 
 
 def eval(linop, *inputs, zero_out_constant=True):
