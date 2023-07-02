@@ -141,7 +141,7 @@ class Dataset(SingleImageDataset):
     def __getitem__(self, index):
         img, _ = super().__getitem__(index)
         img = img.transpose(1, 2, 0)
-        img = cv2.resize(img, dsize=(752, 752),
+        img = cv2.resize(img, dsize=(768, 768),
                          interpolation=cv2.INTER_CUBIC)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = img.transpose(2, 0, 1)
