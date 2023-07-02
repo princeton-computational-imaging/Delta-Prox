@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
 
-
 deps = [
     'imageio',
     'scikit_image',
@@ -14,7 +13,6 @@ deps = [
     'proximal',
     'opencv-python'
 ]
-
 
 setup(
     name='dprox',

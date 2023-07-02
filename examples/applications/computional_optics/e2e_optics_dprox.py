@@ -66,20 +66,8 @@ def build_model():
 
 
 @torch.no_grad()
-def test(
-    savedir='saved/train_deconv',
-    dataset='data/test/Urban100',
-    checkpoint='best.pth',
-    result_dir='results',
-):
-    _, rgb_collim_model, step_fn = build_model()
-
-    # --------------- Load and Run ------------------ #
+def eval(step_fn, result_dir, savedir, dataset):
     savedir = Path(savedir)
-
-    ckpt = torch.load(savedir / checkpoint)
-    rgb_collim_model.load_state_dict(ckpt['model'])
-
     tl.metrics.set_data_format('chw')
 
     root = dataset
@@ -111,14 +99,28 @@ def test(
     logger.info('averge results')
     logger.info(tracker.summary())
     print('Average Running Time', timer.toc() / len(os.listdir(root)))
-    
+
     return tracker['psnr']
+
+
+def test(
+    savedir='saved/train_deconv',
+    dataset='data/test/Urban100',
+    checkpoint='best.pth',
+    result_dir='results',
+):
+    _, rgb_collim_model, step_fn = build_model()
+    ckpt = torch.load(savedir / checkpoint)
+    rgb_collim_model.load_state_dict(ckpt['model'])
+
+    return eval(step_fn, result_dir=result_dir,
+                dataset=dataset, savedir=savedir)
 
 
 def train(
     root='data/bsd500',
     savedir='saved/train_deconv/',
-    epochs=50,
+    epochs=10,
     bs=2,
     lr=1e-4,
     resume=None,
@@ -127,6 +129,8 @@ def train(
     from torch.utils.data.dataloader import DataLoader
     import torch.nn.functional as F
     from tqdm import tqdm
+
+    print('Training on device', device)
 
     _, rgb_collim_model, step_fn = build_model()
 
@@ -151,8 +155,6 @@ def train(
     imgdir = savedir / 'imgs'
     imgdir.mkdir(exist_ok=True, parents=True)
 
-    psf = rgb_collim_model.get_psf()
-
     if resume:
         ckpt = torch.load(savedir / resume)
         rgb_collim_model.load_state_dict(ckpt['model'])
@@ -161,17 +163,51 @@ def train(
         gstep = ckpt['gstep'] + 1
         best_psnr = ckpt['best_psnr']
 
+    def save_ckpt(name, psnr=0):
+        ckpt = {
+            'model': rgb_collim_model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+            'epoch': epoch,
+            'gstep': gstep,
+            'psnr': psnr,
+            'best_psnr': best_psnr,
+        }
+        torch.save(ckpt, savedir / name)
+
+    save_ckpt('last.pth')
+    history_psf = []
+    history_psnr = []
+
     while epoch < epochs:
         tracker = tl.trainer.util.MetricTracker()
         pbar = tqdm(total=len(loader), dynamic_ncols=True, desc=f'Epcoh[{epoch}]')
+
         for i, batch in enumerate(loader):
             if gstep % 10 == 0:
+                # validate
+                with torch.no_grad():
+                    psnr = eval(
+                        step_fn=step_fn,
+                        dataset='data/visual',
+                        result_dir='results_eval',
+                        savedir=savedir,
+                    )
+                    if psnr > best_psnr:
+                        best_psnr = psnr
+                        save_ckpt('best.pth')
+                    logger.info('Validate Epoch {} PSNR={} Best PSNR={}'.format(epoch, psnr, best_psnr))
+
                 psf = rgb_collim_model.get_psf()
                 psf = crop_center_region(
                     normalize_psf(to_ndarray(psf, debatch=True), clip_percentile=0.01)
                 )
                 imageio.imsave(imgdir / f'psf_{gstep}.png', psf)
-                
+                history_psf.append(psf)
+                history_psnr.append(psnr)
+
+                with open(savedir / 'stat.txt', 'a') as f:
+                    f.write(f'{gstep} {psnr}\n')
+
             gt, inp, pred = step_fn(batch)
 
             loss = F.mse_loss(gt, pred)
@@ -188,33 +224,16 @@ def train(
             pbar.set_postfix({'loss': f'{tracker["loss"]:.4f}',
                               'psnr': f'{tracker["psnr"]:.4f}'})
             pbar.update()
-                
+
             gstep += 1
 
         logger.info('Epoch {} Loss={} LR={}'.format(epoch, tracker['loss'], tlnn.utils.get_learning_rate(optimizer)))
 
-        def save_ckpt(name):
-            ckpt = {
-                'model': rgb_collim_model.state_dict(),
-                'optimizer': optimizer.state_dict(),
-                'epoch': epoch,
-                'gstep': gstep,
-                'psnr': tracker['psnr'],
-                'best_psnr': best_psnr,
-            }
-            torch.save(ckpt, savedir / name)
-
+        save_ckpt('last.pth', tracker['psnr'])
         pbar.close()
-        save_ckpt('last.pth')
         epoch += 1
 
-        # validate
-        with torch.no_grad():
-            psnr = test(savedir=savedir, checkpoint='last.pth', result_dir='results_eval')
-            if psnr > best_psnr:
-                best_psnr = psnr
-                save_ckpt('best.pth')
-            logger.info('Validate Epoch {} PSNR={} Best PSNR={}'.format(epoch, psnr, best_psnr))
+    imageio.mimsave(savedir / 'psf.mp4', history_psf)
 
 
 if __name__ == '__main__':

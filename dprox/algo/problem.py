@@ -33,7 +33,7 @@ SPECAILIZATIONS = {
 def compile(
     prox_fns: List[ProxFn],
     method: str = 'admm',
-    device: Union[str, torch.device] = 'cpu',
+    device: Union[str, torch.device] = 'cuda' if torch.cuda.is_available() else 'cpu',
     **kwargs
 ):
     """
@@ -46,7 +46,7 @@ def compile(
       method (str): A string that specifies the name of the optimization method to use. Defaults to `admm`.
         Valid methods include [`admm`, `admm_vxu`, `ladmm`, `hqs`, `pc`, `pgd`]. 
       device (Union[str, torch.device]): The device (CPU or GPU) on which the solver should run. 
-        It can be either a string ('cpu' or 'cuda') or a `torch.device` object. Defaults to cpu
+        It can be either a string ('cpu' or 'cuda') or a `torch.device` object. Defaults to cuda if avaliable.
 
     Returns:
       An instance of a solver object that is created using the specified algorithm and proximal functions. 
@@ -63,7 +63,7 @@ def compile(
 def specialize(
     solver: Algorithm,
     method: str = 'deq',
-    device: Union[str, torch.device] = 'cpu',
+    device: Union[str, torch.device] = 'cuda' if torch.cuda.is_available() else 'cpu',
     **kwargs
 ):
     """ 
@@ -77,7 +77,7 @@ def specialize(
       solver (Algorithm): the proximal solver that need to be specialized.
       method (str): the strategy for the specialization. Choose from [`deq`, `rl`, `unroll`].
       device (Union[str, torch.device]): The device (CPU or GPU) on which the solver should run. 
-        It can be either a string ('cpu' or 'cuda') or a `torch.device` object. Defaults to cuda
+        It can be either a string ('cpu' or 'cuda') or a `torch.device` object. Defaults to cuda if avaliable
 
     Returns:
       The specialized solver.

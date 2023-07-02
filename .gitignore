@@ -4,6 +4,7 @@ data
 abc
 datasets
 upload.sh
+examples/applications/computional_optics/optics
 *.png
 # *.mat
 # Byte-compiled / optimized / DLL files
