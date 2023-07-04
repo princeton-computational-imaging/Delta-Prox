@@ -1,5 +1,7 @@
 from scipy.io import loadmat
-
+from pathlib import Path
+from tfpnp.utils.noise import GaussianModelD
+    
 from dprox import *
 from dprox.algo.tune import *
 from dprox.utils import *
@@ -25,10 +27,6 @@ def main():
     solver, placeholders = build_solver()
 
     # dataset
-
-    from pathlib import Path
-
-    from tfpnp.utils.noise import GaussianModelD
     data_dir = Path('data')
     mask_dir = Path('data/csmri/masks')
     train_root = data_dir / 'Images_128'
