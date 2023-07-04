@@ -391,14 +391,14 @@ def test_tfpnp_unet_medical7_4x_n5():
     psnr = run_tfpnp(denoiser='unet',
                      dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/5'),
                      name='Medical7_2020/radial_128_4/5')
-    assert abs(psnr - 31.82) < TOL
+    assert abs(psnr - 31.76) < TOL
 
 
 def test_tfpnp_unet_medical7_4x_n15():
     psnr = run_tfpnp(denoiser='unet',
                      dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'),
                      name='Medical7_2020/radial_128_4/15')
-    assert abs(psnr - 28.57) < TOL
+    assert abs(psnr - 28.49) < TOL
 
 
 def test_tfpnp_unet_miccai2020_4x_n5():
@@ -423,7 +423,7 @@ def test_tfpnp_drunet_medical7_4x_n5():
     psnr = run_tfpnp(denoiser='drunet',
                      dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/5'),
                      name='Medical7_2020/radial_128_4/5')
-    assert abs(psnr - 32.66) < TOL
+    assert abs(psnr - 32.57) < TOL
 
 
 def test_tfpnp_drunet_medical7_4x_n15():

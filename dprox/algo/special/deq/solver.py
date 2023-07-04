@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from dprox.algo.base import Algorithm, move
+from dprox.algo.base import Algorithm, move, auto_convert_to_tensor
 from dprox.utils import to_torch_tensor
 
 from .utils.solvers import anderson
@@ -73,7 +73,8 @@ class DEQSolver(nn.Module):
         self.rhos = rhos
         self.lams = lams
 
-    def forward(
+    @auto_convert_to_tensor(['x0', 'rhos', 'lams'], batchify=['x0'])
+    def solve(
         self,
         x0: Union[torch.Tensor, np.ndarray] = None,
         rhos: Union[float, torch.Tensor, np.ndarray] = None,
@@ -96,14 +97,11 @@ class DEQSolver(nn.Module):
         state = self.internal.unpack(state)
         return state[0]
 
-    def solve(
+    def forward(
         self,
-        x0: Union[torch.Tensor, np.ndarray] = None,
-        rhos: Union[float, torch.Tensor, np.ndarray] = None,
-        lams: Union[float, torch.Tensor, np.ndarray, dict] = None,
         **kwargs
     ):
-        return self.forward(x0, rhos, lams, **kwargs)
+        return self.solve(**kwargs)
 
     def load(self, state_dict, strict=True):
         self.load_state_dict(state_dict['solver'], strict=strict)
