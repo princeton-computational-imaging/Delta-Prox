@@ -16,7 +16,6 @@ def build_solver():
     mask = Placeholder()
     data_term = csmri(x, mask, y)
     reg_term = deep_prior(x, denoiser='unet')
-    # solver = compile(data_term + reg_term, method='admm')
     solver = CustomADMM([reg_term], [data_term])
     return solver, {'y': y, 'mask': mask}
 
@@ -63,7 +62,7 @@ def main():
         lambda_e=0.2,
         tau=0.001,
         action_pack=1,
-        log_dir='custom_admm_pack1-train2',
+        log_dir='rl_unet',
         custom_env=CustomEnv,
     )
     tf_solver.train(dataset, valid_datasets, placeholders, **training_cfg)
