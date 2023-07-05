@@ -57,13 +57,13 @@ Please refer to the [Installtion]() guide for other options.
 ![pipeline](https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/cef78eb6-e2c4-4c23-92f7-a1ab0ae40462)
 
 
-Consider a simple image deconvlution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
+Consider a simple image deconvolution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
 
 $$
-\arg \min_x { \frac{1}{2} |Dx - y|^2_2 + g(x) }
+\arg \min_x { \frac{1}{2} |Dx - y|^2_2 + g(x) }\,,
 $$
 
-where $g(x)$ denotes an implicit plug-and-play denoiser prior. We could solve this problem in ∇-Prox with the following code: 
+where $g(x)$ denotes an implicit plug-and-play denoiser prior. We can solve this problem in ∇-Prox with the following code: 
 
 ```python
 from dprox import *
@@ -82,8 +82,8 @@ prob = Problem(data_term + reg_term)
 out = prob.solve(method='admm', x0=b)
 ```
 
-We could also specialize the solver that adapts for learning-based bi-level optimization. 
-For examples, specializing to a RL solver for automatic parameter tuning.
+We can also specialize the solver that adapts for learning-based bi-level optimization. 
+For example, specializing to a reinforcement learning (RL) solver for automatic parameter tuning.
 
 ```python
 solver = compile(data_term + reg_term, method='admm')
@@ -91,7 +91,7 @@ rl_solver = specialize(solver, method='rl')
 rl_solver = train(rl_solver, dataset)
 ```
 
-Or, specializing to a unrolled solver for end-to-end optic optimization.
+Alternatively, we can specialize the solver into an unrolled solver for end-to-end optic optimization.
 
 ```python
 x = Variable()

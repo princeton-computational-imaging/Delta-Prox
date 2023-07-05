@@ -1,10 +1,10 @@
 # Proximal Algorithms
 
-Extending  ∇-Prox for more proximal algorithms is also easy and straightforward. We again define a new algorithm class that inherits from the base class `Algorithm`. For this particular case, the required methods that have to be implemented are `partition` and `_iter`, which stands for the problem partition and a single algorithm iteration. 
+Extending ∇-Prox for more proximal algorithms is also easy and straightforward. We again define a new algorithm class that inherits from the base class `Algorithm`. For this case, the required methods to be implemented are `partition` and `_iter`, which represent the problem partition and a single algorithm iteration. 
 
-The `partition` takes a list of proxable functions and returns the splits of them as a list of `psi_fn` and `omega_fn`. For `_iter`, it is a single iteration of the proximal algorithm that takes an input of state and two parameters `rho` for penalty strength on multipliers and `lam` for proximal operators. 
+The `partition` takes a list of proxable functions and returns their splits as a list of `psi_fn` and `omega_fn`. For `_iter`, it is a single iteration of the proximal algorithm that takes an input of state and two parameters, `rho` for penalty strength on multipliers and `lam` for proximal operators. 
 
-The state is generally a list of variables including the auxiliary ones that an algorithm creates.  ∇-Prox simply provides state as what returns in the previous execution of `_iter` or the initial state provided by `initialize` method. 
+The state is generally a list of variables, including the auxiliary ones that an algorithm creates. ∇-Prox simply provides a state as what returns in the previous execution of `_iter` or the initial state provided by the `initialize` method. 
 
 ```python
 class new_algorithm(Algorithm):
@@ -33,8 +33,8 @@ class new_algorithm(Algorithm):
         return ...
 ```
 
-The implementations of `partition`, `initialize`, and `_iter` are generally enough for performing the evaluation of the proximal algorithm for a given problem. 
+The implementations of `partition`, `initialize`, and `_iter` are generally enough to evaluate the proximal algorithm for a given problem. 
 
-To integrate it with deep equilibrium learning (DEQ) and deep reinforcement learning (RL), users have to implement two additional helper methods, i.e., `params` for counting the number of hyperparameters, and `state_split` for the structures of the state that returns by `_iter`. 
+To integrate it with deep equilibrium learning (DEQ) and deep reinforcement learning (RL), users have to implement two additional helper methods, i.e., `params` for counting the number of hyperparameters and `state_split` for the structures of the state that returns by `_iter`. 
 
-For example, assuming `_iter` returns the state as nested arrays like `[x,[v1,v2],[u1,u2]]`, the output of `state_split` should be `[1,[2],[2]]`.  ∇-Prox exploits these properties to perform necessary packing and unpacking for the iteration states to achieve a unified interface for the internal DEQ and RL implementations.
+For example, assuming `_iter` returns the state as nested arrays like `[x,[v1,v2],[u1,u2]]`, the output of `state_split` should be `[1,[2],[2]]`. ∇-Prox exploits these properties to perform necessary packing and unpacking for the iteration states to achieve a unified interface for the internal DEQ and RL implementations.
