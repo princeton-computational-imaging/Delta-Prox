@@ -83,7 +83,7 @@ out = prob.solve(method='admm', x0=b)
 ```
 
 We can also specialize the solver that adapts for learning-based bi-level optimization. 
-For example, specializing to a reinforcement learning (RL) solver for automatic parameter tuning.
+For example, we can specialize the solver into a reinforcement learning (RL) solver for automatic parameter tuning.
 
 ```python
 solver = compile(data_term + reg_term, method='admm')
@@ -91,7 +91,7 @@ rl_solver = specialize(solver, method='rl')
 rl_solver = train(rl_solver, dataset)
 ```
 
-Alternatively, we can specialize the solver into an unrolled solver for end-to-end optic optimization.
+Alternatively, we can specialize the solver into an unrolled solver for end-to-end optics optimization.
 
 ```python
 x = Variable()
