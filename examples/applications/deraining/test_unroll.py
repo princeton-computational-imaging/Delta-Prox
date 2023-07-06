@@ -7,13 +7,11 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from derain.data import get_test_data
-
 from dprox import *
 from dprox.utils import *
-# from dprox.utils.examples.derain import LearnableDegOp
 
-from dgunet import LearnableDegOp, unrolled_prior
+from derain.data import get_test_data
+from derain.unroll import LearnableDegOp, unrolled_prior
 
 
 def build_solver():
@@ -32,18 +30,18 @@ def build_solver():
     solver = compile(obj, method='pgd', device='cuda')
 
     # load parameters
-    ckpt = torch.load('derain_pdg_unroll7.pth')
+    ckpt = torch.load('derain_pdg_unroll.pth')
     A.load_state_dict(ckpt['linop'])
     reg_term.load_state_dict(ckpt['prior'])
     rhos = ckpt['rhos']
-    
+
     return solver, rhos, b
 
 
 @torch.no_grad()
 def main(
     dataset='Rain100H',
-    result_dir='results/DGUNet_dprox',
+    result_dir='results/dprox_pdg_unroll',
     data_dir='datasets/test/',
 ):
     solver, rhos, b = build_solver()

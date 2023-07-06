@@ -1,3 +1,6 @@
+import os
+
+import cv2
 import numpy as np
 from scipy.ndimage import convolve
 from skimage.color import rgb2ycbcr
@@ -74,19 +77,19 @@ def SSIM_index(img1, img2, K=None, window=None, L=None):
     return mssim
 
 
-if __name__ == '__main__':
-    import os
-    import cv2
-
+def evaluate(
+    input_root='results/dprox_pdg_unroll/', 
+    gt_root='datasets/test/', 
     datasets = ['Rain100H']
+):
     num_set = len(datasets)
 
     psnr_alldatasets = 0
     ssim_alldatasets = 0
 
     for idx_set in range(num_set):
-        file_path = './results/DGUNet_dprox/' + datasets[idx_set] + '/'
-        gt_path = './datasets/test/' + datasets[idx_set] + '/target/'
+        file_path = os.path.join(input_root, datasets[idx_set])
+        gt_path = os.path.join(gt_root, datasets[idx_set], 'target')
         path_list = [file for file in os.listdir(file_path) if file.endswith('.jpg') or file.endswith('.png')]
         gt_list = [file for file in os.listdir(gt_path) if file.endswith('.jpg') or file.endswith('.png')]
         img_num = len(path_list)
@@ -98,8 +101,8 @@ if __name__ == '__main__':
             for j in range(img_num):
                 image_name = path_list[j]
                 gt_name = gt_list[j]
-                input = cv2.imread(file_path + image_name)
-                gt = cv2.imread(gt_path + gt_name)
+                input = cv2.imread(os.path.join(file_path, image_name))
+                gt = cv2.imread(os.path.join(gt_path, gt_name))
                 ssim_val = compute_ssim(input, gt)
                 psnr_val = compute_psnr(input, gt)
                 total_ssim += ssim_val
@@ -112,3 +115,10 @@ if __name__ == '__main__':
 
         psnr_alldatasets += qm_psnr
         ssim_alldatasets += qm_ssim
+
+
+if __name__ == '__main__':
+    import fire
+    fire.Fire(evaluate)
+    
+    
