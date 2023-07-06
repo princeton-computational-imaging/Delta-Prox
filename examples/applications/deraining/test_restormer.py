@@ -2,18 +2,21 @@ import torch
 import os
 import fire
 
+import numpy as np
 import imageio
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from typing import List, Callable, Union, Iterable
 
 from derain.data import get_test_data
 
+from dprox.algo.base import auto_convert_to_tensor, move
 from dprox import *
 from dprox.utils import *
 # from dprox.utils.examples.derain import LearnableDegOp
 
-from dgunet import LearnableDegOp, unrolled_prior
+from dgunet_restormer import LearnableDegOp, unrolled_prior
 
 
 def build_solver():
@@ -32,11 +35,11 @@ def build_solver():
     solver = compile(obj, method='pgd', device='cuda')
 
     # load parameters
-    ckpt = torch.load('derain_pdg_unroll7.pth')
+    ckpt = torch.load('derain_pdg_restormer.pth')
     A.load_state_dict(ckpt['linop'])
     reg_term.load_state_dict(ckpt['prior'])
     rhos = ckpt['rhos']
-    
+
     return solver, rhos, b
 
 
@@ -56,13 +59,22 @@ def main(
 
     result_dir = os.path.join(result_dir, dataset)
     os.makedirs(result_dir, exist_ok=True)
-
+    
+    
+    from derain.restormer import Restormer
+    restormer = Restormer().cuda()
+    restormer.load_state_dict(torch.load('restormer.pth')['params'])
+    
     for data in tqdm(test_loader):
         input = data[0].cuda()
         filenames = data[1]
 
+        def init_hook(iter, state, rho, lam):
+            if iter == 5:
+                state[0] = restormer(input)
+        
         b.value = input
-        output = solver.solve(x0=input, rhos=rhos, max_iter=7)
+        output = solver.solve(x0=input, rhos=rhos, max_iter=7, callback=init_hook)
         output = output + input
 
         output = torch.clamp(output, 0, 1)

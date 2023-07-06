@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from derain.data import get_test_data
-from derain.DGUNet_conv import DGUNet
+from derain.DGUNet_plus2 import DGUNet
 
 
 def load_checkpoint(model, weights):
@@ -26,8 +26,8 @@ def load_checkpoint(model, weights):
 @torch.no_grad()
 def main(
     dataset='Rain100H',
-    result_dir='results/DGUNet_conv',
-    ckpt='checkpoints/DGUNet_conv/model_best.pth',
+    result_dir='results/DGUNet_plus2',
+    ckpt='checkpoints/DGUNet_plus2/model_best.pth',
     data_dir='datasets/test/',
 ):
     net = DGUNet().cuda().eval()

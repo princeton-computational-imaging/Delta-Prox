@@ -5,9 +5,12 @@ from .dgu import Denoiser
 
 
 class unrolled_prior(ProxFn):
-    def __init__(self, linop):
+    def __init__(self, linop, denoiser=None):
         super().__init__(linop)
-        self.denoiser = Denoiser()
+        if denoiser is not None:
+            self.denoiser = denoiser()
+        else:
+            self.denoiser = Denoiser()
     
     def eval(self, v):
         raise NotImplementedError('deep prior cannot be explictly evaluated')
