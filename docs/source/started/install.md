@@ -18,12 +18,12 @@ pip install git+https://github.com/Zeqiang-Lai/DeltaProx.git
 
 **Editable install**
 
-You will need an editable install if you’d like to:
+You will need an editable install if you would like to:
 
 1. Use the main version of the source code.
 2. Need to test changes in the code.
 
-To do so, clone the repository and install 🎉  Delta Prox with the following commands:
+To do so, clone the repository and install 🎉 Delta Prox with the following commands:
 
 ```
 git clone git+https://github.com/Zeqiang-Lai/DeltaProx.git

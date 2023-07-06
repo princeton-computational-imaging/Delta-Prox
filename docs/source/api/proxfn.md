@@ -1,6 +1,6 @@
 # Proximal Functions
 
-The following code shows a template for defining a new proxable function. As previously mentioned, we define the function as a class inheriting from the base class `ProxFn`, and implement all the required methods. Then,  ∇-Prox would handle all other things properly, so that the new proxable function can work with operators, algorithms, and training utilities of the existing system.  
+The following code shows a template for defining a new proxable function. As previously mentioned, we define the function as a class inheriting from the base class `ProxFn`, and implement all the required methods. Then, ∇-Prox will properly handle all other things, so that the new proxable function can work with operators, algorithms, and training utilities of the existing system.
 
 ```python
 class new_func(ProxFn):

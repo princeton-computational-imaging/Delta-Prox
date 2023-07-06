@@ -41,7 +41,7 @@ The library includes the following major components:
 
 - A library of differentiable [proximal algorithms](https://pypi.org/project/dprox/), [proximal operators](https://pypi.org/project/dprox/), and [linear operators](https://pypi.org/project/dprox/).
 - Interchangeable [specialization](https://pypi.org/project/dprox/) strategies for balancing trade-offs between speed and memory.
-- Out-of-box [training utilities](https://pypi.org/project/dprox/) for learning-based bi-level optimization with a few lines of code.
+- Out-of-the-box [training utilities](https://pypi.org/project/dprox/) for learning-based bi-level optimization with a few lines of code.
 
 ```{nbgallery}
 ```
@@ -50,7 +50,7 @@ The library includes the following major components:
 <div class="nbsphinx-gallery">
 <a class="reference internal" href="started/quicktour.html">
   <b>Quicktour</b>
-  <p style="color:var(--color-content-foreground)">Learn the fundamental usages. We recommend starting here if you're using 🎉 ∇-Prox for the first time! </p>
+  <p style="color:var(--color-content-foreground)">Learn the fundamentals of using ∇-Prox. We recommend starting here if you are using 🎉 ∇-Prox for the first time! </p>
 </a>
 <a class="reference internal" href="tutorials/index.html">
   <b>Tutorials</b>

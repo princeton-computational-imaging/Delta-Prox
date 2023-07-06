@@ -1,6 +1,6 @@
 # Linear Operator
 
-Defining new linear operators mostly corresponds to defining the forward and adjoint routines. The following code shows the template for defining them. Similar to a [proxable function](), the operator is defined as a class inheriting from the base class `LinOp`.
+Defining new linear operators mainly involves the definition of the forward and adjoint routines. The following code shows the template for defining them. Similar to a [proxable function](), the operator is defined as a class inheriting from the base class `LinOp`.
 
 ```python
 class new_linop(LinOp): 

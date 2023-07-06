@@ -1,7 +1,7 @@
 # Quicktour
 
 
-Consider a simple image deconvlution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
+Consider a simple image deconvolution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
 
 $$
 \arg \min_x { \frac{1}{2} |Dx - y|^2_2 + g(x) }
@@ -30,22 +30,22 @@ prob = Problem(data_term + reg_term)
 out = prob.solve(method='admm', x0=b)
 ```
 
-Here is what we got,
+Here is what obtain as the result:
 
 <img src="../_static/image/example_deconv.png" width="500" />
 
 ### Solver Specialization
 
-Conventional imaging systems employ compound refractive lens systems that are typically hand-engineered for image quality in isolation of the downstream camera task. Departing from this design paradigm, a growing body of work in computational photography [Haim et al. 2018; Horstmeyer et al. 2017] has explored the design of specialized lens system with diffractive optical elements (DOEs). 
+Conventional imaging systems employ compound refractive lens systems that are typically hand-engineered for image quality in isolation of the downstream camera task. Departing from this design paradigm, a growing body of work in computational photography [Haim et al. 2018; Horstmeyer et al. 2017] has explored the design of specialized lens systems with diffractive optical elements (DOEs). 
 
 
-As a specific example, we consider end-to-end computational optics that jointly optimize a diffractive optical element (DOE) and an image reconstruction algorithm,  where the observation $y$ is obtained by convolving a clear image $x$ by the point spread function (PSF) of DOE as,
+As a specific example, we consider end-to-end computational optics that jointly optimize a diffractive optical element (DOE) and an image reconstruction algorithm, where the observation $y$ is obtained by convolving a clear image $x$ by the point spread function (PSF) of DOE as,
 
 $$
     y =  D\left(x;\, \theta_{DOE} \right) + \epsilon, 
 $$
 
-where  $D(\cdot; \theta_{DOE})$ indicates a shift-invariant convolution process with an optical kernel, i.e., PSF, derived from a DOE image formation model parameterized by $\theta_{DOE}$, and $\epsilon$ is measurement noise, e.g., Poissionian-Gaussian noise. 
+where $D(\cdot; \theta_{DOE})$ indicates a shift-invariant convolution process with an optical kernel, i.e., PSF, derived from a DOE image formation model parameterized by $\theta_{DOE}$, and $\epsilon$ is measurement noise, e.g., Poissionian-Gaussian noise. 
 To reconstruct target image $x$ from noise-contaminated measurements $y$, we minimize the sum of a data-fidelity $f$ and regularizer term $r$ as
 
 $$
