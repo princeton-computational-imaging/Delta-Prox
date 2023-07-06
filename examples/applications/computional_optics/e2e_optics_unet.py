@@ -13,8 +13,6 @@ import torchlight as tl
 import torchlight.nn as tlnn
 
 from dprox import *
-from dprox import Variable
-from dprox.linop.conv import conv_doe
 from dprox.utils import *
 from dprox.utils.examples.optic.common import (
     build_doe_model, normalize_psf, load_sample_img, DOEModelConfig
