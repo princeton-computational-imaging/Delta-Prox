@@ -4,6 +4,7 @@ from tqdm import tqdm
 from functools import partial
 from scipy import sparse, io
 from scipy.sparse import linalg as slinalg
+from dprox.utils import get_path
 
 
 class LPATA_Func(torch.nn.Module):
@@ -152,7 +153,7 @@ def scipy_sparse_to_torchop(A, device=None, output_AT=True):
 
 
 def load_simple_cep_model():
-    model_components = io.loadmat("simple_cep_model_20220916/output/esm_instance.mat")
+    model_components = io.loadmat(get_path("data/energy_system/simple_cep_model_20220916/esm_instance.mat"))
     n_con, n_var = model_components["A"].shape
     print("Number of linear constraints (w/o bound constraints):", n_con)
     print("Number of decision variables:", n_var)
