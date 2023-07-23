@@ -20,6 +20,9 @@ class LPATA_Func(torch.nn.Module):
         out = (self.AT @ tmp) + self.sigma * x
         return out
 
+    def clone(self):
+        return LPATA_Func(self.A.clone(), self.AT.clone(), self.rho, self.sigma)
+
 
 class LinearOp(torch.nn.Module):
     def __init__(self, A_fun, AT_fun, shape) -> None:
@@ -45,6 +48,12 @@ class LinearOp(torch.nn.Module):
         return LinearOp(A_fun=self.AT_fun, AT_fun=self.A_fun, shape=(self.shape[1], self.shape[0]))
 
     T = property(transpose)
+
+    def clone(self):
+        """ The deep copy of this linear operator.
+        """
+        A_fun = self.A_fun.clone()
+        return LinearOp(A_fun, A_fun, self.shape)
 
 
 def Ruiz_equilibration_th(A, c, b, ord=float('inf'), max_iters=20, max_tolerance=1e1, verbose=True):

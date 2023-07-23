@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-from dprox.linalg.solve import pcg
+from dprox.linalg.custom import pcg
 from .utils import *
 
 

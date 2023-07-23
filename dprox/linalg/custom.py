@@ -81,3 +81,8 @@ def linear_solve(A: torch.nn.Module, b: torch.Tensor, config: LinearSolveConfig 
       The solution of Ax = b.
     """
     return LinearSolve.apply(A, b, config, *_trainable_parameters(A))
+
+
+def pcg(A: torch.nn.Module, b: torch.Tensor, rtol: float=1e-6, max_iters:int = 100, verbose: bool = False, **kwargs):
+    config = LinearSolveConfig(rtol=rtol, max_iters=max_iters, verbose=verbose, solver_kwargs=kwargs, solver_type='pcg')
+    return LinearSolve.apply(A, b, config, *_trainable_parameters(A))
