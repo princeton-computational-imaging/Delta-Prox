@@ -103,3 +103,15 @@ tensor(-192.8360, device='cuda:0', dtype=torch.float64)09:52:25,952 root INFO te
 13:05:02,34 asyncio DEBUG Using proactor: IocpProactor
 13:05:02,168 asyncio DEBUG Using proactor: IocpProactor
 13:05:02,184 asyncio DEBUG Using proactor: IocpProactor
+22:01:34,219 asyncio DEBUG Using proactor: IocpProactor
+22:01:34,590 asyncio DEBUG Using proactor: IocpProactor
+22:01:34,628 asyncio DEBUG Using proactor: IocpProactor
+22:04:41,968 asyncio DEBUG Using proactor: IocpProactor
+22:04:42,102 asyncio DEBUG Using proactor: IocpProactor
+22:04:42,119 asyncio DEBUG Using proactor: IocpProactor
+22:04:58,510 asyncio DEBUG Using proactor: IocpProactor
+22:04:58,525 asyncio DEBUG Using proactor: IocpProactor
+22:05:01,208 asyncio DEBUG Using proactor: IocpProactor
+22:05:01,221 asyncio DEBUG Using proactor: IocpProactor
+22:05:02,737 asyncio DEBUG Using proactor: IocpProactor
+22:05:02,751 asyncio DEBUG Using proactor: IocpProactor

@@ -172,7 +172,12 @@ class LPSolverADMM(nn.Module):
         z = torch.zeros(m, 1, dtype=dtype, device=device)
         y = torch.zeros(m, 1, dtype=dtype, device=device)
         xtilde = torch.zeros_like(x)
-    
+        # x_hat = torch.zeros_like(x)
+        # z_hat = torch.zeros_like(z)
+        # y_hat = torch.zeros_like(y)
+        # a = 1
+        # cr = float('inf')
+        
         rtols = torch.logspace(-6, -10, 10000)
         history = defaultdict(lambda : [])
 
@@ -194,7 +199,9 @@ class LPSolverADMM(nn.Module):
             rtol = 1e-10 if k >= 10000 else rtols[k]
             variables = x, z, y, xtilde
             x, z, y, xtilde = self._solve_one_iter_precond(variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, alpha, Kinv=Kinv)
-                
+            # variables = x, x_hat, z, z_hat, y, y_hat, xtilde, a, cr
+            # x, x_hat, z, z_hat, y, y_hat, xtilde, a, cr = self._solve_one_iter_precond_fast(variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, Kinv=Kinv)
+
             if k % eval_freq == 0:
                 objval, r_norm, s_norm, eps_primal, eps_dual = self.eval_result(c, A, AT, d, e, gamma_c, gamma_b, x, z, y)                                
 
@@ -309,13 +316,50 @@ class LPSolverADMM(nn.Module):
         x = alpha * xtilde + (1 - alpha) * x
 
         # z-update with relaxation
-        z_hat = alpha * ztilde + (1 - alpha) * z
-        z = torch.clip(z_hat + 1 / rho * y, min=lb, max=ub)
+        ztilde = alpha * ztilde + (1 - alpha) * z
+        z = torch.clip(ztilde + 1 / rho * y, min=lb, max=ub)
         
         # dual update
-        y = y + rho * (z_hat - z)
+        y = y + rho * (ztilde - z)
         
         return x, z, y, xtilde
+    
+    def _solve_one_iter_precond_fast(self, variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, Kinv=None):
+        vector_norm = partial(torch.linalg.vector_norm, ord=2)
+        x_last, x_hat, z_last, z_hat, y_last, y_hat, xtilde, a_last, cr_last = variables
+
+        # x-update
+        right = sigma * x_hat - c + AT @ (rho * z_hat - y_hat)
+        if Kinv is not None:                        
+            xtilde = Kinv @ right
+        else:
+            xtilde = pcg(ATAop, right, Minv=Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
+        ztilde = A @ (xtilde)
+        x = xtilde
+        
+        # z-update
+        z = torch.clip(ztilde + 1 / rho * y_hat, min=lb, max=ub)
+        
+        # dual update
+        y = y_hat + rho * (ztilde - z)
+        
+        # acceleration
+        cr = vector_norm(y - y_hat) / rho + rho * vector_norm(torch.concatenate([z_hat - z, x_hat - x]))
+        eta = 0.999
+        if cr < eta * cr_last:
+            a = (1 + (1 + 4 * a_last**2) ** 0.5) / 2
+            beta = (a_last - 1) / a
+            x_hat = x + beta * (x - x_last)
+            z_hat = z + beta * (z - z_last)
+            y_hat = y + beta * (y - y_last)
+        else:
+            a = 1
+            z_hat = z_last
+            x_hat = x_last
+            y_hat = y_last
+            cr = cr_last / eta
+        
+        return x, x_hat, z, z_hat, y, y_hat, xtilde, a, cr
     
     def eval_result(self, c, A, AT, d, e, gamma_c, gamma_b, x, z, y):
         vector_norm = partial(torch.linalg.vector_norm, ord=self.norm_ord)

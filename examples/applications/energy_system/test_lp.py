@@ -82,7 +82,7 @@ def test_lp_problem(n, m1, m2, seed=0, max_iters=10000, abstol=1e-4, reltol=1e-5
     
     start = time.time()
     with torch.no_grad():
-        x, history, res = lpadmm.solve(lpproblem, rho=1e2, residual_balance=False, direct=True, polish=False)
+        x, history, res = lpadmm.solve(lpproblem, rho=1, alpha=1.6, residual_balance=False, direct=True, polish=False)
     print(res[0])
     # print(torch.linalg.vector_norm(A @ x - b) / torch.linalg.vector_norm(b))
     x = x.cpu().numpy().squeeze()
