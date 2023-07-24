@@ -82,13 +82,13 @@ def test_lp_problem(n, m1, m2, seed=0, max_iters=10000, abstol=1e-4, reltol=1e-5
     
     start = time.time()
     with torch.no_grad():
-        x, history, res = lpadmm.solve(lpproblem, rho=5e2, residual_balance=False, direct=True)
+        x, history, res = lpadmm.solve(lpproblem, rho=1e2, residual_balance=False, direct=True, polish=False)
     print(res[0])
     # print(torch.linalg.vector_norm(A @ x - b) / torch.linalg.vector_norm(b))
     x = x.cpu().numpy().squeeze()
-    print(x.min())
-    print(np.abs(b_eq - A_eq @ x).max())
-    print(np.min(b_ub - A_ub @ x))
+    print(f'x >= 0 err: {x.min():.2e}')
+    print(f'Ax = b err: {np.abs(b_eq - A_eq @ x).max():.2e}')
+    print(f'Ax <= b err: {np.min(b_ub - A_ub @ x):.2e}')
     
     torch.cuda.current_stream().synchronize()
     end = time.time()
@@ -103,17 +103,17 @@ def test_lp_problem(n, m1, m2, seed=0, max_iters=10000, abstol=1e-4, reltol=1e-5
     # plt.yscale('log')
     # plt.show()
     
-    start = time.time()
-    res = sop.linprog(c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=(0, None), 
-                      options={'maxiter': 10000, 'disp': True, 'presolve': True, 'autoscale': True})
-    # res = sop.linprog(c=c, A_eq=A, b_eq=b, bounds=(0, None), method='highs', options={'maxiter': 10000, 'disp': True, 'presolve': False})
-    print(res.fun, res.success, res.status)
-    # feasibility check
-    print(res.x.min())
-    print(res.con, np.abs(res.con).max(), np.abs(b_eq - A_eq @ res.x).max())
-    print(res.slack, res.slack.min())
-    end = time.time()
-    print(f"Time Elapse (SCIPY): {end-start:.4f}s\n")
+    # start = time.time()
+    # res = sop.linprog(c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=(0, None), 
+    #                   options={'maxiter': 10000, 'disp': True, 'presolve': True, 'autoscale': True})
+    # # res = sop.linprog(c=c, A_eq=A, b_eq=b, bounds=(0, None), method='highs', options={'maxiter': 10000, 'disp': True, 'presolve': False})
+    # print(res.fun, res.success, res.status)
+    # # feasibility check
+    # print(res.x.min())
+    # print(res.con, np.abs(res.con).max(), np.abs(b_eq - A_eq @ res.x).max())
+    # print(res.slack, res.slack.min())
+    # end = time.time()
+    # print(f"Time Elapse (SCIPY): {end-start:.4f}s\n")
 
 
 def test_lp_general():
@@ -343,6 +343,6 @@ def test_lp_general_sparse():
     
     
 if __name__ == '__main__':
-    test_lp_problem(n=500, m1=200, m2=200, seed=0, max_iters=int(1e6), abstol=0, reltol=1e-3)
+    test_lp_problem(n=500, m1=200, m2=200, seed=0, max_iters=int(1e6), abstol=0, reltol=1e-5)
     # test_lp_general()
     # test_lp_general_sparse()

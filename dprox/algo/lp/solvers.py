@@ -126,7 +126,7 @@ class LPSolverADMM(nn.Module):
             self.d_mul_log = nn.Parameter(torch.zeros(1, n, dtype=self.dtype))
             self.e_mul_log = nn.Parameter(torch.zeros(m, 1, dtype=self.dtype))
 
-    def solve(self, lpproblem, rho=None, sigma=None, alpha=None, max_iters=None, eval_freq=25, residual_balance=False, direct=False):
+    def solve(self, lpproblem, rho=None, sigma=None, alpha=None, max_iters=None, eval_freq=25, residual_balance=False, direct=False, polish=False):
         if max_iters is None: max_iters = self.max_iters
         vector_norm = partial(torch.linalg.vector_norm, ord=self.norm_ord)
         d, e, gamma_c, gamma_b, A, AT, Acnorm, ub, lb, c = lpproblem.get_data()
@@ -243,13 +243,56 @@ class LPSolverADMM(nn.Module):
 
                 if not self.training and self.verbose:
                     if k % 1000 == 0:
-                        print(f'Obj: {objval.item():.2e}, res_primal: {r_norm.item():.2e}, res_dual: {s_norm.item():.2e}, eps_primal: {eps_primal.item():.2e}, eps_dual: {eps_dual.item():.2e}, rho: {float(rho):.2e}')
-                    
-        objval, r_norm, s_norm, eps_primal, eps_dual = self.eval_result(c, A, AT, d, e, gamma_c, gamma_b, x, z, y)
+                        print(f'Obj: {objval.item():.2e}, res_primal: {r_norm.item():.2e}, res_dual: {s_norm.item():.2e}, eps_primal: {eps_primal.item():.2e}, eps_dual: {eps_dual.item():.2e}, rho: {float(rho):.2e}')                    
         
-        print(objval.item(), r_norm.item(), s_norm.item(), eps_primal.item(), eps_dual.item(), float(rho))
+        if polish:
+            x, z, y = self.solution_polishing(c, A, x, z, y)
+        dz = z - torch.clip(z, min=lb, max=ub)
+        res_z = vector_norm(dz)
+        objval, r_norm, s_norm, eps_primal, eps_dual = self.eval_result(c, A, AT, d, e, gamma_c, gamma_b, x, z, y)
+
+        print(f'Obj: {objval.item():.2e}, res_z: {res_z.item():.2e}, res_primal: {r_norm.item():.2e}, res_dual: {s_norm.item():.2e}, eps_primal: {eps_primal.item():.2e}, eps_dual: {eps_dual.item():.2e}, rho: {float(rho):.2e}')
+                
         results = objval, r_norm, s_norm, eps_primal, eps_dual
         return x * d / gamma_b, history, results
+    
+    def solution_polishing(self, c, A, x, z, y):
+        n = x.shape[0]
+        device = c.device
+        Il = (y < 0)[:, 0]
+        Iu = (y > 0)[:, 0]
+        zl = z[Il, 0]
+        zu = z[Iu, 0]
+        Al = A[Il, :]
+        Au = A[Iu, :]
+        delta = 1e-6
+
+        # solution polishing matrix Kp
+        Kp = torch.vstack([
+            torch.hstack([delta * torch.eye(n, device=device), Al.T, Au.T]),
+            torch.hstack([Al, -delta * torch.eye(Al.shape[0], device=device), torch.zeros((Al.shape[0], Au.shape[0]), device=device)]),
+            torch.hstack([Au, torch.zeros((Au.shape[0], Al.shape[0]), device=device), -delta * torch.eye(Au.shape[0], device=device)])
+        ])
+
+        Kp_gt = torch.vstack([
+            torch.hstack([torch.zeros((n, n), device=device), Al.T, Au.T]),
+            torch.hstack([Al, torch.zeros((Al.shape[0], Al.shape[0]), device=device), torch.zeros((Al.shape[0], Au.shape[0]), device=device)]),
+            torch.hstack([Au, torch.zeros((Au.shape[0], Al.shape[0]), device=device), torch.zeros((Au.shape[0], Au.shape[0]), device=device)])
+        ])
+                
+        rhs = torch.concatenate([-c[:, 0], zl, zu]).unsqueeze_(1)        
+        Kpinv = torch.inverse(Kp)
+        t_hat = Kpinv @ rhs
+
+        for _ in range(2):
+            dt = Kpinv @ (rhs - Kp_gt @ t_hat)
+            t_hat = t_hat + dt
+        
+        x, yl, yu = torch.split(t_hat, [x.shape[0], zl.shape[0], zu.shape[0]])
+        z = A @ x
+        y[Il, :] = yl
+        y[Iu, :] = yu
+        return x, z, y
         
     def _solve_one_iter_precond(self, variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, alpha, Kinv=None):
         x, z, y, xtilde = variables
