@@ -95,10 +95,10 @@ def Ruiz_equilibration_th(A, c, b, ord=float('inf'), max_iters=20, max_tolerance
     gamma_b = 1 / vector_norm(b_bar) * Acnorm.mean()
 
     if verbose:
-        print(Acnorm.max(), Acnorm.mean())
-        print(Arnorm.max(), Arnorm.mean())
-        print(d.max())
-        print(e.max())
+        print(f'Acnorm: {Acnorm.max():.3f}, {Acnorm.mean():.3f}')
+        print(f'Arnorm: {Arnorm.max():.3f}, {Arnorm.mean():.3f}')
+        print(f'dmax: {d.max():.3f}')
+        print(f'emax: {e.max():.3f}')
 
     return d, e, gamma_c, gamma_b, A_bar
 

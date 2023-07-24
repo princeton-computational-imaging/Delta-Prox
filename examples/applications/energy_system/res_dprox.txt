@@ -13,3 +13,36 @@ tensor(-192.8360, device='cuda:0', dtype=torch.float64)09:52:25,952 root INFO te
 
 10:26:40,579 root INFO Time Elapse (DProx ft): 73.1478s
 
+10:43:06,538 root INFO test simple_cep_model_20220916...
+
+10:43:34,451 root INFO test simple_cep_model_20220916...
+
+10:47:28,899 root INFO Time Elapse (DProx train stage): 95.7851s
+
+10:47:28,899 root INFO Time Elapse (DProx ft): 226.3242s
+
+10:50:05,334 root INFO test simple_cep_model_20220916...
+
+10:50:14,653 asyncio DEBUG Using proactor: IocpProactor
+10:50:14,789 asyncio DEBUG Using proactor: IocpProactor
+10:50:14,804 asyncio DEBUG Using proactor: IocpProactor
+11:23:30,677 asyncio DEBUG Using proactor: IocpProactor
+11:23:30,812 asyncio DEBUG Using proactor: IocpProactor
+11:23:30,827 asyncio DEBUG Using proactor: IocpProactor
+11:24:37,63 asyncio DEBUG Using proactor: IocpProactor
+11:24:37,203 asyncio DEBUG Using proactor: IocpProactor
+11:24:37,219 asyncio DEBUG Using proactor: IocpProactor
+11:25:05,562 asyncio DEBUG Using proactor: IocpProactor
+11:25:05,706 asyncio DEBUG Using proactor: IocpProactor
+11:25:05,722 asyncio DEBUG Using proactor: IocpProactor
+11:25:09,617 asyncio DEBUG Using proactor: IocpProactor
+11:25:09,632 asyncio DEBUG Using proactor: IocpProactor
+11:27:16,867 asyncio DEBUG Using proactor: IocpProactor
+11:27:17,17 asyncio DEBUG Using proactor: IocpProactor
+11:27:17,34 asyncio DEBUG Using proactor: IocpProactor
+11:35:30,59 asyncio DEBUG Using proactor: IocpProactor
+11:35:30,199 asyncio DEBUG Using proactor: IocpProactor
+11:35:30,214 asyncio DEBUG Using proactor: IocpProactor
+12:24:51,744 asyncio DEBUG Using proactor: IocpProactor
+12:24:51,882 asyncio DEBUG Using proactor: IocpProactor
+12:24:51,898 asyncio DEBUG Using proactor: IocpProactor

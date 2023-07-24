@@ -38,40 +38,82 @@ def adjust_lr_cosine(optimizer, iteration, num_iters, base_lr, min_lr):
         param_group["lr"] = lr
         
         
-def generate_lp_problem(n, m1, m2, seed=0):
+def generate_lp_problem(n, m1, m2, dtype=torch.float64, seed=0):
     n: int   # dimension of x
     m1: int  # number of equality constraints
     m2: int  # number of inequality constraints
-    dtype = torch.float64
         
     random.seed(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)
         
-    c = torch.clip(torch.randn((n, 1), dtype=dtype, device=device), min=0)  # create nonnegative price vector 
-    # c = torch.rand((n, 1), dtype=dtype, device=device) + 0.5  # create nonnegative price vector with mean 1
+    c = torch.rand((n, 1), dtype=dtype, device=device) + 0.5  # create nonnegative price vector with mean 1
+    # c = torch.clip(torch.randn((n, 1), dtype=dtype, device=device), min=0)  # create nonnegative price vector 
     # c = torch.rand((n, 1), dtype=dtype, device=device)   # create nonnegative price vector 
-    # print(c.min(), c.max(), c.mean())
     
-    x01 = torch.clip(torch.randn((n//2, 1), dtype=dtype, device=device) * 1e2, min=0)  # create random solution vector
-    x02 = torch.clip(torch.randn((n-(n//2), 1), dtype=dtype, device=device) * 1e-2, min=0)  # create random solution vector
-    x0 = torch.vstack([x01, x02])
+    # x01 = torch.clip(torch.randn((n//2, 1), dtype=dtype, device=device) * 1e2, min=0)  # create random solution vector
+    # x02 = torch.clip(torch.randn((n-(n//2), 1), dtype=dtype, device=device) * 1e-2, min=0)  # create random solution vector
+    # x0 = torch.vstack([x01, x02])
     
-    A1 = torch.clip(torch.randn(m1//2, n, dtype=dtype, device=device) * 1e-1, min=0)  # create random, nonnegative matrix A
-    A2 = torch.clip(torch.randn(m1-(m1//2), n, dtype=dtype, device=device) * 1e4, min=0)  # create random, nonnegative matrix A
-    A = torch.vstack([A1, A2])
+    # A1 = torch.clip(torch.randn(m1//2, n, dtype=dtype, device=device) * 1e-1, min=0)  # create random, nonnegative matrix A
+    # A2 = torch.clip(torch.randn(m1-(m1//2), n, dtype=dtype, device=device) * 1e4, min=0)  # create random, nonnegative matrix A
+    # A = torch.vstack([A1, A2])
     
-    G1 = torch.clip(torch.randn(m2//2, n, dtype=dtype, device=device) * 1e5, min=0)  # create random, nonnegative matrix A
-    G2 = torch.clip(torch.randn(m2-(m2//2), n, dtype=dtype, device=device) * 1e-2, min=0)  # create random, nonnegative matrix A
-    G = torch.vstack([G1, G2])
+    # G1 = torch.clip(torch.randn(m2//2, n, dtype=dtype, device=device) * 1e5, min=0)  # create random, nonnegative matrix A
+    # G2 = torch.clip(torch.randn(m2-(m2//2), n, dtype=dtype, device=device) * 1e-2, min=0)  # create random, nonnegative matrix A
+    # G = torch.vstack([G1, G2])
     
-    # A = torch.abs(torch.randn(m1, n, dtype=dtype, device=device) * 1, min=0)  # create random, nonnegative matrix A
-    # G = torch.abs(torch.randn(m2, n, dtype=dtype, device=device) * 1, min=0)  # create random, nonnegative matrix A
+    x0 = torch.abs(torch.randn(n, 1, dtype=dtype, device=device))
+    A = torch.abs(torch.randn(m1, n, dtype=dtype, device=device) * 1)  # create random, nonnegative matrix A
+    G = torch.abs(torch.randn(m2, n, dtype=dtype, device=device) * 1)  # create random, nonnegative matrix A
     b = A @ x0
-    g = G @ x0 + 0.1
+    g = G @ x0 + 0.5
     
     lpproblem = LPProblem(c, G, g, A, b, norm_ord=float('inf'), sparse=False, device=device)
     return lpproblem
+
+
+def test_lp_problem(n, m1, m2, seed=0, max_iters=10000, abstol=1e-4, reltol=1e-5, dtype=torch.float64):    
+    lpproblem = generate_lp_problem(n, m1, m2, dtype, seed)
+    c, A_ub, b_ub, A_eq, b_eq, x_lb, x_ub = lpproblem.unpack(to_numpy=True)
+    lpadmm = LPSolverADMM(problem_scale=None, abstol=abstol, reltol=reltol, max_iters=max_iters, dtype=dtype, verbose=True).to(device)
+    lpadmm.eval()
+    print(lpadmm)
+    
+    start = time.time()
+    with torch.no_grad():
+        x, history, res = lpadmm.solve(lpproblem, rho=5e2, residual_balance=False, direct=True)
+    print(res[0])
+    # print(torch.linalg.vector_norm(A @ x - b) / torch.linalg.vector_norm(b))
+    x = x.cpu().numpy().squeeze()
+    print(x.min())
+    print(np.abs(b_eq - A_eq @ x).max())
+    print(np.min(b_ub - A_ub @ x))
+    
+    torch.cuda.current_stream().synchronize()
+    end = time.time()
+    print(f"Time Elapse (LPADMM): {end-start:.4f}s\n")
+
+    # plt.plot(history['objval'])
+    # plt.plot(history['r_norm'], label='r_norm')
+    # plt.plot(history['s_norm'], label='s_norm')
+    # plt.plot(history['eps_primal'], label='eps_primal')
+    # plt.plot(history['eps_dual'], label='eps_dual')
+    # plt.legend()
+    # plt.yscale('log')
+    # plt.show()
+    
+    start = time.time()
+    res = sop.linprog(c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=(0, None), 
+                      options={'maxiter': 10000, 'disp': True, 'presolve': True, 'autoscale': True})
+    # res = sop.linprog(c=c, A_eq=A, b_eq=b, bounds=(0, None), method='highs', options={'maxiter': 10000, 'disp': True, 'presolve': False})
+    print(res.fun, res.success, res.status)
+    # feasibility check
+    print(res.x.min())
+    print(res.con, np.abs(res.con).max(), np.abs(b_eq - A_eq @ res.x).max())
+    print(res.slack, res.slack.min())
+    end = time.time()
+    print(f"Time Elapse (SCIPY): {end-start:.4f}s\n")
 
 
 def test_lp_general():
@@ -267,7 +309,7 @@ def test_lp_general_sparse():
     for k in range(num_iters):
         # adjust_lr_cosine(optimizer, k, num_iters, base_lr=base_lr, min_lr=1e-3)
         optimizer.zero_grad()
-        _, _, res = lpadmm.solve(lpproblem, max_iters=30)
+        _, _, res = lpadmm.solve(lpproblem, max_iters=100)
         objval, r_norm, s_norm, eps_primal, eps_dual = res
         
         # define loss
@@ -301,5 +343,6 @@ def test_lp_general_sparse():
     
     
 if __name__ == '__main__':
+    test_lp_problem(n=500, m1=200, m2=200, seed=0, max_iters=int(1e6), abstol=0, reltol=1e-3)
     # test_lp_general()
-    test_lp_general_sparse()
+    # test_lp_general_sparse()

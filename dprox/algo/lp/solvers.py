@@ -37,19 +37,26 @@ class LPProblem:
         if x_ub is None:
             x_ub = float('inf') * torch.ones(n, 1, dtype=dtype, device=device)
         self.x_lb = x_lb
-        self.x_ub = x_ub
+        self.x_ub = x_ub        
+        self.original_problem = self.c, self.A_ub, self.b_ub, self.A_eq, self.b_eq, self.x_lb, self.x_ub
         self._preprocess(norm_ord, sparse)
-    
+        
+    def unpack(self, to_numpy=False):
+        lst = self.original_problem
+        if to_numpy:
+            lst = [item.cpu().numpy().squeeze() for item in lst]
+        return lst
+
     @torch.no_grad()
     def _preprocess(self, norm_ord, sparse):
-        c, A_ub, b_ub, A_eq, b_eq, x_lb, x_ub = self.c, self.A_ub, self.b_ub, self.A_eq, self.b_eq, self.x_lb, self.x_ub
+        c, A_ub, b_ub, A_eq, b_eq, x_lb, x_ub = self.original_problem
         device = self.device
         m_ub = A_ub.shape[0]
         m_eq = A_eq.shape[0]
         n = c.shape[0]
         if not sparse:
             A = torch.vstack([A_ub, A_eq, torch.eye(n, device=device)])            
-            self.d, self.e, self.gamma_c, self.gamma_b, self.A = Ruiz_equilibration_th(A, c, b, ord=norm_ord, max_iters=100)
+            self.d, self.e, self.gamma_c, self.gamma_b, self.A = Ruiz_equilibration_th(A, c, b=torch.concatenate([b_ub, b_eq]), ord=norm_ord, max_iters=100)
             self.AT = self.A.T
             self.Acnorm = torch.linalg.norm(A, axis=0)
         else: #NOTE use numpy instead as many functions are not supported in torch.sparse
@@ -119,8 +126,7 @@ class LPSolverADMM(nn.Module):
             self.d_mul_log = nn.Parameter(torch.zeros(1, n, dtype=self.dtype))
             self.e_mul_log = nn.Parameter(torch.zeros(m, 1, dtype=self.dtype))
 
-
-    def solve(self, lpproblem, rho=None, sigma=None, alpha=None, max_iters=None, eval_freq=25, residual_balance=False):
+    def solve(self, lpproblem, rho=None, sigma=None, alpha=None, max_iters=None, eval_freq=25, residual_balance=False, direct=False):
         if max_iters is None: max_iters = self.max_iters
         vector_norm = partial(torch.linalg.vector_norm, ord=self.norm_ord)
         d, e, gamma_c, gamma_b, A, AT, Acnorm, ub, lb, c = lpproblem.get_data()
@@ -170,9 +176,12 @@ class LPSolverADMM(nn.Module):
         rtols = torch.logspace(-6, -10, 10000)
         history = defaultdict(lambda : [])
 
-        # K = (AT @ A).to_dense() * rho + sigma * torch.eye(n, device=device, dtype=dtype)
+        Kinv = None
+        if direct:
+            K = (AT @ A) * rho + sigma * torch.eye(n, device=device, dtype=dtype)
+            Kinv = torch.inverse(K)
         # L = torch.linalg.cholesky(K)  # K = L @ LT
-        L = None
+        # L = None
         
         ATAfun = LPATA_Func(A, AT, rho, sigma)
         ATAop = LinearOp(A_fun=ATAfun, AT_fun=ATAfun, shape=(n, n))
@@ -184,7 +193,7 @@ class LPSolverADMM(nn.Module):
         for k in tqdm(range(max_iters)):
             rtol = 1e-10 if k >= 10000 else rtols[k]
             variables = x, z, y, xtilde
-            x, z, y, xtilde = self._solve_one_iter_precond(variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, alpha, L=L)
+            x, z, y, xtilde = self._solve_one_iter_precond(variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, alpha, Kinv=Kinv)
                 
             if k % eval_freq == 0:
                 objval, r_norm, s_norm, eps_primal, eps_dual = self.eval_result(c, A, AT, d, e, gamma_c, gamma_b, x, z, y)                                
@@ -228,11 +237,13 @@ class LPSolverADMM(nn.Module):
                 history['objval'].append(objval.item())
                 
                 if not self.training and r_norm < eps_primal and s_norm < eps_dual:
+                    if self.verbose:
+                        print(f'Obj: {objval.item():.2e}, res_primal: {r_norm.item():.2e}, res_dual: {s_norm.item():.2e}, eps_primal: {eps_primal.item():.2e}, eps_dual: {eps_dual.item():.2e}, rho: {float(rho):.2e}')
                     break
 
                 if not self.training and self.verbose:
                     if k % 1000 == 0:
-                        print(objval.item(), r_norm.item(), s_norm.item(), eps_primal.item(), eps_dual.item(), float(rho))
+                        print(f'Obj: {objval.item():.2e}, res_primal: {r_norm.item():.2e}, res_dual: {s_norm.item():.2e}, eps_primal: {eps_primal.item():.2e}, eps_dual: {eps_dual.item():.2e}, rho: {float(rho):.2e}')
                     
         objval, r_norm, s_norm, eps_primal, eps_dual = self.eval_result(c, A, AT, d, e, gamma_c, gamma_b, x, z, y)
         
@@ -240,14 +251,15 @@ class LPSolverADMM(nn.Module):
         results = objval, r_norm, s_norm, eps_primal, eps_dual
         return x * d / gamma_b, history, results
         
-    def _solve_one_iter_precond(self, variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, alpha, L=None):
+    def _solve_one_iter_precond(self, variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, alpha, Kinv=None):
         x, z, y, xtilde = variables
 
         # x-update
         right = sigma * x - c + AT @ (rho * z - y)
-        if L is not None:  # seems very slow, why?
-            tmp = torch.linalg.solve_triangular(L, right, upper=False)
-            xtilde = torch.linalg.solve_triangular(L.T, tmp, upper=True)
+        if Kinv is not None:
+            # tmp = torch.linalg.solve_triangular(L, right, upper=False)
+            # xtilde = torch.linalg.solve_triangular(L.T, tmp, upper=True)
+            xtilde = Kinv @ right
         else:
             xtilde = pcg(ATAop, right, Minv=Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
         ztilde = A @ (xtilde)
