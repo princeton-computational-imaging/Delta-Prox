@@ -115,3 +115,5 @@ tensor(-192.8360, device='cuda:0', dtype=torch.float64)09:52:25,952 root INFO te
 22:05:01,221 asyncio DEBUG Using proactor: IocpProactor
 22:05:02,737 asyncio DEBUG Using proactor: IocpProactor
 22:05:02,751 asyncio DEBUG Using proactor: IocpProactor
+22:45:17,150 root INFO test simple_cep_model_20220916...
+

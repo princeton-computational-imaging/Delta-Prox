@@ -82,7 +82,7 @@ def test_lp_problem(n, m1, m2, seed=0, max_iters=10000, abstol=1e-4, reltol=1e-5
     
     start = time.time()
     with torch.no_grad():
-        x, history, res = lpadmm.solve(lpproblem, rho=1, alpha=1.6, residual_balance=False, direct=True, polish=False)
+        x, history, res = lpadmm.solve(lpproblem, rho=1e2, alpha=1.6, residual_balance=False, direct=True, polish=False)
     print(res[0])
     # print(torch.linalg.vector_norm(A @ x - b) / torch.linalg.vector_norm(b))
     x = x.cpu().numpy().squeeze()
@@ -103,17 +103,21 @@ def test_lp_problem(n, m1, m2, seed=0, max_iters=10000, abstol=1e-4, reltol=1e-5
     # plt.yscale('log')
     # plt.show()
     
-    # start = time.time()
-    # res = sop.linprog(c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=(0, None), 
-    #                   options={'maxiter': 10000, 'disp': True, 'presolve': True, 'autoscale': True})
-    # # res = sop.linprog(c=c, A_eq=A, b_eq=b, bounds=(0, None), method='highs', options={'maxiter': 10000, 'disp': True, 'presolve': False})
-    # print(res.fun, res.success, res.status)
-    # # feasibility check
+    start = time.time()
+    res = sop.linprog(c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=(0, None), 
+                      options={'maxiter': 10000, 'disp': True, 'presolve': True, 'autoscale': True})
+    # res = sop.linprog(c=c, A_eq=A, b_eq=b, bounds=(0, None), method='highs', options={'maxiter': 10000, 'disp': True, 'presolve': False})
+    print(res.fun, res.success, res.status)
+    # feasibility check
     # print(res.x.min())
     # print(res.con, np.abs(res.con).max(), np.abs(b_eq - A_eq @ res.x).max())
     # print(res.slack, res.slack.min())
-    # end = time.time()
-    # print(f"Time Elapse (SCIPY): {end-start:.4f}s\n")
+    x = res.x
+    print(f'x >= 0 err: {x.min():.2e}')
+    print(f'Ax = b err: {np.abs(b_eq - A_eq @ x).max():.2e}')
+    print(f'Ax <= b err: {np.min(b_ub - A_ub @ x):.2e}')
+    end = time.time()
+    print(f"Time Elapse (SCIPY): {end-start:.4f}s\n")
 
 
 def test_lp_general():
@@ -273,7 +277,6 @@ def test_lp_general():
     # print(f"Time Elapse (CVXPY): {end-start:.4f}s\n")
 
 
-# 17695.2426s
 def test_lp_general_sparse():
     random.seed(2023)
     torch.manual_seed(2023)
@@ -282,15 +285,13 @@ def test_lp_general_sparse():
     logging.info('test simple_cep_model_20220916...\n')
     c, A_ub, A_eq, b_ub, b_eq = load_simple_cep_model()
     
-    key = (2011, 0)
-
     max_iters = 200000
-    abstol = 1e-3
+    abstol = 1e-5
     reltol = 1e-6
-    rho = 1e-1
+    rho = 9e-1
+    
     dtype = torch.float64
     norm_ord = float('inf')
-    # norm_ord = 2
 
     lpproblem = LPProblem(c, A_ub, b_ub, A_eq, b_eq, norm_ord=norm_ord, dtype=dtype, sparse=True, device=device)
     lpadmm = LPSolverADMM(rho=rho, problem_scale=None, abstol=abstol, reltol=reltol, max_iters=max_iters, dtype=dtype).to(device)
@@ -302,30 +303,26 @@ def test_lp_general_sparse():
     print(lpadmm)
     
     start = time.time()
-    loss_log = []
-    num_iters = 10
-    best_loss = float('inf')
+    # loss_log = []
+    # num_iters = 10
+    # best_loss = float('inf')
     
-    for k in range(num_iters):
-        # adjust_lr_cosine(optimizer, k, num_iters, base_lr=base_lr, min_lr=1e-3)
-        optimizer.zero_grad()
-        _, _, res = lpadmm.solve(lpproblem, max_iters=100)
-        objval, r_norm, s_norm, eps_primal, eps_dual = res
+    # for k in range(num_iters):
+    #     # adjust_lr_cosine(optimizer, k, num_iters, base_lr=base_lr, min_lr=1e-3)
+    #     optimizer.zero_grad()
+    #     _, _, res = lpadmm.solve(lpproblem, max_iters=100)
+    #     objval, r_norm, s_norm, eps_primal, eps_dual = res
         
-        # define loss
-        loss = criterion(r_norm, s_norm, eps_primal, eps_dual)
-        loss.backward()
-        optimizer.step()
+    #     # define loss
+    #     loss = criterion(r_norm, s_norm, eps_primal, eps_dual)
+    #     loss.backward()
+    #     optimizer.step()
 
-        loss_log.append(loss.item())
-        # if best_loss > loss.item():
-        #     best_loss = loss.item()
-        #     best_state_dict = copy.deepcopy(lpadmm.state_dict())
-        
-        print(loss.item())
-        print(lpadmm)
+    #     loss_log.append(loss.item())
+    #     print(loss.item())
+    #     print(lpadmm)
     
-    print(lpadmm)
+    # print(lpadmm)
     end1 = time.time()
 
     with torch.no_grad():
@@ -334,8 +331,13 @@ def test_lp_general_sparse():
         x, history, res = lpadmm.solve(lpproblem, residual_balance=True)
     
     print(res[0])
-    print(torch.linalg.vector_norm(lpproblem.A_eq @ x - lpproblem.b_eq) / torch.linalg.vector_norm(lpproblem.b_eq))
-    print(x.min())
+    # print(torch.linalg.vector_norm(lpproblem.A_eq @ x - lpproblem.b_eq) / torch.linalg.vector_norm(lpproblem.b_eq))
+    # print(x.min())
+    x = x.cpu().numpy().squeeze()
+    print(f'x >= 0 err: {x.min():.2e}')
+    print(f'Ax = b err: {np.abs(b_eq - A_eq @ x).max():.2e}')
+    print(f'Ax <= b err: {np.min(b_ub - A_ub @ x):.2e}')
+
     torch.cuda.current_stream().synchronize()
     end = time.time()
     logging.info(f"Time Elapse (DProx train stage): {end1-start:.4f}s\n")
@@ -343,6 +345,6 @@ def test_lp_general_sparse():
     
     
 if __name__ == '__main__':
-    test_lp_problem(n=500, m1=200, m2=200, seed=0, max_iters=int(1e6), abstol=0, reltol=1e-5)
+    # test_lp_problem(n=500, m1=200, m2=200, seed=0, max_iters=int(1e6), abstol=1e-5, reltol=0)
     # test_lp_general()
-    # test_lp_general_sparse()
+    test_lp_general_sparse()

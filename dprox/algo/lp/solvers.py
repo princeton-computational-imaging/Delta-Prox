@@ -203,7 +203,7 @@ class LPSolverADMM(nn.Module):
             # x, x_hat, z, z_hat, y, y_hat, xtilde, a, cr = self._solve_one_iter_precond_fast(variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, Kinv=Kinv)
 
             if k % eval_freq == 0:
-                objval, r_norm, s_norm, eps_primal, eps_dual = self.eval_result(c, A, AT, d, e, gamma_c, gamma_b, x, z, y)                                
+                objval, r_norm, s_norm, eps_primal, eps_dual = self.eval_result(c, A, AT, d, e, gamma_c, gamma_b, x, z, y)
 
                 # update rho (residual balance)
                 if residual_balance and k % 1000 == 0 and k != 0:
@@ -216,11 +216,15 @@ class LPSolverADMM(nn.Module):
                     else:
                         flag = False
                     if flag:
-                        M = (M_constant + rho * (Acnorm ** 2)).unsqueeze(1)
-                        Minv = lambda x: x / M
-                        ATAfun = LPATA_Func(A, AT, rho, sigma)
-                        ATAop = LinearOp(A_fun=ATAfun, AT_fun=ATAfun, shape=(n, n))
-                    
+                        if direct:
+                            K = (AT @ A) * rho + sigma * torch.eye(n, device=device, dtype=dtype)
+                            Kinv = torch.inverse(K)
+                        else:
+                            M = (M_constant + rho * (Acnorm ** 2)).unsqueeze(1)
+                            Minv = lambda x: x / M
+                            ATAfun = LPATA_Func(A, AT, rho, sigma)
+                            ATAop = LinearOp(A_fun=ATAfun, AT_fun=ATAfun, shape=(n, n))
+                        
                 # if residual_balance and k >= 10000 and k % 500 == 0:
                 #     if (r_norm / eps_primal) > (1 / self.reltol / 1e2) * (s_norm / eps_dual):
                 #         rho = rho * 2
@@ -369,8 +373,10 @@ class LPSolverADMM(nn.Module):
         ATy = AT @ y
         r_norm = vector_norm((Ax - z) / e / gamma_b)
         s_norm = vector_norm((c + ATy) / d / gamma_c)
-        eps_primal = self.abstol * (m**0.5) + self.reltol * max(vector_norm(Ax / e / gamma_b), vector_norm(z / e / gamma_b))
-        eps_dual = self.abstol * (n**0.5) + self.reltol * max(vector_norm(ATy / d / gamma_c),  vector_norm(c / d / gamma_c))
+        # eps_primal = self.abstol * (m**0.5) + self.reltol * max(vector_norm(Ax / e / gamma_b), vector_norm(z / e / gamma_b))
+        # eps_dual = self.abstol * (n**0.5) + self.reltol * max(vector_norm(ATy / d / gamma_c),  vector_norm(c / d / gamma_c))
+        eps_primal = self.abstol + self.reltol * max(vector_norm(Ax / e / gamma_b), vector_norm(z / e / gamma_b))
+        eps_dual = self.abstol + self.reltol * max(vector_norm(ATy / d / gamma_c),  vector_norm(c / d / gamma_c))
         return objval, r_norm, s_norm, eps_primal, eps_dual
 
     def extra_repr(self) -> str:
