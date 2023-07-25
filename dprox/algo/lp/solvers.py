@@ -65,11 +65,15 @@ class LPProblem:
             d, e, gamma_c, gamma_b, A = Ruiz_equilibration_sparse_np(A, c, b=np.concatenate([b_ub, b_eq]), ord=float('inf'), max_iters=20, verbose=True)
             Acnorm = slinalg.norm(A, axis=0)
             self.A, self.AT = scipy_sparse_to_torchop(A, device=device)
-            self.A_eq =scipy_sparse_to_torchop(A_eq, device=device, output_AT=False)
-            self.A_ub =scipy_sparse_to_torchop(A_ub, device=device, output_AT=False)
+            self.A_eq = scipy_sparse_to_torchop(A_eq, device=device, output_AT=False)
+            self.A_ub = scipy_sparse_to_torchop(A_ub, device=device, output_AT=False)
             self.c = c = torch.from_numpy(c).to(device).view(n, 1)
             self.b_eq = b_eq = torch.from_numpy(b_eq).to(device).view(m_eq, 1)
             self.b_ub = b_ub = torch.from_numpy(b_ub).to(device).view(m_ub, 1)
+            if isinstance(x_lb, np.ndarray):
+                self.x_lb = x_lb = torch.from_numpy(x_lb).to(device).view(n, 1)
+            if isinstance(x_ub, np.ndarray):
+                self.x_ub = x_ub = torch.from_numpy(x_ub).to(device).view(n, 1)
             self.d = torch.from_numpy(d).to(device).view(1, n)
             self.e = torch.from_numpy(e).to(device).view(m, 1)
             self.Acnorm = torch.from_numpy(Acnorm).to(device)
@@ -315,7 +319,8 @@ class LPSolverADMM(nn.Module):
             # xtilde = torch.linalg.solve_triangular(L.T, tmp, upper=True)
             xtilde = Kinv @ right
         else:
-            xtilde = pcg(ATAop, right, Minv=Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
+            # verbose = True if rtol < 1e-10 else False
+            xtilde = pcg(ATAop, right, Minv=Minv, x0=xtilde.detach(), rtol=rtol, max_iters=int(1e3), verbose=False)
         ztilde = A @ (xtilde)
         x = alpha * xtilde + (1 - alpha) * x
 

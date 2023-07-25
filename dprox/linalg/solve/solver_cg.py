@@ -196,7 +196,8 @@ def pcg(
     Returns:
       The solution `x` to the linear system `Ax=b` using the conjugate gradient method.
     """
-
+    ord = float('inf')
+    
     if Minv is None:
         def Minv(x): return x
 
@@ -209,7 +210,7 @@ def pcg(
     y = Minv(r)
     p = - y
 
-    bnorm = torch.linalg.vector_norm(b.ravel())
+    bnorm = torch.linalg.vector_norm(b.ravel(), ord=ord)
 
     for iter in range(max_iters):
         Ap = A(p)
@@ -221,11 +222,12 @@ def pcg(
         # y = r
         beta = (r.ravel() @ y.ravel()) / ry
         p = - y + beta * p
-        rnorm = torch.linalg.vector_norm(r.ravel())
+        rnorm = torch.linalg.vector_norm(r.ravel(), ord=ord)
 
-        if rnorm < rtol * bnorm:
+        # if rnorm < rtol * bnorm:
+        if rnorm < rtol:
             break
 
     if verbose:
-        print('#IT:', iter + 1)
+        print(f'#IT: {iter + 1}; bnorm: {bnorm:.3e}; rnorm: {rnorm:.3e}; rtol: {rtol:.3e}')
     return x

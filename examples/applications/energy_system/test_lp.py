@@ -9,7 +9,7 @@ from scipy import sparse, io
 from lpsolvers import linprog_general, linprog_general_precond, linprog_general_precond_iter
 # from lpsolvers_diff import LPProblem, LPSolverADMM, LPConvergenceLoss
 from dprox.algo.lp import LPProblem, LPSolverADMM, LPConvergenceLoss
-from utils import load_simple_cep_model
+from utils import load_simple_cep_model, load_lp_componentes_from_mat
 import copy
 import pickle
 from os.path import join
@@ -42,32 +42,32 @@ def generate_lp_problem(n, m1, m2, dtype=torch.float64, seed=0):
     n: int   # dimension of x
     m1: int  # number of equality constraints
     m2: int  # number of inequality constraints
-        
+
     random.seed(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)
-        
-    c = torch.rand((n, 1), dtype=dtype, device=device) + 0.5  # create nonnegative price vector with mean 1
-    # c = torch.clip(torch.randn((n, 1), dtype=dtype, device=device), min=0)  # create nonnegative price vector 
+
+    # c = torch.rand((n, 1), dtype=dtype, device=device) + 0.5  # create nonnegative price vector with mean 1
+    c = torch.clip(torch.randn((n, 1), dtype=dtype, device=device), min=0.1)  # create nonnegative price vector 
     # c = torch.rand((n, 1), dtype=dtype, device=device)   # create nonnegative price vector 
     
-    # x01 = torch.clip(torch.randn((n//2, 1), dtype=dtype, device=device) * 1e2, min=0)  # create random solution vector
-    # x02 = torch.clip(torch.randn((n-(n//2), 1), dtype=dtype, device=device) * 1e-2, min=0)  # create random solution vector
-    # x0 = torch.vstack([x01, x02])
+    x01 = torch.clip(torch.randn((n//2, 1), dtype=dtype, device=device) * 1e2, min=0)  # create random solution vector
+    x02 = torch.clip(torch.randn((n-(n//2), 1), dtype=dtype, device=device) * 1e-2, min=0)  # create random solution vector
+    x0 = torch.vstack([x01, x02])
     
-    # A1 = torch.clip(torch.randn(m1//2, n, dtype=dtype, device=device) * 1e-1, min=0)  # create random, nonnegative matrix A
-    # A2 = torch.clip(torch.randn(m1-(m1//2), n, dtype=dtype, device=device) * 1e4, min=0)  # create random, nonnegative matrix A
-    # A = torch.vstack([A1, A2])
+    A1 = torch.clip(torch.randn(m1//2, n, dtype=dtype, device=device) * 1e-1, min=0)  # create random, nonnegative matrix A
+    A2 = torch.clip(torch.randn(m1-(m1//2), n, dtype=dtype, device=device) * 1e4, min=0)  # create random, nonnegative matrix A
+    A = torch.vstack([A1, A2])
     
-    # G1 = torch.clip(torch.randn(m2//2, n, dtype=dtype, device=device) * 1e5, min=0)  # create random, nonnegative matrix A
-    # G2 = torch.clip(torch.randn(m2-(m2//2), n, dtype=dtype, device=device) * 1e-2, min=0)  # create random, nonnegative matrix A
-    # G = torch.vstack([G1, G2])
+    G1 = torch.clip(torch.randn(m2//2, n, dtype=dtype, device=device) * 1e5, min=0)  # create random, nonnegative matrix A
+    G2 = torch.clip(torch.randn(m2-(m2//2), n, dtype=dtype, device=device) * 1e-2, min=0)  # create random, nonnegative matrix A
+    G = torch.vstack([G1, G2])
     
-    x0 = torch.abs(torch.randn(n, 1, dtype=dtype, device=device))
-    A = torch.abs(torch.randn(m1, n, dtype=dtype, device=device) * 1)  # create random, nonnegative matrix A
-    G = torch.abs(torch.randn(m2, n, dtype=dtype, device=device) * 1)  # create random, nonnegative matrix A
+    # x0 = torch.abs(torch.randn(n, 1, dtype=dtype, device=device))
+    # A = torch.abs(torch.randn(m1, n, dtype=dtype, device=device) * 1)  # create random, nonnegative matrix A
+    # G = torch.abs(torch.randn(m2, n, dtype=dtype, device=device) * 1)  # create random, nonnegative matrix A
     b = A @ x0
-    g = G @ x0 + 0.5
+    g = G @ x0 * 1.2
     
     lpproblem = LPProblem(c, G, g, A, b, norm_ord=float('inf'), sparse=False, device=device)
     return lpproblem
@@ -82,13 +82,13 @@ def test_lp_problem(n, m1, m2, seed=0, max_iters=10000, abstol=1e-4, reltol=1e-5
     
     start = time.time()
     with torch.no_grad():
-        x, history, res = lpadmm.solve(lpproblem, rho=1e2, alpha=1.6, residual_balance=False, direct=True, polish=False)
+        x, history, res = lpadmm.solve(lpproblem, rho=1e3, alpha=1.6, residual_balance=True, direct=False, polish=False)
     print(res[0])
     # print(torch.linalg.vector_norm(A @ x - b) / torch.linalg.vector_norm(b))
     x = x.cpu().numpy().squeeze()
     print(f'x >= 0 err: {x.min():.2e}')
     print(f'Ax = b err: {np.abs(b_eq - A_eq @ x).max():.2e}')
-    print(f'Ax <= b err: {np.min(b_ub - A_ub @ x):.2e}')
+    print(f'Ax <= b err: {min(np.min(b_ub - A_ub @ x), 0):.2e}')
     
     torch.cuda.current_stream().synchronize()
     end = time.time()
@@ -103,21 +103,21 @@ def test_lp_problem(n, m1, m2, seed=0, max_iters=10000, abstol=1e-4, reltol=1e-5
     # plt.yscale('log')
     # plt.show()
     
-    start = time.time()
-    res = sop.linprog(c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=(0, None), 
-                      options={'maxiter': 10000, 'disp': True, 'presolve': True, 'autoscale': True})
-    # res = sop.linprog(c=c, A_eq=A, b_eq=b, bounds=(0, None), method='highs', options={'maxiter': 10000, 'disp': True, 'presolve': False})
-    print(res.fun, res.success, res.status)
-    # feasibility check
-    # print(res.x.min())
-    # print(res.con, np.abs(res.con).max(), np.abs(b_eq - A_eq @ res.x).max())
-    # print(res.slack, res.slack.min())
-    x = res.x
-    print(f'x >= 0 err: {x.min():.2e}')
-    print(f'Ax = b err: {np.abs(b_eq - A_eq @ x).max():.2e}')
-    print(f'Ax <= b err: {np.min(b_ub - A_ub @ x):.2e}')
-    end = time.time()
-    print(f"Time Elapse (SCIPY): {end-start:.4f}s\n")
+    # start = time.time()
+    # res = sop.linprog(c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=(0, None), 
+    #                   options={'maxiter': 10000, 'disp': True, 'presolve': True, 'autoscale': True})
+    # # res = sop.linprog(c=c, A_eq=A, b_eq=b, bounds=(0, None), method='highs', options={'maxiter': 10000, 'disp': True, 'presolve': False})
+    # print(res.fun, res.success, res.status)
+    # # feasibility check
+    # # print(res.x.min())
+    # # print(res.con, np.abs(res.con).max(), np.abs(b_eq - A_eq @ res.x).max())
+    # # print(res.slack, res.slack.min())
+    # x = res.x
+    # print(f'x >= 0 err: {x.min():.2e}')
+    # print(f'Ax = b err: {np.abs(b_eq - A_eq @ x).max():.2e}')
+    # print(f'Ax <= b err: {np.min(b_ub - A_ub @ x):.2e}')
+    # end = time.time()
+    # print(f"Time Elapse (SCIPY): {end-start:.4f}s\n")
 
 
 def test_lp_general():
@@ -277,27 +277,24 @@ def test_lp_general():
     # print(f"Time Elapse (CVXPY): {end-start:.4f}s\n")
 
 
-def test_lp_general_sparse():
-    random.seed(2023)
-    torch.manual_seed(2023)
-    np.random.seed(2023)
+def test_lp_general_sparse(seed=0, max_iters=int(2e6), abstol=1e-6, reltol=1e-12):
+    random.seed(seed)
+    torch.manual_seed(seed)
+    np.random.seed(seed)
 
-    logging.info('test simple_cep_model_20220916...\n')
-    c, A_ub, A_eq, b_ub, b_eq = load_simple_cep_model()
-    
-    max_iters = 200000
-    abstol = 1e-5
-    reltol = 1e-6
-    rho = 9e-1
+    # logging.info('test simple_cep_model_20220916...\n')
+    c, A_ub, A_eq, b_ub, b_eq = load_simple_cep_model() # rho=1e-2
+    # A_ub, b_ub, A_eq, b_eq, c, x_lb, x_ub = load_lp_componentes_from_mat('./IESP_P1.mat')  # rho=1e-4
+    # A_ub, b_ub, A_eq, b_eq, c, x_lb, x_ub = load_lp_componentes_from_mat('./IESP_P2.mat')
     
     dtype = torch.float64
     norm_ord = float('inf')
 
-    lpproblem = LPProblem(c, A_ub, b_ub, A_eq, b_eq, norm_ord=norm_ord, dtype=dtype, sparse=True, device=device)
-    lpadmm = LPSolverADMM(rho=rho, problem_scale=None, abstol=abstol, reltol=reltol, max_iters=max_iters, dtype=dtype).to(device)
-    base_lr = 5e-3
+    lpproblem = LPProblem(c, A_ub, b_ub, A_eq, b_eq, x_lb=None, x_ub=None, norm_ord=norm_ord, dtype=dtype, sparse=True, device=device)
+    # lpproblem = LPProblem(c, A_ub, b_ub, A_eq, b_eq, x_lb=x_lb, x_ub=x_ub, norm_ord=norm_ord, dtype=dtype, sparse=True, device=device)
+    lpadmm = LPSolverADMM(rho=1e-2, problem_scale=None, abstol=abstol, reltol=reltol, max_iters=max_iters, dtype=dtype).to(device)
     
-    optimizer = torch.optim.Adam(lpadmm.parameters(), lr=base_lr)
+    optimizer = torch.optim.Adam(lpadmm.parameters(), lr=5e-3)
     criterion = LPConvergenceLoss()
 
     print(lpadmm)
@@ -327,7 +324,6 @@ def test_lp_general_sparse():
 
     with torch.no_grad():
         lpadmm.eval()
-        # x, history, res = lpadmm.solve(lpproblem, rho=1e-1, sigma=1e-6, alpha=1.6)
         x, history, res = lpadmm.solve(lpproblem, residual_balance=True)
     
     print(res[0])
@@ -336,7 +332,7 @@ def test_lp_general_sparse():
     x = x.cpu().numpy().squeeze()
     print(f'x >= 0 err: {x.min():.2e}')
     print(f'Ax = b err: {np.abs(b_eq - A_eq @ x).max():.2e}')
-    print(f'Ax <= b err: {np.min(b_ub - A_ub @ x):.2e}')
+    print(f'Ax <= b err: {min(np.min(b_ub - A_ub @ x), 0):.2e}')
 
     torch.cuda.current_stream().synchronize()
     end = time.time()
@@ -345,6 +341,6 @@ def test_lp_general_sparse():
     
     
 if __name__ == '__main__':
-    # test_lp_problem(n=500, m1=200, m2=200, seed=0, max_iters=int(1e6), abstol=1e-5, reltol=0)
+    # test_lp_problem(n=2000, m1=2000, m2=2000, seed=0, max_iters=int(2e6), abstol=1e-6, reltol=1e-12)
     # test_lp_general()
-    test_lp_general_sparse()
+    test_lp_general_sparse(seed=0, max_iters=int(1e5), abstol=1e-2, reltol=1e-10)

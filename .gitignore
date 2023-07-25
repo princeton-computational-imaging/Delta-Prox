@@ -1,4 +1,6 @@
+*.txt
 *.pth
+*.mat
 simple_cep_model_20220916
 data
 abc

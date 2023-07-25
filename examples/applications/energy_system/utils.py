@@ -181,6 +181,22 @@ def load_simple_cep_model():
     return c, A_ub, A_eq, b_ub, b_eq
 
 
+def load_lp_componentes_from_mat(filename):
+    """
+    Loads the linear program components from a .mat file.
+    """
+    model_components = io.loadmat(filename)
+    A_ub = model_components["A_ub"]
+    b_ub = model_components["b_ub"][0, :]
+    A_eq = model_components["A_eq"]
+    b_eq = model_components["b_eq"][0, :]
+    c = model_components["c"][0, :]
+    x_lb = model_components["x_lb"][0, :]
+    x_ub = model_components["x_ub"][0, :]
+
+    return (A_ub, b_ub, A_eq, b_eq, c, x_lb, x_ub)
+
+
 def adjust_lr_cosine(optimizer, iteration, num_iters, base_lr, min_lr):
     ratio = iteration / num_iters
     lr = min_lr + (base_lr - min_lr) * (1.0 + np.cos(np.pi * ratio)) / 2.0
