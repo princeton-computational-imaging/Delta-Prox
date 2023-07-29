@@ -33,19 +33,18 @@ class LPProblem:
         n = c.shape[0]
         self.device = device
         if x_lb is None:
-            x_lb = torch.zeros(n, 1, dtype=dtype, device=device)
+            # x_lb = torch.zeros(n, 1, dtype=dtype, device=device)
+            x_lb = np.zeros((n, 1))
         if x_ub is None:
-            x_ub = float('inf') * torch.ones(n, 1, dtype=dtype, device=device)
+            # x_ub = float('inf') * torch.ones(n, 1, dtype=dtype, device=device)
+            x_ub = float('inf') * np.ones((n, 1))
         self.x_lb = x_lb
-        self.x_ub = x_ub        
+        self.x_ub = x_ub
         self.original_problem = self.c, self.A_ub, self.b_ub, self.A_eq, self.b_eq, self.x_lb, self.x_ub
         self._preprocess(norm_ord, sparse)
         
-    def unpack(self, to_numpy=False):
-        lst = self.original_problem
-        if to_numpy:
-            lst = [item.cpu().numpy().squeeze() for item in lst]
-        return lst
+    def unpack(self):
+        return self.original_problem
 
     @torch.no_grad()
     def _preprocess(self, norm_ord, sparse):
@@ -56,13 +55,13 @@ class LPProblem:
         n = c.shape[0]
         if not sparse:
             A = torch.vstack([A_ub, A_eq, torch.eye(n, device=device)])            
-            self.d, self.e, self.gamma_c, self.gamma_b, self.A = Ruiz_equilibration_th(A, c, b=torch.concatenate([b_ub, b_eq]), ord=norm_ord, max_iters=100)
+            self.d, self.e, self.gamma_c, self.gamma_b, self.A = Ruiz_equilibration_th(A, c, b=torch.concatenate([b_ub, b_eq, x_ub]), ord=norm_ord, max_iters=100)
             self.AT = self.A.T
             self.Acnorm = torch.linalg.norm(A, axis=0)
         else: #NOTE use numpy instead as many functions are not supported in torch.sparse
             A = scipy.sparse.vstack([A_ub, A_eq, scipy.sparse.eye(n)])
             m, _ = A.shape
-            d, e, gamma_c, gamma_b, A = Ruiz_equilibration_sparse_np(A, c, b=np.concatenate([b_ub, b_eq]), ord=float('inf'), max_iters=20, verbose=True)
+            d, e, gamma_c, gamma_b, A = Ruiz_equilibration_sparse_np(A, c, b=np.concatenate([b_ub, b_eq, x_ub]), ord=float('inf'), max_iters=20, verbose=True)
             Acnorm = slinalg.norm(A, axis=0)
             self.A, self.AT = scipy_sparse_to_torchop(A, device=device)
             self.A_eq = scipy_sparse_to_torchop(A_eq, device=device, output_AT=False)
@@ -70,21 +69,21 @@ class LPProblem:
             self.c = c = torch.from_numpy(c).to(device).view(n, 1)
             self.b_eq = b_eq = torch.from_numpy(b_eq).to(device).view(m_eq, 1)
             self.b_ub = b_ub = torch.from_numpy(b_ub).to(device).view(m_ub, 1)
-            if isinstance(x_lb, np.ndarray):
-                self.x_lb = x_lb = torch.from_numpy(x_lb).to(device).view(n, 1)
-            if isinstance(x_ub, np.ndarray):
-                self.x_ub = x_ub = torch.from_numpy(x_ub).to(device).view(n, 1)
             self.d = torch.from_numpy(d).to(device).view(1, n)
             self.e = torch.from_numpy(e).to(device).view(m, 1)
             self.Acnorm = torch.from_numpy(Acnorm).to(device)
             self.gamma_b = gamma_b
             self.gamma_c = gamma_c
+        
+        if isinstance(x_lb, np.ndarray):
+            self.x_lb = x_lb = torch.from_numpy(x_lb).to(device).view(n, 1)
+        if isinstance(x_ub, np.ndarray):
+            self.x_ub = x_ub = torch.from_numpy(x_ub).to(device).view(n, 1)
 
         lb = torch.vstack([-float('inf') * torch.ones(m_ub, 1, device=device), b_eq, x_lb])
-        b = torch.vstack([b_ub, b_eq])
-        ub = torch.vstack([b, x_ub])
+        ub = torch.vstack([b_ub, b_eq, x_ub])
         self.lb, self.ub = lb, ub
-
+        
     def get_data(self):
         return self.d.detach().clone(), self.e.detach().clone(),\
             self.gamma_c, self.gamma_b, \
@@ -134,6 +133,17 @@ class LPSolverADMM(nn.Module):
         if max_iters is None: max_iters = self.max_iters
         vector_norm = partial(torch.linalg.vector_norm, ord=self.norm_ord)
         d, e, gamma_c, gamma_b, A, AT, Acnorm, ub, lb, c = lpproblem.get_data()
+        m, n = A.shape
+        m_ub = lpproblem.A_ub.shape[0]
+        
+        device = c.device
+        dtype = self.dtype
+
+        rho = rho if rho is not None else self.rho
+        # rho = rho if rho is not None else torch.exp(self.rho_log)
+        sigma = sigma if sigma is not None else torch.exp(self.sigma_log)
+        # sigma = sigma if sigma is not None else self.sigma
+        alpha = alpha if alpha is not None else self.alpha
         
         if self.problem_scale is not None:  #NOTE do not use as it doesn't work well 
             d_mul = torch.exp(self.d_mul_log)
@@ -147,40 +157,24 @@ class LPSolverADMM(nn.Module):
         
         gamma_c = self.gamma_c_mul * gamma_c
         gamma_b = self.gamma_b_mul * gamma_b
-        
-        device = c.device
-        dtype = self.dtype
-
-        rho = rho if rho is not None else self.rho
-        # rho = rho if rho is not None else torch.exp(self.rho_log)
-        sigma = sigma if sigma is not None else torch.exp(self.sigma_log)
-        # sigma = sigma if sigma is not None else self.sigma
-        alpha = alpha if alpha is not None else self.alpha
-
-        # alpha = torch.clamp(alpha, min=0, max=2)
-        
-        m, n = A.shape
-        m_ub = lpproblem.A_ub.shape[0]
         d = d.view(n, 1)
         e = e.view(m, 1)
-        
         c = gamma_c * (d * c)
-        # lb = e * lb * gamma_b
-        # ub = e * ub * gamma_b
-        # lb = e * lb
-        # ub = e * ub
-        lb[m_ub:] *= gamma_b * e[m_ub:]
-        ub[:-n] *= gamma_b * e[:-n]
         
+        mask_lb = ~torch.isinf(lb)
+        mask_ub = ~torch.isinf(ub)
+        lb[mask_lb] *= gamma_b * e[mask_lb]
+        ub[mask_ub] *= gamma_b * e[mask_ub]
+        
+        # rho_base = torch.ones(m, 1, dtype=dtype, device=device)
+        # mask_rho = (lb == ub)
+        # rho_base[mask_rho] *= 1e3
+        # rho = rho_base * rho
+
         x = torch.zeros(n, 1, dtype=dtype, device=device)
         z = torch.zeros(m, 1, dtype=dtype, device=device)
         y = torch.zeros(m, 1, dtype=dtype, device=device)
         xtilde = torch.zeros_like(x)
-        # x_hat = torch.zeros_like(x)
-        # z_hat = torch.zeros_like(z)
-        # y_hat = torch.zeros_like(y)
-        # a = 1
-        # cr = float('inf')
         
         rtols = torch.logspace(-6, -10, 10000)
         history = defaultdict(lambda : [])
@@ -189,22 +183,18 @@ class LPSolverADMM(nn.Module):
         if direct:
             K = (AT @ A) * rho + sigma * torch.eye(n, device=device, dtype=dtype)
             Kinv = torch.inverse(K)
-        # L = torch.linalg.cholesky(K)  # K = L @ LT
-        # L = None
         
         ATAfun = LPATA_Func(A, AT, rho, sigma)
         ATAop = LinearOp(A_fun=ATAfun, AT_fun=ATAfun, shape=(n, n))
         
-        M_constant = sigma * torch.ones(n, dtype=dtype, device=device)
-        M = (M_constant + rho * (Acnorm ** 2)).unsqueeze(1)
+        M_constant = sigma * torch.ones((n, 1), dtype=dtype, device=device)
+        M = (M_constant + rho * (Acnorm.unsqueeze(1) ** 2))
         Minv = lambda x: x / M
         
         for k in tqdm(range(max_iters)):
             rtol = 1e-10 if k >= 10000 else rtols[k]
             variables = x, z, y, xtilde
             x, z, y, xtilde = self._solve_one_iter_precond(variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, alpha, Kinv=Kinv)
-            # variables = x, x_hat, z, z_hat, y, y_hat, xtilde, a, cr
-            # x, x_hat, z, z_hat, y, y_hat, xtilde, a, cr = self._solve_one_iter_precond_fast(variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, Kinv=Kinv)
 
             if k % eval_freq == 0:
                 objval, r_norm, s_norm, eps_primal, eps_dual = self.eval_result(c, A, AT, d, e, gamma_c, gamma_b, x, z, y)
@@ -224,7 +214,7 @@ class LPSolverADMM(nn.Module):
                             K = (AT @ A) * rho + sigma * torch.eye(n, device=device, dtype=dtype)
                             Kinv = torch.inverse(K)
                         else:
-                            M = (M_constant + rho * (Acnorm ** 2)).unsqueeze(1)
+                            M = (M_constant + rho * (Acnorm.unsqueeze(1) ** 2))
                             Minv = lambda x: x / M
                             ATAfun = LPATA_Func(A, AT, rho, sigma)
                             ATAop = LinearOp(A_fun=ATAfun, AT_fun=ATAfun, shape=(n, n))
@@ -315,8 +305,6 @@ class LPSolverADMM(nn.Module):
         # x-update
         right = sigma * x - c + AT @ (rho * z - y)
         if Kinv is not None:
-            # tmp = torch.linalg.solve_triangular(L, right, upper=False)
-            # xtilde = torch.linalg.solve_triangular(L.T, tmp, upper=True)
             xtilde = Kinv @ right
         else:
             # verbose = True if rtol < 1e-10 else False
@@ -332,44 +320,7 @@ class LPSolverADMM(nn.Module):
         y = y + rho * (ztilde - z)
         
         return x, z, y, xtilde
-    
-    def _solve_one_iter_precond_fast(self, variables, c, A, AT, ATAop, Minv, lb, ub, rtol, rho, sigma, Kinv=None):
-        vector_norm = partial(torch.linalg.vector_norm, ord=2)
-        x_last, x_hat, z_last, z_hat, y_last, y_hat, xtilde, a_last, cr_last = variables
-
-        # x-update
-        right = sigma * x_hat - c + AT @ (rho * z_hat - y_hat)
-        if Kinv is not None:                        
-            xtilde = Kinv @ right
-        else:
-            xtilde = pcg(ATAop, right, Minv=Minv, x0=xtilde.detach(), rtol=rtol, max_iters=200, verbose=False)
-        ztilde = A @ (xtilde)
-        x = xtilde
         
-        # z-update
-        z = torch.clip(ztilde + 1 / rho * y_hat, min=lb, max=ub)
-        
-        # dual update
-        y = y_hat + rho * (ztilde - z)
-        
-        # acceleration
-        cr = vector_norm(y - y_hat) / rho + rho * vector_norm(torch.concatenate([z_hat - z, x_hat - x]))
-        eta = 0.999
-        if cr < eta * cr_last:
-            a = (1 + (1 + 4 * a_last**2) ** 0.5) / 2
-            beta = (a_last - 1) / a
-            x_hat = x + beta * (x - x_last)
-            z_hat = z + beta * (z - z_last)
-            y_hat = y + beta * (y - y_last)
-        else:
-            a = 1
-            z_hat = z_last
-            x_hat = x_last
-            y_hat = y_last
-            cr = cr_last / eta
-        
-        return x, x_hat, z, z_hat, y, y_hat, xtilde, a, cr
-    
     def eval_result(self, c, A, AT, d, e, gamma_c, gamma_b, x, z, y):
         vector_norm = partial(torch.linalg.vector_norm, ord=self.norm_ord)
         m, n = A.shape

@@ -176,9 +176,9 @@ def load_simple_cep_model():
     c = model_components["obj"][:,0]
     print('c:', c.shape)
 
-    # lb = model_components["lb"][:,0]
-    # ub = model_components["ub"][:,0]
-    return c, A_ub, A_eq, b_ub, b_eq
+    x_lb = model_components["lb"][:,0]
+    x_ub = model_components["ub"][:,0]
+    return c, A_ub, A_eq, b_ub, b_eq, x_lb, x_ub
 
 
 def load_lp_componentes_from_mat(filename):

@@ -1,5 +1,0 @@
-Obj: 8.34e+04, res_z: 0.00e+00, res_primal: 2.66e-02, res_dual: 1.68e-03, eps_primal: 2.10e-02, eps_dual: 1.00e-03, rho: 2.68e+04
-tensor([[83431.3016]], device='cuda:0', dtype=torch.float64)
-x >= 0 err: -1.51e-02
-Ax = b err: 9.10e-04
-Ax <= b err: -8.27e-03

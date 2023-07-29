@@ -16,7 +16,7 @@ class LPATA_Func(torch.nn.Module):
         self.sigma = sigma
 
     def forward(self, x):
-        tmp = (self.A @ x) * self.rho
+        tmp = self.rho * (self.A @ x)
         out = (self.AT @ tmp) + self.sigma * x
         return out
 
@@ -137,16 +137,18 @@ def Ruiz_equilibration_sparse_np(A, c, b, ord=float('inf'), max_iters=100, max_t
     Arnorm = slinalg.norm(A_bar, ord=ord, axis=1)
     Acnorm = slinalg.norm(A_bar, ord=ord, axis=0)
 
-    b_bar = b * e[:b.shape[0]]
+    mask = ~np.isinf(b)
+    b_bar = b[mask] * e[mask]
     gamma_c = 1 / vector_norm(c_bar) * Arnorm.mean()
     gamma_b = 1 / vector_norm(b_bar) * Acnorm.mean()
-    # gamma_b = 1
 
     if verbose:
-        print(Acnorm.max(), Acnorm.mean())
-        print(Arnorm.max(), Arnorm.mean())
-        print(d.max())
-        print(e.max())
+        print(f'Acnorm: {Acnorm.max():.3f}, {Acnorm.mean():.3f}')
+        print(f'Arnorm: {Arnorm.max():.3f}, {Arnorm.mean():.3f}')
+        print(f'dmax: {d.max():.3f}')
+        print(f'emax: {e.max():.3f}')
+        print(f'gamma_c: {gamma_c:.3e}')
+        print(f'gamma_b: {gamma_b:.3e}')
 
     return d, e, gamma_c, gamma_b, A_bar
 
