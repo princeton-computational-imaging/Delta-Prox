@@ -1,6 +1,6 @@
 <p align="center">
 <a href="https://light.princeton.edu/publication/delta_prox/">
-    <img src="https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/9968a127-d6a9-4ba8-8a31-269f1c3267c4" alt="" width="33%">
+    <img src="https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/8e81717a-977c-4dd6-bc8b-7cba975690b8" alt="" width="33%">
 <!--     <img src="https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/9c4d10a2-7d15-4f25-83b7-c94b442a8347" alt="" width="30%"> -->
     </a> &ensp; 
 </p>
