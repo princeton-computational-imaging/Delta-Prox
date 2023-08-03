@@ -1,8 +1,8 @@
 # Welcome to ∇-Prox Tutorials
 
-Familiarize yourself with ∇-Prox concepts and modules. We provide several step-by-step tutorials for the framework and its applications.
+Get familiar with ∇-Prox concepts and modules. We provide several step-by-step tutorials for the framework and its applications.
 
-To run the notebook locally, please follow the [installation tutorial]() to install the dependencies. Optionally, you could run the tutorial on Colab online.
+To locally run the notebook, please follow the [installation tutorial]() to install the necessary dependencies. You can also run the tutorial notebooks in Colab.
 
 ### Framework
 

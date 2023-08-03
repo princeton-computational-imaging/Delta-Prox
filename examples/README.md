@@ -2,4 +2,4 @@
 
 The examples of using Delta-Prox for various applications. 
 
-> Contribution are welcomed.
+> Contributions are welcome.
