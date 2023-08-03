@@ -1,7 +1,6 @@
 <p align="center">
 <a href="https://light.princeton.edu/publication/delta_prox/">
-    <img src="https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/f0fcbb72-adf1-4f97-8d73-77b4e124d221" alt="Delta Prox" width="33%">
-<!--     <img src="https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/9c4d10a2-7d15-4f25-83b7-c94b442a8347" alt="" width="30%"> -->
+    <img src="docs/source/_static/logo3.svg" alt="Delta Prox" width="33%">
     </a> &ensp; 
 </p>
 
@@ -12,20 +11,19 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 </p>
 
 <p align="center">
-<!-- <a href="">Project Page</a> | -->
-<a href="#">Paper</a> |
+<a href="https://light.princeton.edu/publication/delta_prox/">Paper</a> |
 <a href="https://deltaprox.readthedocs.io/">Docs</a> |
-<a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/tutorials">Tutorials</a> |
-<a href="https://github.com/Zeqiang-Lai/DeltaProx/tree/master/examples">Examples</a> |
-<a href="https://github.com/Zeqiang-Lai/DeltaProx#citation">Citation</a> 
+<a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks">Tutorials</a> |
+<a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/examples">Examples</a> |
+<a href="https://github.com/princeton-computational-imaging/Delta-Prox#citation">Citation</a> 
 </p>
 
 <p align="center">
-    <a href="[https://pypi.org/project/dprox/](https://pypi.org/project/dprox/)">
+    <a href="https://pypi.org/project/dprox/">
         <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/v/dprox">
     </a>
-    <a href="[https://pypi.org/project/auto-gptq/](https://arxiv.org/abs/2207.02849)">
-        <img alt="arXiv" src="https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg">
+    <a href="https://dl.acm.org/doi/abs/10.1145/3592144">
+        <img alt="arXiv" src="https://img.shields.io/badge/ACM-10.1145/3592144-b31b1b.svg">
     </a>
 </p>
 
@@ -40,11 +38,11 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 
 
 - **Jun 2023** :  Release preview code.
-- **May 2023** : 🎉 $\nabla$-Prox is accepted by the journal track of SIGGRAPH 2023.
+- **May 2023** : $\nabla$-Prox is accepted as journal paper at SIGGRAPH 2023.
 
 ## Installtion
 
-We recommend installing 🍕 $\nabla$-Prox in a virtual environment from PyPI.
+We recommend installing $\nabla$-Prox in a virtual environment from PyPI.
 
 ```bash
 pip install dprox
@@ -53,8 +51,7 @@ pip install dprox
 Please refer to the [Installtion]() guide for other options.
 
 ## Quickstart
-<!-- ![pipeline](https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/544a0972-f911-4976-8228-a5aa6de319c8) -->
-![pipeline2](https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/6cef8951-7671-4d7a-88dd-e4e6d508fe09)
+![pipeline2](docs/source/_static/pipeline_dprox.gif)
 
 
 Consider a simple image deconvolution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
@@ -82,7 +79,7 @@ prob = Problem(data_term + reg_term)
 out = prob.solve(method='admm', x0=b)
 ```
 
-We can also specialize the solver that adapts for learning-based bi-level optimization. 
+We can also specialize the solver via bi-level optimization.
 For example, we can specialize the solver into a reinforcement learning (RL) solver for automatic parameter tuning.
 
 ```python
@@ -104,16 +101,20 @@ unrolled_solver = specialize(solver, step=10)
 train(unrolled_solver, dataset)
 ```
 
-Want to learn more? Check out the [documentation]() or have a look at our [tutorials]().
+Want to learn more? Check out the [documentation](https://deltaprox.readthedocs.io/) or have a look at our [tutorials](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks).
 
 ## Citation
 
 ```bibtex
-@article{deltaprox2023,
+@article{lai2023prox,
   title={∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
-  author={Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and Härtel, Philipp and Heide, Felix},
-  journal={ACM Transactions on Graphics},
+  author={Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and H{\"a}rtel, Philipp and Heide, Felix},
+  journal={ACM Transactions on Graphics (TOG)},
+  volume={42},
+  number={4},
+  pages={1--19},
   year={2023},
+  publisher={ACM New York, NY, USA}
 }
 ```
 
