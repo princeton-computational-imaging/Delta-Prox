@@ -37,8 +37,8 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 ## News
 
 
-- **Jun 2023** :  Release preview code.
-- **May 2023** : $\nabla$-Prox is accepted as journal paper at SIGGRAPH 2023.
+- **Jun 2023** : Release preview code.
+- **May 2023** : $\nabla$-Prox is accepted as a journal paper at SIGGRAPH 2023.
 
 ## Installtion
 
@@ -48,7 +48,7 @@ We recommend installing $\nabla$-Prox in a virtual environment from PyPI.
 pip install dprox
 ```
 
-Please refer to the [Installtion]() guide for other options.
+Please refer to the [Installation]() guide for other options.
 
 ## Quickstart
 ![pipeline2](docs/source/_static/pipeline_dprox.gif)
