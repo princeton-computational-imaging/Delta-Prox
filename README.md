@@ -1,9 +1,9 @@
 <p align="center">
 <a href="https://light.princeton.edu/publication/delta_prox/">
-    <img src="docs/source/_static/logo3.svg" alt="Delta Prox" width="33%">
+    <img src="https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/649bd6bf-5eca-4425-9696-477adfa9b9da" alt="Delta Prox" width="16.5%">
+<!--     <img src="docs/source/_static/logo3.svg" alt="Delta Prox" width="33%"> -->
     </a> &ensp; 
 </p>
-
 
 
 <p align="center">
