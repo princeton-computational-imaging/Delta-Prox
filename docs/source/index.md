@@ -6,7 +6,7 @@ hide-toc: true
 <br/>
 <p align="center">
 <a href="https://light.princeton.edu/publication/delta_prox/">
-    <img src="_static/logo.svg" alt="" width="40%">
+    <img src="_static/logo6.svg" alt="" width="22%">
 </a> 
 </p>
 

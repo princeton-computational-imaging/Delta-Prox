@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = '∇-Prox 🎉'
+project = '∇-Prox'
 copyright = '2023'
 author = 'Zeqiang-Lai'
 
@@ -117,6 +117,7 @@ html_theme_options = {
         "font-stack": "Arial,Noto Sans,sans-serif",
         "font-stack--monospace": "IBM Plex Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace",
     },
+    "sidebar_hide_name": True,
 }
 
 #
@@ -131,7 +132,8 @@ myst_admonition_enable = True
 myst_deflist_enable = True
 myst_heading_anchors = 3
 
-# html_logo = "logo.png"
+html_logo = "_static/logo6.svg"
+html_favicon = '_static/favicon.ico'
 
 
 pygments_style = "default"

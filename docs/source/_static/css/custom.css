@@ -1,4 +1,9 @@
 
+.sidebar-logo {
+    display: block;
+    margin: 0;
+    max-width: 50%;
+}
 
 .nbsphinx-gallery {
     display: grid;
