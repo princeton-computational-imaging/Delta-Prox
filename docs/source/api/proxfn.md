@@ -1,6 +1,6 @@
 # Proximal Functions
 
-The following code shows a template for defining a new proxable function. As previously mentioned, we define the function as a class inheriting from the base class `ProxFn`, and implement all the required methods. Then, ∇-Prox will properly handle all other things, so that the new proxable function can work with operators, algorithms, and training utilities of the existing system.
+The following code shows a template for defining a new proxable function. As previously mentioned, we define the function as a class inheriting from the base class `ProxFn`, and implement all the required methods. Then, ∇-Prox will properly handle all other necessary steps so that the new proxable function can work with operators, algorithms, and training utilities of the existing system.
 
 ```python
 class new_func(ProxFn):
@@ -24,11 +24,11 @@ class new_func(ProxFn):
         return ...
 ```
 
-Specifically, defining a new function only requires a method `_prox` to be implemented, which evaluates the proximal operator of the given function. 
+More specifically, defining a new function only requires a method `_prox` to be implemented, which evaluates the proximal operator of the given function. 
 
 Users can optionally implement the `_grad` function to provide a routine for computing the analytic gradient of the proxable function. This facilitates the algorithms that partially rely on the gradient evaluation, e.g., proximal gradient descent. 
 
-Besides, users could also implement the `_eval` method that computes the forwarding results of the proxable function if it is possible.  ∇-Prox would take the `_eval` routine and compute the gradient with auto-diff if `_grad` is not implemented.
+Alternatively, users can also implement the `_eval` method that computes the forwarding results of the proxable function if it is possible. ∇-Prox takes the `_eval` routine and computes the gradient with auto-diff if `_grad` is not implemented.
 
 
 ```{eval-rst}

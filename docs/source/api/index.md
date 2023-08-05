@@ -13,10 +13,6 @@ utils
 
 ∇-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. 
 
-```{tip}
-🚧 The API documentation is still under construction.
-```
-
 ## Indices
 
 - [Proximal Algorithms](algo.md)
