@@ -57,7 +57,7 @@ Please refer to the [Installation]() guide for other options.
 Consider a simple image deconvolution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
 
 $$
-\arg \min_x { \frac{1}{2} |Dx - y|^2_2 + g(x) }\,,
+\arg \min_x { \frac{1}{2} |Dx - y|^2_2 + g(x) },
 $$
 
 where $g(x)$ denotes an implicit plug-and-play denoiser prior. We can solve this problem in ∇-Prox with the following code: 
