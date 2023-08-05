@@ -1,7 +1,6 @@
 <p align="center">
 <a href="https://light.princeton.edu/publication/delta_prox/">
-    <img src="https://github.com/princeton-computational-imaging/Delta-Prox/assets/26198430/649bd6bf-5eca-4425-9696-477adfa9b9da" alt="Delta Prox" width="16.5%">
-<!--     <img src="docs/source/_static/logo3.svg" alt="Delta Prox" width="33%"> -->
+    <img src="docs/source/_static/logo.svg" alt="Delta Prox" width="16.5%">
     </a> &ensp; 
 </p>
 
@@ -23,13 +22,13 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
         <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/v/dprox">
     </a>
     <a href="https://dl.acm.org/doi/abs/10.1145/3592144">
-        <img alt="arXiv" src="https://img.shields.io/badge/ACM-10.1145/3592144-b31b1b.svg">
+        <img alt="arXiv" src="https://img.shields.io/badge/doi-10.1145/3592144-b31b1b.svg">
     </a>
+    <a href="https://huggingface.co/delta-prox">
+        <img alt="huggingface" src="https://img.shields.io/badge/%F0%9F%A4%97-Hugging%20Face-blue">
+    </a>
+
 </p>
-
-<!-- <a href="https://pypi.org/project/dprox/">![Version](https://img.shields.io/pypi/v/dprox)</a> -->
-<!-- <a href="https://arxiv.org/abs/2207.02849">![arXiv](https://img.shields.io/badge/arXiv-2207.02489-b31b1b.svg)</a> -->
-
 
 
 > $\nabla$-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. Departing from handwriting these solvers and differentiating via autograd, $\nabla$-Prox requires only a few lines of code to define a solver that can be *specialized based on user requirements w.r.t memory constraints or training budget* by optimized algorithm unrolling, deep equilibrium learning, and deep reinforcement learning. $\nabla$-Prox makes it easier to prototype different learning-based bi-level optimization problems for a diverse range of applications. We compare our framework against existing methods with naive implementations. $\nabla$-Prox is significantly more compact in terms of lines of code and compares favorably in memory consumption in applications across domains.
@@ -48,7 +47,7 @@ We recommend installing $\nabla$-Prox in a virtual environment from PyPI.
 pip install dprox
 ```
 
-Please refer to the [Installation]() guide for other options.
+Please refer to the [Installation](https://deltaprox.readthedocs.io/started/install) guide for other options.
 
 ## Quickstart
 ![pipeline2](docs/source/_static/pipeline_dprox.gif)

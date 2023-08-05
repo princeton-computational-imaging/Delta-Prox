@@ -2,7 +2,7 @@
 
 Get familiar with ∇-Prox concepts and modules. We provide several step-by-step tutorials for the framework and its applications.
 
-To locally run the notebook, please follow the [installation tutorial]() to install the necessary dependencies. You can also run the tutorial notebooks in Colab.
+To locally run the notebook, please follow the [installation tutorial](https://deltaprox.readthedocs.io/started/install) to install the necessary dependencies. You can also run the tutorial notebooks in Colab.
 
 ### Framework
 
@@ -11,6 +11,8 @@ To locally run the notebook, please follow the [installation tutorial]() to inst
 | [Learning the Basics](learn_the_basic.ipynb)   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/princeton-computational-imaging/Delta-Prox/blob/main/notebooks/learn_the_basic.ipynb)|
 | [Differentiable Linear Solver](differentiable_linear_solver.ipynb)   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/princeton-computational-imaging/Delta-Prox/blob/main/notebooks/differentiable_linear_solver.ipynb)|
 | [Linear Operator](linear_operator.ipynb)   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/princeton-computational-imaging/Delta-Prox/blob/main/notebooks/linear_operator.ipynb)|
+| [Primitive](primitive.ipynb)   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/princeton-computational-imaging/Delta-Prox/blob/main/notebooks/primitive.ipynb)|
+
 
 
 ### Applications

@@ -1,15 +1,10 @@
-import os
-import urllib.request
 from typing import List
 
 import imageio
 import numpy as np
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from . import to_ndarray
-
-DPROX_DIR = os.path.join(os.path.expanduser('~'), '.cache/dprox')
+from .misc import to_ndarray
 
 
 def imread_rgb(path: str) -> np.ndarray:
@@ -103,54 +98,3 @@ def filter_ckpt(prefix: str, ckpt: dict, remove_prefix: bool = True):
             else: new_k = k
             new_ckpt[new_k] = v
     return new_ckpt
-
-
-class DownloadProgressBar(tqdm):
-    # The DownloadProgressBar class is a subclass of the tqdm class in Python used to
-    # display progress bars for downloading files.
-    def update_to(self, b=1, bsize=1, tsize=None):
-        if tsize is not None:
-            self.total = tsize
-        self.update(b * bsize - self.n)
-
-
-def get_path(base_path: str) -> str:
-    """
-    check if a file exists in a specific directory and download it from a URL if it
-    doesn't exist.
-
-    Args:
-      base_path (str): The base path is a string that represents the path to a file or directory that the
-        function is trying to locate or download. It is used to construct the full path to the file or
-        directory by appending it to the DPROX_DIR path
-
-    Return: 
-      a string which is the path to the file specified by the input parameter `base_path`.
-    """
-    if os.path.exists(base_path):
-        return base_path
-
-    save_path = os.path.join(DPROX_DIR, base_path)
-    if not os.path.exists(save_path):
-        url = f"https://huggingface.co/aaronb/DeltaProx/resolve/main/{base_path}"
-        print(f'{base_path} not found')
-        print('Try to download from huggingface: ', url)
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        download_url(url, save_path)
-        print('Downloaded to ', save_path)
-    return save_path
-
-
-def download_url(url: str, output_path: str) -> None:
-    """
-    download a file from a given URL and save it to a specified output path while
-    displaying a progress bar.
-
-    Args:
-      url (str): The URL of the file to be downloaded
-      output_path (str): output_path is a string representing the file path where the downloaded file
-        will be saved. It should include the file name and extension
-    """
-    with DownloadProgressBar(unit='B', unit_scale=True,
-                             miniters=1, desc=url.split('/')[-1]) as t:
-        urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
