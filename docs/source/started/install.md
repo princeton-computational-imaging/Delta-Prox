@@ -32,5 +32,5 @@ pip install -e .
 ```
 
 ```{caution}
-You must keep the DeltaProx folder if you want to keep using the library.
+Note that you must keep the DeltaProx folder if you want to keep using the library.
 ```

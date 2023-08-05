@@ -1,7 +1,7 @@
 # Quicktour
 
 
-Consider a simple image deconvolution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
+Consider a simple image deconvolution problem, where we want to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
 
 $$
 \arg \min_x { \frac{1}{2} |Dx - y|^2_2 + g(x) }
@@ -11,7 +11,7 @@ where $g(x)$ denotes an implicit plug-and-play denoiser prior.
 
 ### Solver Compliation
 
-We could solve this problem in ∇-Prox with the following code: 
+We can solve this problem in ∇-Prox with the following code: 
 
 ```python
 from dprox import *
@@ -30,7 +30,7 @@ prob = Problem(data_term + reg_term)
 out = prob.solve(method='admm', x0=b)
 ```
 
-Here is what obtain as the result:
+Here is the result we obtain:
 
 <img src="../_static/image/example_deconv.png" width="500" />
 
@@ -46,7 +46,7 @@ $$
 $$
 
 where $D(\cdot; \theta_{DOE})$ indicates a shift-invariant convolution process with an optical kernel, i.e., PSF, derived from a DOE image formation model parameterized by $\theta_{DOE}$, and $\epsilon$ is measurement noise, e.g., Poissionian-Gaussian noise. 
-To reconstruct target image $x$ from noise-contaminated measurements $y$, we minimize the sum of a data-fidelity $f$ and regularizer term $r$ as
+To reconstruct the target image $x$ from noise-contaminated measurements $y$, we minimize the sum of a data-fidelity $f$ and regularizer term $r$ as
 
 $$
     min_{x \in R^n} ~ f \left( D\left(x;\, \theta_{DOE} \right) \right) + r \left(x ; \, \theta_r \right).
