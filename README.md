@@ -106,15 +106,18 @@ Want to learn more? Check out the [documentation](https://deltaprox.readthedocs.
 ## Citation
 
 ```bibtex
-@article{lai2023prox,
-  title={∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
-  author={Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and H{\"a}rtel, Philipp and Heide, Felix},
+@article{deltaprox2023,
+  title = {∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
+  author = {Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and H\"{a}rtel, Philipp and Heide, Felix},
   journal={ACM Transactions on Graphics (TOG)},
-  volume={42},
-  number={4},
-  pages={1--19},
+  volume = {42},
+  number = {4},
+  articleno = {105},
+  pages = {1--19},
   year={2023},
-  publisher={ACM New York, NY, USA}
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  doi = {10.1145/3592144},
 }
 ```
 
