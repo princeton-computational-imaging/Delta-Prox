@@ -13,25 +13,25 @@ from .denoisers.composite import Augment
 
 def get_denoiser(type):
     if type == 'ffdnet':
-        model_path = hf.load_path('denoiser/ffdnet_gray.pth')
+        model_path = hf.load_path('pnp_denoiser/ffdnet_gray.pth', repo_type='models')
         return FFDNetDenoiser(model_path)
     if type == 'ffdnet_color':
-        model_path = hf.load_path('denoiser/ffdnet_color.pth')
+        model_path = hf.load_path('pnp_denoiser/ffdnet_color.pth', repo_type='models')
         return FFDNetColorDenoiser(model_path)
     if type == 'drunet_color':
-        model_path = hf.load_path('denoiser/drunet_color.pth')
+        model_path = hf.load_path('pnp_denoiser/drunet_color.pth', repo_type='models')
         return DRUNetDenoiser(3, model_path)
     if type == 'drunet':
-        model_path = hf.load_path('denoiser/drunet_gray.pth')
+        model_path = hf.load_path('pnp_denoiser/drunet_gray.pth', repo_type='models')
         return DRUNetDenoiser(1, model_path)
     if type == 'ircnn':
-        model_path = hf.load_path('denoiser/ircnn_gray.pth')
+        model_path = hf.load_path('pnp_denoiser/ircnn_gray.pth', repo_type='models')
         return IRCNNDenoiser(1, model_path)
     if type == 'grunet':
-        model_path = hf.load_path('denoiser/unet_qrnn3d.pth')
+        model_path = hf.load_path('pnp_denoiser/unet_qrnn3d.pth', repo_type='models')
         return GRUNetDenoiser(model_path)
     if type == 'unet':
-        model_path = hf.load_path('denoiser/unet-nm.pt')
+        model_path = hf.load_path('pnp_denoiser/unet-nm.pt', repo_type='models')
         return UNetDenoiser(model_path)
 
 

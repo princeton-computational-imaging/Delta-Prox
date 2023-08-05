@@ -3,16 +3,36 @@ import torch.utils.data
 import torch
 
 
+def pad_to_ratio_of_32(tensor):
+    B, C, H, W = tensor.size()
+
+    next_h_multiple_of_32 = (H + 31) // 32 * 32
+    next_w_multiple_of_32 = (W + 31) // 32 * 32
+
+    padding_h = next_h_multiple_of_32 - H
+    padding_w = next_w_multiple_of_32 - W
+
+    padded_tensor = torch.nn.functional.pad(tensor, (0, padding_w, 0, padding_h))
+
+    return padded_tensor
+
+
+def unpad_from_ratio_of_32(padded_tensor, original_shape):
+    B, C, H, W = original_shape
+    unpadded_tensor = padded_tensor[:, :, :H, :W]
+    return unpadded_tensor
+
+
 class conv_block(nn.Module):
     def __init__(self, in_ch, out_ch):
         super(conv_block, self).__init__()
-        
+
         self.conv = nn.Sequential(
             nn.Conv2d(in_ch, out_ch, kernel_size=3, stride=1, padding=1, bias=True),
             nn.LeakyReLU(negative_slope=0.01, inplace=True),
             nn.Conv2d(out_ch, out_ch, kernel_size=3, stride=1, padding=1, bias=True),
             nn.LeakyReLU(negative_slope=0.01, inplace=True))
-        
+
         self.conv_residual = nn.Conv2d(in_ch, out_ch, kernel_size=1, stride=1, bias=True)
 
     def forward(self, x):
@@ -26,7 +46,7 @@ class U_Net(nn.Module):
 
         n1 = 32
         filters = [n1, n1 * 2, n1 * 4, n1 * 8, n1 * 16]
-        
+
         self.Down1 = nn.Conv2d(filters[0], filters[0], kernel_size=4, stride=2, padding=1, bias=True)
         self.Down2 = nn.Conv2d(filters[1], filters[1], kernel_size=4, stride=2, padding=1, bias=True)
         self.Down3 = nn.Conv2d(filters[2], filters[2], kernel_size=4, stride=2, padding=1, bias=True)
@@ -53,7 +73,9 @@ class U_Net(nn.Module):
         self.Conv = nn.Conv2d(filters[0], out_ch, kernel_size=1, stride=1, padding=0)
 
     def forward(self, x):
-
+        shape = x.shape
+        x = pad_to_ratio_of_32(x)
+        
         e1 = self.Conv1(x)
 
         e2 = self.Down1(e1)
@@ -85,5 +107,8 @@ class U_Net(nn.Module):
         d2 = self.Up_conv2(d2)
 
         out = self.Conv(d2)
+        
+        out = out + x
 
-        return out+x
+        out = unpad_from_ratio_of_32(out, shape)
+        return out

@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -10,8 +9,8 @@ from dprox import *
 from dprox import Variable
 from dprox.linop.conv import conv_doe
 from dprox.utils import *
-from dprox.utils.examples.optic.common import (build_doe_model, DOEModelConfig, load_sample_img)
-from dprox.utils.examples.optic.doe_model import img_psf_conv
+from dprox.contrib.optic.utils import load_sample_img
+from dprox.contrib.optic.doe_model import img_psf_conv, build_doe_model, DOEModelConfig
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -63,20 +62,18 @@ def run_optics(dataset):
     print('Trainable model size (M)', tlnn.benchmark.trainable_model_size(rgb_collim_model))
 
     # --------------- Load and Run ------------------ #
-    savedir = 'saved/train_deconv_trainable_params'
-    savedir = Path(savedir)
-
-    ckpt = torch.load(savedir / 'best.pth')
+    ckpt = hf.load_checkpoint('computational-optics/joint_dprox.pth')
     rgb_collim_model.load_state_dict(ckpt['model'])
 
     tl.metrics.set_data_format('chw')
 
-    root = 'data/test/' + dataset
+    root = dataset
+    root = hf.download_dataset(root)
     tracker = tl.trainer.util.MetricTracker()
 
     timer = tl.utils.Timer()
     timer.tic()
-    for idx, name in enumerate(os.listdir(root)):
+    for idx, name in enumerate(list_image_files(root)):
         gt = load_sample_img(os.path.join(root, name))
 
         torch.manual_seed(idx)
@@ -94,7 +91,7 @@ def run_optics(dataset):
 
     print('averge results')
     print(tracker.summary())
-    print(timer.toc() / len(os.listdir(root)))
+    print(timer.toc() / len(list_image_files(root)))
     return tracker['psnr'], tracker['ssim']
 
 

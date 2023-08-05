@@ -11,7 +11,7 @@ from torchlight.data import SingleImageDataset
 from .doe_model import img_psf_conv
 
 
-def load_sample_img(path, keep_ratio=True, patch_size=768):
+def load_sample_img(path, keep_ratio=True, patch_size=748):
     img = Image.open(path)
     ps = patch_size
     if keep_ratio:

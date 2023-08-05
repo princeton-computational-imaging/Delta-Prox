@@ -94,6 +94,23 @@ def view_as_complex(x):
     return x[..., 0] + 1j * x[..., 1]
 
 
+def load_data(path):
+    mat = loadmat(path)
+    mat['name'] = mat['name'].item()
+    mat.pop('__globals__', None)
+    mat.pop('__header__', None)
+    mat.pop('__version__', None)
+    mat['output'] = complex2real(mat['ATy0'])
+    mat['input'] = view_as_complex(mat['x0'])
+    mat['x0'] = view_as_complex(mat['x0'])
+    mat['y0'] = view_as_complex(mat['y0'])
+    mat['mask'] = np.expand_dims(mat['mask'], axis=0).astype('bool')
+    mat['sigma_n'] = complex2real(mat['sigma_n'])
+
+    mat['params'] = {'y': mat['y0'], 'mask': mat['mask']}
+    return mat
+
+
 class CSMRIEvalDataset(Dataset):
     def __init__(self, datadir, fns=None):
         super(CSMRIEvalDataset, self).__init__()
@@ -208,7 +225,6 @@ def custom_policy_ob_pack_fn(variables, x0, T, aux_state):
                       T,
                       aux_state['sigma_n'].cuda(),
                       ], dim=1).real
-
 
 
 def sample(name='Bust.jpg'):

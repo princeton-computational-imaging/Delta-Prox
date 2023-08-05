@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import imageio
@@ -98,3 +99,19 @@ def filter_ckpt(prefix: str, ckpt: dict, remove_prefix: bool = True):
             else: new_k = k
             new_ckpt[new_k] = v
     return new_ckpt
+
+
+def is_image_file(filename):
+    # List of common image file extensions
+    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp']
+    # Check if the file extension is in the image extensions list (case insensitive)
+    return any(filename.lower().endswith(ext) for ext in image_extensions)
+
+
+def list_image_files(directory):
+    image_files = []
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+        if os.path.isfile(filepath) and is_image_file(filename):
+            image_files.append(filename)
+    return image_files

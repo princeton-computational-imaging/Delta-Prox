@@ -1,5 +1,6 @@
 import os
 import urllib.request
+import huggingface_hub
 
 from tqdm import tqdm
 
@@ -74,3 +75,10 @@ def load_checkpoint(path, user_id='delta-prox'):
     import torch
     ckpt_path = load_path(path, repo_type='models', user_id=user_id)
     return torch.load(ckpt_path)
+
+
+def download_dataset(path, user_id='delta-prox'):
+    huggingface_hub.snapshot_download(repo_id=f"{user_id}/{path}",
+                                      local_dir=os.path.join(CACHE_DIR, path),
+                                      repo_type="dataset")
+    return os.path.join(CACHE_DIR, path)
