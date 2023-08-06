@@ -100,7 +100,7 @@ train(unrolled_solver, dataset)
 ```
 
 <!-- Want to learn more? Check out the [documentation](https://deltaprox.readthedocs.io/) or have a look at our [tutorials](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks).-->
-Want to learn more? Check out the [tutorials](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks).
+Want to learn more? Check out the step-by-step [tutorials](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks) for the framework and its applications.
 
 ## Citation
 

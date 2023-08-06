@@ -1,6 +1,6 @@
 # End-to-End Computational Optics
 
-The application of Delta-Prox for end-to-end computational optics. 
+The application of $\nabla$-Prox for end-to-end computational optics. 
 
 ## Prepare Data and Checkpoints
 

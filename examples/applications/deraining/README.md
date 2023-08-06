@@ -1,6 +1,6 @@
 # Image Deraining
 
-The application of Delta-Prox for image-deraining.
+The application of $\nabla$-Prox for image-deraining.
 
 ## Prepare Data and Checkpoints
 
