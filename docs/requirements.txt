@@ -20,4 +20,4 @@ torchlights
 tensorboardX
 termcolor
 proximal
-opencv-python'
+opencv-python
