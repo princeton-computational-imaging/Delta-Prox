@@ -11,7 +11,6 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 
 <p align="center">
 <a href="https://light.princeton.edu/publication/delta_prox/">Paper</a> |
-<a href="https://deltaprox.readthedocs.io/">Docs</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks">Tutorials</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/examples">Examples</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox#citation">Citation</a> 
@@ -36,10 +35,10 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 ## News
 
 
-- **Jun 2023** : Release preview code.
+- **August 2023** : $\nabla$-Prox is presented at SIGGRAPH 2023 and its code base is now public.
 - **May 2023** : $\nabla$-Prox is accepted as a journal paper at SIGGRAPH 2023.
 
-## Installtion
+## Installation
 
 We recommend installing $\nabla$-Prox in a virtual environment from PyPI.
 
@@ -47,13 +46,13 @@ We recommend installing $\nabla$-Prox in a virtual environment from PyPI.
 pip install dprox
 ```
 
-Please refer to the [Installation](https://deltaprox.readthedocs.io/started/install) guide for other options.
+<!-- Please refer to the [Installation](https://deltaprox.readthedocs.io/started/install) guide for other options. -->
 
 ## Quickstart
 ![pipeline2](docs/source/_static/pipeline_dprox.gif)
 
 
-Consider a simple image deconvolution problem, where we seek to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
+Consider a simple image deconvolution problem, where we want to find a clean image $x$ given the blurred observation $y$ that minimizes the following objective function:
 
 $$
 \arg \min_x { \frac{1}{2} |Dx - y|^2_2 + g(x) },
@@ -100,7 +99,8 @@ unrolled_solver = specialize(solver, step=10)
 train(unrolled_solver, dataset)
 ```
 
-Want to learn more? Check out the [documentation](https://deltaprox.readthedocs.io/) or have a look at our [tutorials](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks).
+<!-- Want to learn more? Check out the [documentation](https://deltaprox.readthedocs.io/) or have a look at our [tutorials](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks).-->
+Want to learn more? Check out the [tutorials](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks).
 
 ## Citation
 
