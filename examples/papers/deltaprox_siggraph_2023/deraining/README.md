@@ -7,7 +7,7 @@ The application of Delta-Prox for image-deraining.
 - Download test data from [Google drive](https://drive.google.com/file/d/1P_-RAvltEoEhfT-9GrWRdpEi6NSswTs8/view?usp=sharing
 ). Put it into the `datasets/test` folder. For example, use `datasets/test/Rain100H`.
 
-- Download the checkpoints from [Huggingface]().
+- Download the checkpoints from [Huggingface](https://huggingface.co/delta-prox/image_deraining).
 
 ## Evaluation
 

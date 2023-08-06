@@ -4,8 +4,8 @@ The application of Delta-Prox for end-to-end computational optics.
 
 ## Prepare Data and Checkpoints
 
-- Download [BSD500]() for training, and [CBSD68]() and [Urban100]() for evaluation.
-- The pretrained models are hosted at [Huggingface]().
+- Download [BSD500](https://huggingface.co/datasets/delta-prox/BSD500) for training, and [CBSD68](https://huggingface.co/datasets/delta-prox/CBSD68) and [Urban100](https://huggingface.co/datasets/delta-prox/Urban100) for evaluation.
+- The pretrained models are hosted at [Huggingface](https://huggingface.co/delta-prox/computational_optics).
 
 ## Training 
 
