@@ -77,7 +77,7 @@ assert dp.validate(op)
    :members: forward, adjoint
 .. autoclass:: dprox.linop.scale.scale
    :members: forward, adjoint
-.. autoclass:: dprox.linop.placeholder.PlaceHolder
+.. autoclass:: dprox.linop.placeholder.Placeholder
    :members: forward, adjoint
 .. autoclass:: dprox.linop.grad.grad
    :members: forward, adjoint
