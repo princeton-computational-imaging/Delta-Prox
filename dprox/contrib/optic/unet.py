@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.utils.data
 import torch
+import torch.nn.functional as F
 
 
 def pad_to_ratio_of_32(tensor):
@@ -12,7 +13,7 @@ def pad_to_ratio_of_32(tensor):
     padding_h = next_h_multiple_of_32 - H
     padding_w = next_w_multiple_of_32 - W
 
-    padded_tensor = torch.nn.functional.pad(tensor, (0, padding_w, 0, padding_h))
+    padded_tensor = F.pad(tensor, (0, padding_w, 0, padding_h), mode='circular')
 
     return padded_tensor
 

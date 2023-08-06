@@ -67,6 +67,22 @@ def center_crop(im, new_height, new_width):
     return im
 
 
+def normalize_psf2(psf, range=1, mode='band'):
+    def norm(psf):
+        if mode == 'band':
+            psf[:, :, 0] = (psf[:, :, 0] - psf[:, :, 0].min()) / (psf[:, :, 0].max() - psf[:, :, 0].min())
+            psf[:, :, 1] = (psf[:, :, 1] - psf[:, :, 1].min()) / (psf[:, :, 1].max() - psf[:, :, 1].min())
+            psf[:, :, 2] = (psf[:, :, 2] - psf[:, :, 2].min()) / (psf[:, :, 2].max() - psf[:, :, 2].min())
+        else:
+            psf = (psf - psf.min()) / (psf.max() - psf.min())
+        return psf
+
+    psf = norm(psf)
+    psf = psf.clip(0, range)
+    psf = norm(psf)
+    return psf
+
+
 def normalize_psf(psf: np.ndarray, clip_percentile=0.01, bandwise=False):
     """
     normalize a point spread function (PSF) by dividing it by its sum, correcting for
