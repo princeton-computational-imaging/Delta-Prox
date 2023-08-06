@@ -11,6 +11,7 @@ linear_operator
 
 ```{nbgallery}
 computational_optics
+csmri
 deraining
 energy_system
 image_restoration
