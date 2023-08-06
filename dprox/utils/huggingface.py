@@ -52,8 +52,8 @@ def load_path(base_path: str, repo_type='datasets', user_id='delta-prox') -> str
         base_url = 'https://huggingface.co'
         if repo_type == 'datasets':
             base_url += '/' + repo_type
-        repo_id = base_path.split(os.path.sep)[0]
-        path = os.path.join(*(base_path.split(os.path.sep)[1:]))
+        repo_id = base_path.split('/')[0]
+        path = os.path.join(*(base_path.split('/')[1:]))
         url = f"{base_url}/{user_id}/{repo_id}/resolve/main/{path}"
         print(f'{base_path} not found')
         print('Try to download from huggingface: ', url)
@@ -77,8 +77,10 @@ def load_checkpoint(path, user_id='delta-prox'):
     return torch.load(ckpt_path)
 
 
-def download_dataset(path, user_id='delta-prox'):
+def download_dataset(path, user_id='delta-prox', local_dir=None):
+    if local_dir is None:
+        local_dir = os.path.join(CACHE_DIR, path)
     huggingface_hub.snapshot_download(repo_id=f"{user_id}/{path}",
-                                      local_dir=os.path.join(CACHE_DIR, path),
+                                      local_dir=local_dir,
                                       repo_type="dataset")
-    return os.path.join(CACHE_DIR, path)
+    return local_dir

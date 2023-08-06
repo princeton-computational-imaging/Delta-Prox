@@ -1,12 +1,12 @@
 from dprox import *
 from dprox.utils import *
-from dprox.utils import examples
+from dprox import contrib
 
 
 def test_admm():
-    img = examples.sample('face')
-    psf = examples.point_spread_function(15, 5)
-    b = examples.blurring(img, psf)
+    img = contrib.sample('face')
+    psf = contrib.point_spread_function(15, 5)
+    b = contrib.blurring(img, psf)
 
     x = Variable()
     data_term = sum_squares(conv(x, psf) - b)
@@ -21,9 +21,9 @@ def test_admm():
 
 
 def test_ladmm():
-    img = examples.sample('face')
-    psf = examples.point_spread_function(15, 5)
-    b = examples.blurring(img, psf)
+    img = contrib.sample('face')
+    psf = contrib.point_spread_function(15, 5)
+    b = contrib.blurring(img, psf)
 
     x = Variable()
     data_term = sum_squares(conv(x, psf) - b)
@@ -38,9 +38,9 @@ def test_ladmm():
 
 
 def test_admm_vxu():
-    img = examples.sample('face')
-    psf = examples.point_spread_function(15, 5)
-    b = examples.blurring(img, psf)
+    img = contrib.sample('face')
+    psf = contrib.point_spread_function(15, 5)
+    b = contrib.blurring(img, psf)
 
     x = Variable()
     data_term = sum_squares(conv(x, psf) - b)
@@ -55,9 +55,9 @@ def test_admm_vxu():
 
 
 def test_hqs():
-    img = examples.sample('face')
-    psf = examples.point_spread_function(15, 5)
-    b = examples.blurring(img, psf)
+    img = contrib.sample('face')
+    psf = contrib.point_spread_function(15, 5)
+    b = contrib.blurring(img, psf)
 
     x = Variable()
     data_term = sum_squares(conv(x, psf) - b)
@@ -72,9 +72,9 @@ def test_hqs():
 
 
 def test_pc():
-    img = examples.sample('face')
-    psf = examples.point_spread_function(15, 5)
-    b = examples.blurring(img, psf)
+    img = contrib.sample('face')
+    psf = contrib.point_spread_function(15, 5)
+    b = contrib.blurring(img, psf)
 
     x = Variable()
     data_term = sum_squares(conv(x, psf) - b)
@@ -89,9 +89,9 @@ def test_pc():
 
 
 def test_pgd():
-    img = examples.sample('face')
-    psf = examples.point_spread_function(15, 5)
-    b = examples.blurring(img, psf)
+    img = contrib.sample('face')
+    psf = contrib.point_spread_function(15, 5)
+    b = contrib.blurring(img, psf)
 
     x = Variable()
     data_term = sum_squares(conv(x, psf) - b)

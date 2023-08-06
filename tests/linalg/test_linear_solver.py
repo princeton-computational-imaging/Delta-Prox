@@ -1,7 +1,9 @@
 import torch
 import dprox as dp
 import numpy as np
+import dprox.utils
 
+dprox.utils.misc.seed_everything(2023)
 
 P = np.random.rand(5,5)
 I = np.eye(5)

@@ -1,17 +1,12 @@
-import torch
-
 from dprox import *
 from dprox.utils import *
-
-
-from dprox.utils.examples.derain import LearnableDegOp
-
+from dprox.contrib.derain import LearnableDegOp
 
 def test():
-    b = imread('sample_data/derain_input.png')
-    gt = imread('sample_data/derain_target.png')
+    b = hf.load_image('examples/derain/derain_input.png')
+    gt = hf.load_image('examples/derain/derain_target.png')
     imshow(gt, b)
-    
+
     # custom linop
     A = LearnableDegOp().cuda()
     def forward_fn(input, step): return A.forward(input, step)
@@ -26,7 +21,7 @@ def test():
     solver = compile(obj, method='pgd')
 
     # load parameters
-    ckpt = torch.load(get_path('checkpoints/derain_pdg.pth'))
+    ckpt = hf.load_checkpoint('image_deraining/derain_pdg.pth')
     A.load_state_dict(ckpt['linop'])
     reg_term.load_state_dict(ckpt['prior'])
     rhos = ckpt['rhos']

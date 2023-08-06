@@ -1,8 +1,8 @@
-# Welcome to ∇-Prox Tutorials
+# Welcome to the $\nabla$-Prox tutorials
 
-Get familiar with ∇-Prox concepts and modules. We provide several step-by-step tutorials for the framework and its applications.
+Get familiar with the concepts and modules of $\nabla$-Prox. We provide several step-by-step tutorials for the framework and its applications.
 
-To locally run the notebook, please follow the [installation tutorial](https://deltaprox.readthedocs.io/started/install) to install the necessary dependencies. You can also run the tutorial notebooks in Colab.
+To locally run the notebooks, please follow the [installation tutorial](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main#installation) to install the necessary dependencies. You can also run the tutorial notebooks in Colab.
 
 ### Framework
 

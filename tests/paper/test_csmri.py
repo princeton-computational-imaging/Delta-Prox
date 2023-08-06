@@ -1,3 +1,5 @@
+from pathlib import Path
+import pytest
 import os
 
 import torch
@@ -8,11 +10,20 @@ from torch.utils.data import DataLoader
 from dprox import *
 from dprox.algo.special.deq.solver import DEQ
 from dprox.algo.tune import *
+from dprox.contrib.csmri import (CustomADMM, EvalDataset,
+                                 custom_policy_ob_pack_fn)
 from dprox.utils import *
-from dprox.utils.examples.csmri.common import (CustomADMM, EvalDataset, custom_policy_ob_pack_fn)
 
 # allowed torlence
 TOL = 0.03
+CACHE_DIR = Path(CACHE_DIR)
+
+
+@pytest.fixture(scope='module', autouse=True)
+def fixture():
+    print('Download data')
+    hf.download_dataset('Medical_7_2020')
+    hf.download_dataset('MICCAI_2020')
 
 
 def run_pnp(denoiser, rhos, sigmas, dataset, name):
@@ -59,8 +70,8 @@ def test_pnp_drunet_medical7_4x_n5():
     rhos, sigmas = log_descent(80, 40, max_iter)
     rhos, _ = log_descent(10, 0.1, max_iter)
     psnr = run_pnp(denoiser='drunet', rhos=rhos, sigmas=sigmas,
-                   dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/5'),
-                   name='Medical7_2020/radial_128_4/5')
+                   dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/5'),
+                   name='Medical_7_2020/radial_128_4/5')
     assert abs(psnr - 31.78) < TOL
 
 
@@ -69,8 +80,8 @@ def test_pnp_drunet_medical7_4x_n15():
     rhos, sigmas = log_descent(80, 55, max_iter)
     rhos, _ = log_descent(1, 0.1, max_iter)
     psnr = run_pnp(denoiser='drunet', rhos=rhos, sigmas=sigmas,
-                   dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'),
-                   name='Medical7_2020/radial_128_4/15')
+                   dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/15'),
+                   name='Medical_7_2020/radial_128_4/15')
     assert abs(psnr - 28.43) < TOL
 
 
@@ -79,7 +90,7 @@ def test_pnp_drunet_miccai2020_4x_n5():
     rhos, sigmas = log_descent(60, 40, max_iter)
     rhos, _ = log_descent(4, 0.1, max_iter)
     psnr = run_pnp(denoiser='drunet', rhos=rhos, sigmas=sigmas,
-                   dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_4/5'),
+                   dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_4/5'),
                    name='MICCAI_2020/radial_128_4/5')
     assert abs(psnr - 35.57) < TOL
 
@@ -89,7 +100,7 @@ def test_pnp_drunet_miccai2020_8x_n5():
     rhos, sigmas = log_descent(60, 40, max_iter)
     rhos, _ = log_descent(1, 0.1, max_iter)
     psnr = run_pnp(denoiser='drunet', rhos=rhos, sigmas=sigmas,
-                   dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_8/5'),
+                   dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_8/5'),
                    name='MICCAI_2020/radial_128_8/5')
     assert abs(psnr - 32.19) < TOL
 
@@ -103,8 +114,8 @@ def test_pnp_unet_medical7_4x_n5():
     rhos, sigmas = log_descent(70, 40, max_iter)
     rhos, _ = log_descent(120, 0.1, max_iter)
     psnr = run_pnp(denoiser='unet', rhos=rhos, sigmas=sigmas,
-                   dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/5'),
-                   name='Medical7_2020/radial_128_4/5')
+                   dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/5'),
+                   name='Medical_7_2020/radial_128_4/5')
     assert abs(psnr - 31.64) < TOL
 
 
@@ -113,8 +124,8 @@ def test_pnp_unet_medical7_4x_n15():
     rhos, sigmas = log_descent(50, 40, max_iter)
     rhos, _ = log_descent(0.1, 0.1, max_iter)
     psnr = run_pnp(denoiser='unet', rhos=rhos, sigmas=sigmas,
-                   dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'),
-                   name='Medical7_2020/radial_128_4/15')
+                   dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/15'),
+                   name='Medical_7_2020/radial_128_4/15')
     assert abs(psnr - 28.18) < TOL
 
 
@@ -123,7 +134,7 @@ def test_pnp_unet_miccai2020_4x_n5():
     rhos, sigmas = log_descent(60, 40, max_iter)
     rhos, _ = log_descent(4, 0.1, max_iter)
     psnr = run_pnp(denoiser='unet', rhos=rhos, sigmas=sigmas,
-                   dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_4/5'),
+                   dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_4/5'),
                    name='MICCAI_2020/radial_128_4/5')
     assert abs(psnr - 35.56) < TOL
 
@@ -133,7 +144,7 @@ def test_pnp_unet_miccai2020_8x_n5():
     rhos, sigmas = log_descent(60, 40, max_iter)
     rhos, _ = log_descent(1, 0.1, max_iter)
     psnr = run_pnp(denoiser='unet', rhos=rhos, sigmas=sigmas,
-                   dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_8/5'),
+                   dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_8/5'),
                    name='MICCAI_2020/radial_128_8/5')
     assert abs(psnr - 32.19) < TOL
 
@@ -142,7 +153,7 @@ def test_pnp_unet_miccai2020_8x_n5():
 # ---------------------------------------------------------------------------- #
 
 
-def run_deq(denoiser, dataset, name, ckpt_dir='ckpt/deq_unet2'):
+def run_deq(denoiser, dataset, name):
     x = Variable()
     y = Placeholder()
     mask = Placeholder()
@@ -164,7 +175,7 @@ def run_deq(denoiser, dataset, name, ckpt_dir='ckpt/deq_unet2'):
         pred = deq_solver.solve(x0=x0, rhos=rhos, lams={reg_term: sigmas}, max_iter=max_iter).real
         return target, pred
 
-    ckpt = torch.load(os.path.join(ckpt_dir, 'last.pth'))
+    ckpt = hf.load_checkpoint('compressive_mri/csmri_deq_unet.pth')
     deq_solver.load_state_dict(ckpt['solver'], strict=True)
     deq_solver.eval()
 
@@ -185,28 +196,28 @@ def run_deq(denoiser, dataset, name, ckpt_dir='ckpt/deq_unet2'):
 
 def test_deq_unet_medical7_4x_n5():
     psnr = run_deq(denoiser='unet',
-                   dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/5'),
-                   name='Medical7_2020/radial_128_4/5')
+                   dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/5'),
+                   name='Medical_7_2020/radial_128_4/5')
     assert abs(psnr - 31.31) < TOL
 
 
 def test_deq_unet_medical7_4x_n15():
     psnr = run_deq(denoiser='unet',
-                   dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'),
-                   name='Medical7_2020/radial_128_4/15')
-    assert abs(psnr - 28.09) < TOL
+                   dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/15'),
+                   name='Medical_7_2020/radial_128_4/15')
+    assert abs(psnr - 28.02) < TOL
 
 
 def test_deq_unet_miccai2020_4x_n5():
     psnr = run_deq(denoiser='unet',
-                   dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_4/5'),
+                   dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_4/5'),
                    name='MICCAI_2020/radial_128_4/5')
     assert abs(psnr - 35.63) < TOL
 
 
 def test_deq_unet_miccai2020_8x_n5():
     psnr = run_deq(denoiser='unet',
-                   dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_8/5'),
+                   dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_8/5'),
                    name='MICCAI_2020/radial_128_8/5')
     assert abs(psnr - 32.09) < TOL
 
@@ -244,7 +255,7 @@ def test_deq_unet_medical7_4x_n15_2():
 
     tf_solver = AutoTuneSolver(solver, policy='resnet', action_pack=1, max_episode_step=30,
                                custom_policy_ob_pack_fn=custom_policy_ob_pack_fn)
-    ckpt_path = 'ckpt/custom_admm_pack1-train2/actor_best.pkl'
+    ckpt_path = hf.load_path('compressive_mri/csmri_tfpnp_actor_custom_admm.pkl', repo_type='models')
     tf_solver.load(ckpt_path)
     deq_solver = CustomDEQSolver(solver, tf_solver)
 
@@ -256,12 +267,12 @@ def test_deq_unet_medical7_4x_n15_2():
         pred = deq_solver.forward(x0, batch).real
         return target, pred
 
-    ckpt = torch.load('ckpt/deq_csmri_admm_iter1/epoch_9.pth')
+    ckpt = hf.load_checkpoint('compressive_mri/csmri_deq_tfpnp_unet.pth')
     deq_solver.load_state_dict(ckpt['solver'], strict=False)
     deq_solver.eval()
 
     total_psnr = 0
-    test_loader = DataLoader(EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'))
+    test_loader = DataLoader(EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/15'))
     for batch in test_loader:
         with torch.no_grad():
             target, pred = step_fn(batch)
@@ -279,7 +290,7 @@ def test_deq_unet_medical7_4x_n15_2():
 # ---------------------------------------------------------------------------- #
 
 
-def run_unroll(denoiser, dataset, name, ckpt_dir='ckpt/unroll_unet'):
+def run_unroll(denoiser, dataset, name):
     x = Variable()
     y = Placeholder()
     mask = Placeholder()
@@ -300,7 +311,7 @@ def run_unroll(denoiser, dataset, name, ckpt_dir='ckpt/unroll_unet'):
         pred = solver.solve(x0=x0, rhos=solver.rhos, lams={reg_term: solver.sigmas}, max_iter=max_iter).real
         return target, pred
 
-    ckpt = torch.load(os.path.join(ckpt_dir, 'last.pth'))
+    ckpt = hf.load_checkpoint('compressive_mri/csmri_unroll_joint_custom_admm.pth')
     solver.load_state_dict(ckpt['solver'], strict=True)
     solver.eval()
 
@@ -320,28 +331,28 @@ def run_unroll(denoiser, dataset, name, ckpt_dir='ckpt/unroll_unet'):
 
 def test_unroll_unet_medical7_4x_n5():
     psnr = run_unroll(denoiser='unet',
-                      dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/5'),
-                      name='Medical7_2020/radial_128_4/5')
+                      dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/5'),
+                      name='Medical_7_2020/radial_128_4/5')
     assert abs(psnr - 31.86) < TOL
 
 
 def test_unroll_unet_medical7_4x_n15():
     psnr = run_unroll(denoiser='unet',
-                      dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'),
-                      name='Medical7_2020/radial_128_4/15')
+                      dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/15'),
+                      name='Medical_7_2020/radial_128_4/15')
     assert abs(psnr - 28.66) < TOL
 
 
 def test_unroll_unet_miccai2020_4x_n5():
     psnr = run_unroll(denoiser='unet',
-                      dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_4/5'),
+                      dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_4/5'),
                       name='MICCAI_2020/radial_128_4/5')
     assert abs(psnr - 36.25) < TOL
 
 
 def test_unroll_unet_miccai2020_8x_n5():
     psnr = run_unroll(denoiser='unet',
-                      dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_8/5'),
+                      dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_8/5'),
                       name='MICCAI_2020/radial_128_8/5')
     assert abs(psnr - 32.56) < TOL
 
@@ -368,7 +379,7 @@ def run_tfpnp(denoiser, dataset, name):
         pred = tf_solver.solve(x0, batch).real
         return target, pred
 
-    ckpt_path = 'ckpt/tfpnp_unet/actor_best.pkl'
+    ckpt_path = hf.load_path('compressive_mri/csmri_tfpnp_unet_custom_admm.pth', repo_type='models')
     tf_solver.load(ckpt_path)
 
     total_psnr = 0
@@ -389,28 +400,28 @@ def run_tfpnp(denoiser, dataset, name):
 
 def test_tfpnp_unet_medical7_4x_n5():
     psnr = run_tfpnp(denoiser='unet',
-                     dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/5'),
-                     name='Medical7_2020/radial_128_4/5')
+                     dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/5'),
+                     name='Medical_7_2020/radial_128_4/5')
     assert abs(psnr - 31.76) < TOL
 
 
 def test_tfpnp_unet_medical7_4x_n15():
     psnr = run_tfpnp(denoiser='unet',
-                     dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'),
-                     name='Medical7_2020/radial_128_4/15')
+                     dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/15'),
+                     name='Medical_7_2020/radial_128_4/15')
     assert abs(psnr - 28.49) < TOL
 
 
 def test_tfpnp_unet_miccai2020_4x_n5():
     psnr = run_tfpnp(denoiser='unet',
-                     dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_4/5'),
+                     dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_4/5'),
                      name='MICCAI_2020/radial_128_4/5')
     assert abs(psnr - 36.21) < TOL
 
 
 def test_tfpnp_unet_miccai2020_8x_n5():
     psnr = run_tfpnp(denoiser='unet',
-                     dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_8/5'),
+                     dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_8/5'),
                      name='MICCAI_2020/radial_128_8/5')
     assert abs(psnr - 32.70) < TOL
 
@@ -421,27 +432,27 @@ def test_tfpnp_unet_miccai2020_8x_n5():
 
 def test_tfpnp_drunet_medical7_4x_n5():
     psnr = run_tfpnp(denoiser='drunet',
-                     dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/5'),
-                     name='Medical7_2020/radial_128_4/5')
+                     dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/5'),
+                     name='Medical_7_2020/radial_128_4/5')
     assert abs(psnr - 32.57) < TOL
 
 
 def test_tfpnp_drunet_medical7_4x_n15():
     psnr = run_tfpnp(denoiser='drunet',
-                     dataset=EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'),
-                     name='Medical7_2020/radial_128_4/15')
+                     dataset=EvalDataset(CACHE_DIR / 'Medical_7_2020/radial_128_4/15'),
+                     name='Medical_7_2020/radial_128_4/15')
     assert abs(psnr - 28.91) < TOL
 
 
 def test_tfpnp_drunet_miccai2020_4x_n5():
     psnr = run_tfpnp(denoiser='drunet',
-                     dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_4/5'),
+                     dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_4/5'),
                      name='MICCAI_2020/radial_128_4/5')
     assert abs(psnr - 36.64) < TOL
 
 
 def test_tfpnp_drunet_miccai2020_8x_n5():
     psnr = run_tfpnp(denoiser='drunet',
-                     dataset=EvalDataset('data/csmri/MICCAI_2020/radial_128_8/5'),
+                     dataset=EvalDataset(CACHE_DIR / 'MICCAI_2020/radial_128_8/5'),
                      name='MICCAI_2020/radial_128_8/5')
     assert abs(psnr - 33.22) < TOL
