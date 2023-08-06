@@ -19,7 +19,7 @@ To locally run the notebooks, please follow the [installation tutorial](https://
 
 | Tutorial | Colab |
 | -- | -- |
-| [Compressive-MRI](csmri.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/princeton-computational-imaging/Delta-Prox/blob/main/notebooks/csmri.ipynb) |
+<!-- | [Compressive-MRI](csmri.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/princeton-computational-imaging/Delta-Prox/blob/main/notebooks/csmri.ipynb) | -->
 | [Computational Optics ](computational_optics.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/princeton-computational-imaging/Delta-Prox/blob/main/notebooks/computational_optics.ipynb) |
 | [Image Deraining](deraining.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/princeton-computational-imaging/Delta-Prox/blob/main/notebooks/deraining.ipynb) |
 | [Energy System Planning](energy_system_planning.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/princeton-computational-imaging/Delta-Prox/blob/main/notebooks/energy_system_planning.ipynb) |
