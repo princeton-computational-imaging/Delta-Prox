@@ -1,9 +1,8 @@
-# %%
 from dprox import *
 from dprox.utils import *
-from dprox.utils import examples
+from dprox import contrib
 
-x0, y0, gt, mask = examples.csmri.sample()
+x0, y0, gt, mask = contrib.csmri.sample()
 
 x = Variable()
 y = Placeholder()
@@ -19,9 +18,7 @@ prob.solve(
     device='cuda',
     x0=x0, rhos=rhos, lams={reg_term: sigmas}, max_iter=max_iter, pbar=True
 )
-out = x.value
+out = x.value.real
 
-print(psnr(out, gt)) # 36.11
+print(psnr(out, gt)) # 43
 imshow(out)
-
-# %%

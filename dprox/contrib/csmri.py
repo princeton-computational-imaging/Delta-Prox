@@ -4,7 +4,7 @@ import random
 import numpy as np
 import torch
 from dprox.algo.admm import ADMM
-from dprox.algo.special.rl.solver import (Batch, Env, apply_recursive,
+from dprox.algo.specialization.rl.solver import (Batch, Env, apply_recursive,
                                           complex2channel)
 from dprox.utils import to_torch_tensor, fft2, ifft2, hf
 from PIL import Image

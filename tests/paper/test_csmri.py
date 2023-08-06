@@ -8,7 +8,7 @@ from tfpnp.utils.metric import psnr_qrnn3d
 from torch.utils.data import DataLoader
 
 from dprox import *
-from dprox.algo.special.deq.solver import DEQ
+from dprox.algo.specialization.deq.solver import DEQ
 from dprox.algo.tune import *
 from dprox.contrib.csmri import (CustomADMM, EvalDataset,
                                  custom_policy_ob_pack_fn)

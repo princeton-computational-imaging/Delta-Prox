@@ -13,10 +13,10 @@ pip install dprox
 **Install from source**
 
 ```bash
-pip install git+https://github.com/Zeqiang-Lai/DeltaProx.git
+pip install git+https://github.com/princeton-computational-imaging/Delta-Prox.git
 ```
 
-**Editable install**
+**Editable installation**
 
 You will need an editable install if you would like to:
 
@@ -26,11 +26,11 @@ You will need an editable install if you would like to:
 To do so, clone the repository and install 🎉 Delta Prox with the following commands:
 
 ```
-git clone git+https://github.com/Zeqiang-Lai/DeltaProx.git
+git clone git+https://github.com/princeton-computational-imaging/Delta-Prox.git
 cd DeltaProx
 pip install -e .
 ```
 
 ```{caution}
-Note that you must keep the DeltaProx folder if you want to keep using the library.
+Note that you must keep the DeltaProx folder for editable installation if you want to keep using the library.
 ```

@@ -1,6 +1,6 @@
 from dprox import *
 from dprox.utils import *
-from dprox.utils.examples import *
+from dprox.contrib import *
 
 img = sample()
 psf = point_spread_function(15, 5)
@@ -12,5 +12,5 @@ reg_term = deep_prior(x, denoiser='ffdnet_color')
 prob = Problem(data_term + reg_term)
 prob.solve(method='admm', x0=b)
 
-print(psnr(x.value, img))  # 31.50
+print(psnr(x.value, img))  # 35
 imshow(x.value)

@@ -35,7 +35,7 @@ Paper <https://dl.acm.org/doi/abs/10.1145/3592144>
 
 🎉  ∇-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. 
 <br/>
-🎉  ∇-Prox allows for rapid prototyping of learning-based bi-level optimization problems for a diverse range of applications, by [optimized algorithm unrolling](https://pypi.org/project/dprox/), [deep equilibrium learning](https://pypi.org/project/dprox/), and [deep reinforcement learning](https://pypi.org/project/dprox/). 
+🎉  ∇-Prox allows for rapid prototyping of learning-based bi-level optimization problems for a diverse range of applications, by [optimized algorithm unrolling](api/primitive), [deep equilibrium learning](api/primitive), and [deep reinforcement learning](api/primitive). 
 
 The library includes the following major components:
 

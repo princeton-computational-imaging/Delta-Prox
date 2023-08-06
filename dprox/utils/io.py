@@ -28,7 +28,7 @@ def imshow(*imgs: List[np.ndarray],
            maxcol: int = 3,
            gray: bool = False,
            titles: List[str] = None,
-           off_axis: bool = False) -> None:
+           off_axis: bool = True) -> None:
     """
     Display one or more images in a grid with customizable parameters such as 
     maximum number of columns, grayscale, and titles.

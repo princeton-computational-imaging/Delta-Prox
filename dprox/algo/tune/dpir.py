@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 def get_rho_sigma_admm(sigma=2.55 / 255, iter_num=15, modelSigma1=49.0, modelSigma2=2.55, w=1.0, lam=0.23):
@@ -9,7 +10,8 @@ def get_rho_sigma_admm(sigma=2.55 / 255, iter_num=15, modelSigma1=49.0, modelSig
     return rhos, sigmas
 
 
-def log_descent(upper, lower, iter=24, sigma=0.255 / 255, w=1.0, lam=0.23):
+def log_descent(upper, lower, iter=24, sigma=0.255 / 255,
+                w=1.0, lam=0.23, sqrt=False):
     """
     generate a list of rhos and sigmas based on given parameters using
     logarithmic descent.
@@ -30,7 +32,10 @@ def log_descent(upper, lower, iter=24, sigma=0.255 / 255, w=1.0, lam=0.23):
     modelSigmaS_lin = np.linspace(upper, lower, iter).astype(np.float32)
     sigmas = (modelSigmaS * w + modelSigmaS_lin * (1 - w)) / 255.
     rhos = list(map(lambda x: lam * (sigma**2) / (x**2), sigmas))
-    sigmas = list(sigmas**2)
+    if not sqrt:
+        sigmas = list(sigmas**2)
+    rhos = torch.tensor(rhos).float()
+    sigmas = torch.tensor(sigmas).float()
     return rhos, sigmas
 
 

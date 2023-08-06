@@ -1,7 +1,6 @@
-# %%
 from dprox import *
 from dprox.utils import *
-from dprox.utils.examples import *
+from dprox.contrib import *
 
 img = sample('face')
 psf = point_spread_function(5, 3)
@@ -17,5 +16,5 @@ rhos, sigmas = log_descent(35, 35, max_iter)
 
 out = prob.solve(method='admm', x0=x0, rhos=rhos, lams={reg_term: sigmas}, max_iter=24, pbar=True)
 
-print(psnr(out, img))  # 33.518
+print(psnr(out, img))  # 32.9
 imshow(out)

@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from scipy.io import loadmat
 
 from dprox import *
-from dprox.algo.special.deq.solver import DEQ
+from dprox.algo.specialization.deq.solver import DEQ
 from dprox.algo.tune import *
 from dprox.utils import *
 from dprox.contrib.csmri import (CustomADMM, CustomEnv,

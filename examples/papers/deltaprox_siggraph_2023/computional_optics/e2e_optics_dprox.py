@@ -39,8 +39,6 @@ def build_model():
     max_iter = 10
     sigma = 7.65 / 255.
     rhos, sigmas = log_descent(49, 7.65, max_iter, sigma=max(0.255 / 255, sigma))
-    rhos = torch.tensor(rhos, device=device).float()
-    sigmas = torch.tensor(sigmas, device=device).float()
     rgb_collim_model.rhos = nn.parameter.Parameter(rhos)
     rgb_collim_model.sigmas = nn.parameter.Parameter(sigmas)
 
@@ -135,7 +133,7 @@ def train(
     logger = tl.logging.Logger(savedir)
 
     # ----------------- Start Training ------------------------ #
-    root = hf.download_dataset(training_dataset)
+    root = hf.download_dataset(training_dataset, force_download=False)
     dataset = Dataset(root)
     loader = DataLoader(dataset, batch_size=bs, shuffle=True)
 
@@ -180,30 +178,29 @@ def train(
         pbar = tqdm(total=len(loader), dynamic_ncols=True, desc=f'Epcoh[{epoch}]')
 
         for i, batch in enumerate(loader):
-            if gstep % 10 == 0:
-                # validate
-                with torch.no_grad():
-                    psnr = eval(
-                        step_fn=step_fn,
-                        dataset='data/visual',
-                        result_dir='results_eval',
-                        savedir=savedir,
-                    )
-                    if psnr > best_psnr:
-                        best_psnr = psnr
-                        save_ckpt('best.pth')
-                    logger.info('Validate Epoch {} PSNR={} Best PSNR={}'.format(epoch, psnr, best_psnr))
+            # if gstep % 10 == 0:
+            #     # validate
+            #     with torch.no_grad():
+            #         psnr = eval(
+            #             step_fn=step_fn,
+            #             dataset='data/visual',
+            #             result_dir='results_eval',
+            #         )
+            #         if psnr > best_psnr:
+            #             best_psnr = psnr
+            #             save_ckpt('best.pth')
+            #         logger.info('Validate Epoch {} PSNR={} Best PSNR={}'.format(epoch, psnr, best_psnr))
 
-                psf = rgb_collim_model.get_psf()
-                psf = crop_center_region(
-                    normalize_psf(to_ndarray(psf, debatch=True), clip_percentile=0.01)
-                )
-                imageio.imsave(imgdir / f'psf_{gstep}.png', psf)
-                history_psf.append(psf)
-                history_psnr.append(psnr)
+            #     psf = rgb_collim_model.get_psf()
+            #     psf = crop_center_region(
+            #         normalize_psf(to_ndarray(psf, debatch=True), clip_percentile=0.01)
+            #     )
+            #     imageio.imsave(imgdir / f'psf_{gstep}.png', psf)
+            #     history_psf.append(psf)
+            #     history_psnr.append(psnr)
 
-                with open(savedir / 'stat.txt', 'a') as f:
-                    f.write(f'{gstep} {psnr}\n')
+            #     with open(savedir / 'stat.txt', 'a') as f:
+            #         f.write(f'{gstep} {psnr}\n')
 
             gt, inp, pred = step_fn(batch)
 

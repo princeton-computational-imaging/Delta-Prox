@@ -77,9 +77,11 @@ def load_checkpoint(path, user_id='delta-prox'):
     return torch.load(ckpt_path)
 
 
-def download_dataset(path, user_id='delta-prox', local_dir=None):
+def download_dataset(path, user_id='delta-prox', local_dir=None, force_download=True):
     if local_dir is None:
         local_dir = os.path.join(CACHE_DIR, path)
+    if os.path.exists(local_dir) and not force_download:
+        return local_dir
     huggingface_hub.snapshot_download(repo_id=f"{user_id}/{path}",
                                       local_dir=local_dir,
                                       repo_type="dataset")
