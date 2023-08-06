@@ -6,8 +6,7 @@ from dprox import *
 from dprox.algo.tune import *
 from dprox.utils import *
 from dprox.contrib.csmri import (CustomADMM, CustomEnv,
-                                 EvalDataset, TrainDataset,
-                                 seed_everything)
+                                 EvalDataset, TrainDataset)
 
 
 def build_solver():
@@ -21,27 +20,26 @@ def build_solver():
 
 
 def main():
-    seed_everything(1234)
-
     solver, placeholders = build_solver()
 
     # dataset
-    data_dir = Path('data')
-    mask_dir = Path('data/csmri/masks')
-    train_root = data_dir / 'Images_128'
+    examples_root = Path(hf.download_dataset('examples', force_download=False))
+    train_root = Path(hf.download_dataset('Images128', force_download=False))
+    val_root = Path(hf.download_dataset('Medical_7_2020', force_download=False))
 
+    mask_dir = examples_root / 'csmri/masks'
     sigma_ns = [5, 10, 15]
     sampling_masks = ['radial_128_2', 'radial_128_4', 'radial_128_8']
 
     noise_model = GaussianModelD(sigma_ns)
-    masks = [loadmat(mask_dir / f'{sampling_mask}.mat').get('mask')
+    masks = [loadmat(str(mask_dir / f'{sampling_mask}.mat')).get('mask')
              for sampling_mask in sampling_masks]
     dataset = TrainDataset(train_root, fns=None, masks=masks, noise_model=noise_model)
 
     valid_datasets = {
-        'Medical7_2020/radial_128_2/15': EvalDataset('data/csmri/Medical7_2020/radial_128_2/15'),
-        'Medical7_2020/radial_128_4/15': EvalDataset('data/csmri/Medical7_2020/radial_128_4/15'),
-        'Medical7_2020/radial_128_8/15': EvalDataset('data/csmri/Medical7_2020/radial_128_8/15'),
+        'Medical_7_2020/radial_128_2/15': EvalDataset(val_root / 'radial_128_2/15'),
+        'Medical_7_2020/radial_128_4/15': EvalDataset(val_root / 'radial_128_4/15'),
+        'Medical_7_2020/radial_128_8/15': EvalDataset(val_root / 'radial_128_8/15'),
     }
 
     # train

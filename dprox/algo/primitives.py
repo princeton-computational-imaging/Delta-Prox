@@ -36,6 +36,7 @@ SPECAILIZATIONS = {
     'unroll': build_unrolled_solver,
 }
 
+
 def compile(
     prox_fns: List[ProxFn],
     method: str = 'admm',
@@ -109,6 +110,18 @@ def visualize():
 
 
 def train(
+    solver=None,
+    **kwargs,
+):
+    if solver is None:
+        return _train(**kwargs)
+    if isinstance(solver, AutoTuneSolver):
+        return solver.train(**kwargs)
+    else:
+        raise ValueError(f'Training {solver} is not supported yet.')
+
+
+def _train(
     model,
     step_fn,
     dataset='BSD500',

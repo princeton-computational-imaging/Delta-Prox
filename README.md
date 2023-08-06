@@ -63,7 +63,7 @@ where $g(x)$ denotes an implicit plug-and-play denoiser prior. We can solve this
 ```python
 from dprox import *
 from dprox.utils import *
-from dprox.utils.examples import *
+from dprox.contrib import *
 
 img = sample()
 psf = point_spread_function(15, 5)
@@ -74,7 +74,7 @@ data_term = sum_squares(conv(x, psf) - b)
 reg_term = deep_prior(x, denoiser='ffdnet_color')
 prob = Problem(data_term + reg_term)
 
-out = prob.solve(method='admm', x0=b)
+prob.solve(method='admm', x0=b)
 ```
 
 We can also specialize the solver via bi-level optimization.
@@ -83,7 +83,7 @@ For example, we can specialize the solver into a reinforcement learning (RL) sol
 ```python
 solver = compile(data_term + reg_term, method='admm')
 rl_solver = specialize(solver, method='rl')
-rl_solver = train(rl_solver, dataset)
+rl_solver = train(rl_solver, **training_kwargs)
 ```
 
 Alternatively, we can specialize the solver into an unrolled solver for end-to-end optics optimization.
@@ -95,11 +95,26 @@ PSF = Placeholder()
 data_term = sum_squares(conv_doe(x, PSF, circular=True) - y)
 reg_term = deep_prior(x, denoiser='ffdnet_color')
 solver = compile(data_term + reg_term, method='admm')
-unrolled_solver = specialize(solver, step=10)
-train(unrolled_solver, dataset)
+unrolled_solver = specialize(solver, method='unroll', max_iter=10)
+
+# training doe model and hyperparameters
+doe_model = build_doe_model()
+doe_model.rhos = nn.parameter.Parameter(rhos)
+doe_model.lams = nn.parameter.Parameter(lams)
+
+def step_fn(gt):
+    psf = doe_model.get_psf()
+    inp = img_psf_conv(gt, psf, circular=True)
+    inp = inp + torch.randn(*inp.shape) * sigma
+    y.value = inp
+    PSF.value = psf
+
+    out = solver.solve(x0=inp, rhos=doe_model.rhos, lams={reg_term: doe_model.lams})
+    return gt, inp, out
+    
+train(doe_model, step_fn, dataset)
 ```
 
-<!-- Want to learn more? Check out the [documentation](https://deltaprox.readthedocs.io/) or have a look at our [tutorials](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks).-->
 Want to learn more? Check out the step-by-step [tutorials](https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks) for the framework and its applications.
 
 ## Citation

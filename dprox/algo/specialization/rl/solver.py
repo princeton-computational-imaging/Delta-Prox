@@ -24,7 +24,7 @@ from dprox.utils import to_torch_tensor
 
 default_config = dict(
     rmsize=480,
-    max_episode_step=6,
+    max_episode_step=30,
     train_steps=15000,
     warmup=20,
     save_freq=1000,
@@ -115,7 +115,7 @@ class Env(PnPEnv):
             variables,
             x0,
             ob.T,
-        ], 1)
+        ], 1).real
 
     def get_eval_ob(self, ob):
         return self.get_policy_ob(ob)
@@ -301,11 +301,11 @@ def DatasetFactory(degrade, base_dataset='img'):
 
 
 class AutoTuneSolver(nn.Module):
-    def __init__(self, solver, policy='resnet', action_pack=5, max_episode_step=6, custom_policy_ob_pack_fn=None):
+    def __init__(self, solver, policy='resnet', action_pack=5, ob_dim=9, max_episode_step=6, custom_policy_ob_pack_fn=None):
         super().__init__()
         self.solver = solver
         # TODO: compute ob_dim based on ckpt
-        self.policy = make_policy(solver, action_pack, ob_dim=9, type=policy)
+        self.policy = make_policy(solver, action_pack, ob_dim=ob_dim, type=policy)
         self.policy.eval()
         self.max_episode_step = max_episode_step
         self.custom_policy_ob_pack_fn = custom_policy_ob_pack_fn
