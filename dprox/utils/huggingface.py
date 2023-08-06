@@ -52,8 +52,8 @@ def load_path(base_path: str, repo_type='datasets', user_id='delta-prox') -> str
         base_url = 'https://huggingface.co'
         if repo_type == 'datasets':
             base_url += '/' + repo_type
-        repo_id = base_path.split(os.path.sep)[0]
-        path = os.path.join(*(base_path.split(os.path.sep)[1:]))
+        repo_id = base_path.split('/')[0]
+        path = os.path.join(*(base_path.split('/')[1:]))
         url = f"{base_url}/{user_id}/{repo_id}/resolve/main/{path}"
         print(f'{base_path} not found')
         print('Try to download from huggingface: ', url)

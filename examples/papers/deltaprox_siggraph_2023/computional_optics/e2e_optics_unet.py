@@ -1,48 +1,29 @@
 import os
 from pathlib import Path
 
-import imageio
 import fire
+import imageio
 import torch
-import torch.nn as nn
+import torch.utils.data
 import torchlight as tl
 import torchlight.nn as tlnn
 
 from dprox import *
-from dprox import Variable
-from dprox.linop.conv import conv_doe
+from dprox.contrib.optic import (DOEModelConfig, U_Net, build_doe_model,
+                                 img_psf_conv, load_sample_img, normalize_psf)
 from dprox.utils import *
-from dprox.utils.examples.optic.common import (
-    build_doe_model, normalize_psf, load_sample_img, DOEModelConfig
-)
-from dprox.utils.examples.optic.doe_model import img_psf_conv
-
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def build_model():
+    solver = U_Net(3, 3).to(device)
     config = DOEModelConfig()
     rgb_collim_model = build_doe_model(config).to(device)
     circular = config.circular
 
-    # -------------------- Define Model --------------------- #
-    x = Variable()
-    y = Placeholder()
-    PSF = Placeholder()
-    data_term = sum_squares(conv_doe(x, PSF, circular=circular), y)
-    reg_term = deep_prior(x, denoiser='ffdnet_color')
-    solver = compile(data_term + reg_term, method='admm')
-    solver.eval()
-
     # ---------------- Setup Hyperparameter ----------------- #
-    max_iter = 10
     sigma = 7.65 / 255.
-    rhos, sigmas = log_descent(49, 7.65, max_iter, sigma=max(0.255 / 255, sigma))
-    rhos = torch.tensor(rhos, device=device).float()
-    sigmas = torch.tensor(sigmas, device=device).float()
-    rgb_collim_model.rhos = nn.parameter.Parameter(rhos)
-    rgb_collim_model.sigmas = nn.parameter.Parameter(sigmas)
 
     # ---------------- Forward Model ------------------------ #
     def step_fn(gt):
@@ -50,13 +31,7 @@ def build_model():
         psf = rgb_collim_model.get_psf()
         inp = img_psf_conv(gt, psf, circular=circular)
         inp = inp + torch.randn(*inp.shape, device=inp.device) * sigma
-        y.value = inp
-        PSF.value = psf
-
-        out = solver.solve(x0=inp,
-                           rhos=rgb_collim_model.rhos,
-                           lams={reg_term: rgb_collim_model.sigmas.sqrt()},
-                           max_iter=max_iter)
+        out = solver(inp)
         return gt, inp, out
 
     print('Model size (M)', tlnn.benchmark.model_size(rgb_collim_model))
@@ -66,19 +41,18 @@ def build_model():
 
 
 @torch.no_grad()
-def eval(step_fn, result_dir, savedir, dataset):
-    savedir = Path(savedir)
+def eval(step_fn, result_dir, dataset):
     tl.metrics.set_data_format('chw')
 
-    root = dataset
+    root = hf.download_dataset(dataset)
     dataset = os.path.basename(root)
-    logger = tl.logging.Logger(savedir / result_dir / dataset, name=dataset)
+    logger = tl.logging.Logger(os.path.join(result_dir, dataset), name=dataset)
     tracker = tl.trainer.util.MetricTracker()
 
     timer = tl.utils.Timer()
     timer.tic()
     for idx, name in enumerate(os.listdir(root)):
-        gt = load_sample_img(os.path.join(root, name))
+        gt = load_sample_img(os.path.join(root, name), patch_size=768)
 
         torch.manual_seed(idx)
         torch.cuda.manual_seed(idx)
@@ -104,41 +78,41 @@ def eval(step_fn, result_dir, savedir, dataset):
 
 
 def test(
-    savedir='saved/train_deconv',
-    dataset='data/test/Urban100',
-    checkpoint='best.pth',
-    result_dir='results',
+    dataset='Urban100',
+    checkpoint='computational_optics/joint_deepoptics_unet.pth',
+    result_dir='results/e2e_optics_unet',
 ):
     _, rgb_collim_model, step_fn = build_model()
-    ckpt = torch.load(savedir / checkpoint)
+    ckpt = hf.load_checkpoint(checkpoint)
     rgb_collim_model.load_state_dict(ckpt['model'])
 
-    return eval(step_fn, result_dir=result_dir,
-                dataset=dataset, savedir=savedir)
+    return eval(step_fn, result_dir=result_dir, dataset=dataset)
 
 
 def train(
-    root='data/bsd500',
-    savedir='saved/train_deconv/',
-    epochs=10,
+    training_dataset='BSD500',
+    savedir='saved/e2e_optics_unet/',
+    epochs=50,
     bs=2,
     lr=1e-4,
     resume=None,
 ):
-    from dprox.utils.examples.optic.common import Dataset
-    from torch.utils.data.dataloader import DataLoader
     import torch.nn.functional as F
+    from torch.utils.data.dataloader import DataLoader
     from tqdm import tqdm
+
+    from dprox.contrib.optic import Dataset
 
     print('Training on device', device)
 
-    _, rgb_collim_model, step_fn = build_model()
+    solver, rgb_collim_model, step_fn = build_model()
 
     savedir = Path(savedir)
     savedir.mkdir(exist_ok=True, parents=True)
     logger = tl.logging.Logger(savedir)
 
     # ----------------- Start Training ------------------------ #
+    root = hf.download_dataset(training_dataset)
     dataset = Dataset(root)
     loader = DataLoader(dataset, batch_size=bs, shuffle=True)
 
@@ -146,7 +120,13 @@ def train(
         rgb_collim_model.parameters(),
         lr=1e-4, weight_decay=1e-3
     )
+    optimizer2 = torch.optim.AdamW(
+        solver.parameters(),
+        lr=1e-4, weight_decay=1e-3
+    )
+
     tlnn.utils.adjust_learning_rate(optimizer, lr)
+    tlnn.utils.adjust_learning_rate(optimizer2, lr)
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, epochs, eta_min=1e-6)
 
     epoch = 0
@@ -158,6 +138,7 @@ def train(
     if resume:
         ckpt = torch.load(savedir / resume)
         rgb_collim_model.load_state_dict(ckpt['model'])
+        solver.load_state_dict(ckpt['solver'])
         optimizer.load_state_dict(ckpt['optimizer'])
         epoch = ckpt['epoch'] + 1
         gstep = ckpt['gstep'] + 1
@@ -166,6 +147,7 @@ def train(
     def save_ckpt(name, psnr=0):
         ckpt = {
             'model': rgb_collim_model.state_dict(),
+            'solver': solver.state_dict(),
             'optimizer': optimizer.state_dict(),
             'epoch': epoch,
             'gstep': gstep,
@@ -214,7 +196,9 @@ def train(
             loss.backward()
 
             optimizer.step()
+            optimizer2.step()
             optimizer.zero_grad()
+            optimizer2.zero_grad()
 
             psnr = tl.metrics.psnr(pred, gt)
             loss = loss.item()

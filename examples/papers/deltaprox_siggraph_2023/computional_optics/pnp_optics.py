@@ -1,17 +1,15 @@
-import torchlight as tl
 import os
+
 import torch
+import torchlight as tl
 
 from dprox import *
-from dprox.utils import *
 from dprox import Variable
+from dprox.contrib.optic import (DOEModelConfig, build_baseline_profile,
+                                 build_doe_model, img_psf_conv,
+                                 load_sample_img)
 from dprox.linop.conv import conv_doe
-from dprox.utils.examples.optic.common import (
-    build_doe_model, load_sample_img, build_baseline_profile,
-    DOEModelConfig
-)
-from dprox.utils.examples.optic.doe_model import img_psf_conv
-
+from dprox.utils import *
 
 # -------------------- Define Model --------------------- #
 
@@ -37,6 +35,7 @@ sigma = 7.65 / 255
 max_iter = 10
 rhos, sigmas = log_descent(49, 7.65, max_iter, sigma=max(0.255 / 255, sigma))
 
+
 def step_fn(gt):
     gt = gt.to(device).float()
     psf = rgb_collim_model.get_psf(fresnel_phase_c)
@@ -51,6 +50,7 @@ def step_fn(gt):
     return gt, inp, out
 
 # -------------------- Evalution --------------------- #
+
 
 tl.metrics.set_data_format('chw')
 
