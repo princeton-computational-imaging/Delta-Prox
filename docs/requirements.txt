@@ -7,3 +7,5 @@ nbsphinx
 nbsphinx_link
 linkify-it-py
 linkify
+dprox
+ipython
