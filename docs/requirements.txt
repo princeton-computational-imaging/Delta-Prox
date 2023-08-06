@@ -8,3 +8,16 @@ nbsphinx_link
 linkify-it-py
 linkify
 ipython
+
+torch
+imageio
+scikit_image
+matplotlib
+munch
+tfpnp
+cvxpy
+torchlights
+tensorboardX
+termcolor
+proximal
+opencv-python'
