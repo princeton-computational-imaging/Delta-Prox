@@ -62,7 +62,7 @@ def run_optics(dataset):
     print('Trainable model size (M)', tlnn.benchmark.trainable_model_size(rgb_collim_model))
 
     # --------------- Load and Run ------------------ #
-    ckpt = hf.load_checkpoint('computational-optics/joint_dprox.pth')
+    ckpt = hf.load_checkpoint('computational_optics/joint_dprox.pth')
     rgb_collim_model.load_state_dict(ckpt['model'])
 
     tl.metrics.set_data_format('chw')
