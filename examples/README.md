@@ -4,9 +4,9 @@ The examples of using $\nabla$-Prox for various applications.
 
 | Application |
 | -- |
-| [Computational Optics](applications/computional_optics/README.md) |
-| [CS-MRI](applications/csmri/README.md) |
-| [Image Deraining](applications/deraining/README.md) |
+| [Computational Optics](papers/deltaprox_siggraph_2023/computional_optics/README.md) |
+| [Compressive-MRI](papers/deltaprox_siggraph_2023/csmri/README.md) |
+| [Image Deraining](papers/deltaprox_siggraph_2023/deraining/README.md) |
 
 
 > Contributions are welcome.
