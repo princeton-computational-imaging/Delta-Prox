@@ -12,7 +12,7 @@ linalg
 
 ∇-Prox is a domain-specific language (DSL) and compiler that transforms optimization problems into differentiable proximal solvers. 
 
-## Indices
+## Index
 
 - [Proximal Algorithms](algo.md)
 - [Proximal Functions](proxfn.md)

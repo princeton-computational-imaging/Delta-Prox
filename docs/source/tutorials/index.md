@@ -1,6 +1,6 @@
 # Tutorials
 
-## Basic
+## Basics
 ```{nbgallery}
 learn_the_basic
 differentiable_linear_solver

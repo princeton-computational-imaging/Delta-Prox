@@ -11,6 +11,7 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 
 <p align="center">
 <a href="https://light.princeton.edu/publication/delta_prox/">Paper</a> |
+<a href="https://deltaprox.readthedocs.io/en/latest/">Doc</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks">Tutorials</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/examples">Examples</a> |
 <a href="https://deltaprox.readthedocs.io/en/latest/">Documentation</a> |
@@ -47,7 +48,7 @@ We recommend installing $\nabla$-Prox in a virtual environment from PyPI.
 pip install dprox
 ```
 
-<!-- Please refer to the [Installation](https://deltaprox.readthedocs.io/started/install) guide for other options. -->
+Please refer to the [Installation](https://deltaprox.readthedocs.io/en/latest/started/install.html) guide for other options.
 
 ## Quickstart
 ![pipeline2](docs/source/_static/pipeline_dprox.gif)
