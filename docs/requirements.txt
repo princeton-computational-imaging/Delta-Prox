@@ -21,3 +21,4 @@ tensorboardX
 termcolor
 proximal
 opencv-python
+huggingface_hub
