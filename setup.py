@@ -21,7 +21,7 @@ setup(
     author='Zeqiang Lai',
     author_email='laizeqiang@outlook.com',
     packages=find_packages(),
-    version='0.1.3',
+    version='0.2',
     include_package_data=True,
     install_requires=deps,
 )
