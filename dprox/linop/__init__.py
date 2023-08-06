@@ -10,10 +10,4 @@ from .base import LinOp
 from .vstack import vstack, split
 from .placeholder import Placeholder
 from .grad import grad
-# from .conv_nofft import conv_nofft
-# from .mul_elemwise import mul_elemwise
-# from .hstack import hstack
-# from .warp import warp
-# from .mul_color import mul_color
-# from .reshape import reshape
-# from .transpose import transpose
+from .mul import mul_color, mul_elementwise
