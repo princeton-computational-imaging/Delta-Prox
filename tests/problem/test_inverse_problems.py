@@ -2,11 +2,11 @@ import numpy as np
 
 from dprox import *
 from dprox.utils import *
-from dprox.utils import examples
+from dprox import contrib
 
 
 def test_csmri():
-    x0, y0, gt, mask = examples.csmri.sample()
+    x0, y0, gt, mask = contrib.csmri.sample()
 
     x = Variable()
     y = Placeholder()
@@ -29,9 +29,9 @@ def test_csmri():
 
 
 def test_deconv():
-    img = examples.sample('face')
-    psf = examples.point_spread_function(15, 5)
-    b = examples.blurring(img, psf)
+    img = contrib.sample('face')
+    psf = contrib.point_spread_function(15, 5)
+    b = contrib.blurring(img, psf)
 
     x = Variable()
     data_term = sum_squares(conv(x, psf) - b)
@@ -46,10 +46,10 @@ def test_deconv():
 
 
 def test_deconv2():
-    img = examples.sample('face')
-    psf = examples.point_spread_function(ksize=15, sigma=5)
+    img = contrib.sample('face')
+    psf = contrib.point_spread_function(ksize=15, sigma=5)
     # TODO: this still has bug
-    y = examples.blurring(img, psf) + np.random.randn(*img.shape).astype('float32') * 5 / 255.0
+    y = contrib.blurring(img, psf) + np.random.randn(*img.shape).astype('float32') * 5 / 255.0
     y.squeeze(0)
     print(img.shape, y.shape)
 

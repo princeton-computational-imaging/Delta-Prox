@@ -2,8 +2,8 @@ import torch
 
 from dprox import *
 from dprox.utils import *
-from dprox.utils.examples import *
 from dprox.linalg import LinearSolveConfig
+from dprox.contrib import *
 
 
 def test_jd2():

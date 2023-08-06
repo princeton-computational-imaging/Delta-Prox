@@ -1,7 +1,7 @@
 import torch
 import dprox as dp
 
-from dprox.utils.examples import fspecial_gaussian
+from dprox.contrib import fspecial_gaussian
 from dprox.utils import to_torch_tensor
 
 from scipy.misc import face
@@ -104,11 +104,11 @@ def test_vstack():
 
 
 def test_complex():
-    from dprox.utils import examples
+    from dprox import contrib
 
-    img = examples.sample('face')
-    psf = examples.point_spread_function(15, 5)
-    b = examples.blurring(img, psf)
+    img = contrib.sample('face')
+    psf = contrib.point_spread_function(15, 5)
+    b = contrib.blurring(img, psf)
 
     x = dp.Variable()
     data_term = dp.sum_squares(dp.conv(x, psf) - b)
