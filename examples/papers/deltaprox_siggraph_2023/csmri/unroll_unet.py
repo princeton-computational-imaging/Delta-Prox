@@ -11,8 +11,8 @@ from torch.utils.data import DataLoader
 from dprox import *
 from dprox.algo.tune import *
 from dprox.utils import *
-from dprox.utils.examples.csmri.common import (CustomADMM, EvalDataset,
-                                               TrainDataset)
+from dprox.contrib.csmri import (CustomADMM, EvalDataset,
+                                 TrainDataset)
 
 
 def get_datasets():

@@ -1,13 +1,13 @@
 from scipy.io import loadmat
 from pathlib import Path
 from tfpnp.utils.noise import GaussianModelD
-    
+
 from dprox import *
 from dprox.algo.tune import *
 from dprox.utils import *
-from dprox.utils.examples.csmri.common import (CustomADMM, CustomEnv,
-                                               EvalDataset, TrainDataset,
-                                               seed_everything)
+from dprox.contrib.csmri import (CustomADMM, CustomEnv,
+                                 EvalDataset, TrainDataset,
+                                 seed_everything)
 
 
 def build_solver():

@@ -9,9 +9,9 @@ from torchlight.logging import Logger
 from dprox import *
 from dprox.algo.tune import *
 from dprox.utils import *
-from dprox.utils.examples.csmri.common import (CustomADMM, CustomEnv,
-                                               EvalDataset, TrainDataset,
-                                               custom_policy_ob_pack_fn)
+from dprox.contrib.csmri import (CustomADMM, CustomEnv,
+                                 EvalDataset, TrainDataset,
+                                 custom_policy_ob_pack_fn)
 
 
 def get_datasets():
