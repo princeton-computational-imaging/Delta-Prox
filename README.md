@@ -13,6 +13,7 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 <a href="https://light.princeton.edu/publication/delta_prox/">Paper</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks">Tutorials</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/examples">Examples</a> |
+<a href="https://deltaprox.readthedocs.io/en/latest/">Documentation</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox#citation">Citation</a> 
 </p>
 

@@ -5,3 +5,5 @@ sphinx-copybutton
 sphinx-inline-tabs
 nbsphinx
 nbsphinx_link
+linkify-it-py
+linkify
