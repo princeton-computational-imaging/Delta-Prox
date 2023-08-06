@@ -132,7 +132,7 @@ myst_admonition_enable = True
 myst_deflist_enable = True
 myst_heading_anchors = 3
 
-html_logo = "_static/logo6.svg"
+html_logo = "_static/logo.svg"
 html_favicon = '_static/favicon.ico'
 
 

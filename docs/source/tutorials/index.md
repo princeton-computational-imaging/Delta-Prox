@@ -10,8 +10,9 @@ linear_operator
 ## Tasks
 
 ```{nbgallery}
+computational_optics
 csmri
-optics
 deraining
+energy_system
 image_restoration
 ```

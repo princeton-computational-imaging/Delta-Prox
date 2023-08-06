@@ -8,7 +8,7 @@ The following publications discuss the ideas behind ∇-Prox:
 
 > **ProxImaL: Efficient Image Optimization Using Proximal Algorithms** </br>
 > F. Heide, S. Diamond, M. Niessner, J. Ragan-Kelley, W. Heidrich, and G. Wetzstein. </br>
->  ACM Transactions on Graphics, SIGGRAPH, 2016.
+> ACM Transactions on Graphics, SIGGRAPH, 2016.
 
 ```bibtex
 @article{deltaprox2023,

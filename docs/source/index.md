@@ -28,7 +28,7 @@ citation
 PyPI Page <https://pypi.org/project/dprox/>
 GitHub Repository <https://github.com/princeton-computational-imaging/Delta-Prox>
 Project Page <https://light.princeton.edu/publication/delta_prox/>
-Paper <https://pypi.org/project/dprox/>
+Paper <https://dl.acm.org/doi/abs/10.1145/3592144>
 ```
 
 <br/>
@@ -39,9 +39,9 @@ Paper <https://pypi.org/project/dprox/>
 
 The library includes the following major components:
 
-- A library of differentiable [proximal algorithms](https://pypi.org/project/dprox/), [proximal operators](https://pypi.org/project/dprox/), and [linear operators](https://pypi.org/project/dprox/).
-- Interchangeable [specialization](https://pypi.org/project/dprox/) strategies for balancing trade-offs between speed and memory.
-- Out-of-the-box [training utilities](https://pypi.org/project/dprox/) for learning-based bi-level optimization with a few lines of code.
+- A library of differentiable [proximal algorithms](api/algo), [proximal operators](api/proxfn), and [linear operators](api/linop).
+- Interchangeable [specialization](api/primitive) strategies for balancing trade-offs between speed and memory.
+- Out-of-the-box [training utilities](api/primitive) for learning-based bi-level optimization with a few lines of code.
 
 ```{nbgallery}
 ```
