@@ -122,7 +122,7 @@ Want to learn more? Check out the step-by-step [tutorials](https://github.com/pr
 
 ```bibtex
 @article{deltaprox2023,
-  title = {∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
+  title = {$\nabla$-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
   author = {Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and H\"{a}rtel, Philipp and Heide, Felix},
   journal={ACM Transactions on Graphics (TOG)},
   volume = {42},
