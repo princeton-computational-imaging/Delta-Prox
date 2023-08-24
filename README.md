@@ -11,7 +11,6 @@ Differentiable Proximal Algorithm Modeling for Large-Scale Optimization
 
 <p align="center">
 <a href="https://light.princeton.edu/publication/delta_prox/">Paper</a> |
-<a href="https://deltaprox.readthedocs.io/en/latest/">Doc</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/notebooks">Tutorials</a> |
 <a href="https://github.com/princeton-computational-imaging/Delta-Prox/tree/main/examples">Examples</a> |
 <a href="https://deltaprox.readthedocs.io/en/latest/">Documentation</a> |
@@ -123,7 +122,7 @@ Want to learn more? Check out the step-by-step [tutorials](https://github.com/pr
 
 ```bibtex
 @article{deltaprox2023,
-  title = {∇-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
+  title = {$\nabla$-Prox: Differentiable Proximal Algorithm Modeling for Large-Scale Optimization},
   author = {Lai, Zeqiang and Wei, Kaixuan and Fu, Ying and H\"{a}rtel, Philipp and Heide, Felix},
   journal={ACM Transactions on Graphics (TOG)},
   volume = {42},
