@@ -12,7 +12,7 @@ from dprox.algo.tune import *
 from dprox.utils import *
 from dprox.contrib.csmri import (CustomADMM, EvalDataset,
                                  TrainDataset)
-
+from dprox.algo.specialization import train_deq
 
 def get_datasets():
     from pathlib import Path
