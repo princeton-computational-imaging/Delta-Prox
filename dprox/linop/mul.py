@@ -1,19 +1,36 @@
-from dprox.utils.misc import to_nn_parameter, to_torch_tensor
+from typing import Union
+
+import torch
+import torch.nn as nn
+import numpy as np
+
+from dprox.utils.misc import to_torch_tensor
 
 from .base import LinOp
+from .placeholder import Placeholder
 
 
 class mul_color(LinOp):
-    def __init__(self, srf):
-        super().__init__()
+    def __init__(
+        self,
+        arg: LinOp,
+        srf: Union[Placeholder, torch.Tensor, np.array],
+    ):
+        super().__init__([arg])
         # srf: [C, C_2]
-        srf = to_torch_tensor(srf).float()
-        self.srf = to_nn_parameter(srf)
+        self._srf = srf
 
-    def forward(self, x):
+        if isinstance(srf, Placeholder):
+            def on_change(val):
+                self.srf = nn.parameter.Parameter(val)
+            self._srf.change(on_change)
+        else:
+            self.srf = nn.parameter.Parameter(to_torch_tensor(srf, batch=True))
+
+    def forward(self, x, **kwargs):
         return self.apply(x, self.srf)
 
-    def adjoint(self, x):
+    def adjoint(self, x, **kwargs):
         return self.apply(x, self.srf.T)
 
     def apply(self, x, srf):
@@ -25,20 +42,32 @@ class mul_color(LinOp):
 
 
 class mul_elementwise(LinOp):
-    def __init__(self, w):
-        super().__init__()
-        self.w = self.to_parameter(w)
+    def __init__(
+        self,
+        arg: LinOp,
+        w: Union[Placeholder, torch.Tensor, np.array],
+    ):
+        super().__init__([arg])
+        self._w = w
 
-    def forward(self, x):
-        return self.w.value * x
+        if isinstance(w, Placeholder):
+            def on_change(val):
+                self.w = nn.parameter.Parameter(val)
+            self._w.change(on_change)
+        else:
+            self.w = nn.parameter.Parameter(to_torch_tensor(w, batch=True))
 
-    def adjoint(self, x):
-        return self.w.value * x
+    def forward(self, x, **kwargs):
+        w = self.w.to(x.device)
+        return w * x
 
-    def is_diagonalizable(self, freq=False):
+    def adjoint(self, x, **kwargs):
+        return self.forward(x)
+
+    def is_diag(self, freq=False):
         return not freq
 
-    def diag(self, freq=False):
+    def get_diag(self, x, freq=False):
         if not freq:
-            return self.w.value
+            return self.w.to(x.device)
         return None
