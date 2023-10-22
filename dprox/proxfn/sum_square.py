@@ -1,16 +1,16 @@
 from typing import List
 
 import torch
+import torch.nn as nn
 
-from dprox.linop import LinOp, vstack, LinOpFactory, eval, adjoint
-from dprox.linalg import linear_solve, LinearSolveConfig
+from dprox.linalg import LinearSolveConfig, linear_solve
+from dprox.linop import LinOp, LinOpFactory, adjoint, eval, vstack
 
 from . import ProxFn
 
 
 class sum_squares(ProxFn):
-    """ |x|_2^2 
-    """
+    """|x|_2^2"""
 
     def __init__(self, linop, b=None, eps=1e-7):
         super().__init__(linop)
@@ -43,13 +43,14 @@ class ext_sum_squares(sum_squares):
 
     def solve(self, b, rho, eps=1e-6):
         xtilde = 0
-        for v in b: xtilde += v
+        for v in b:
+            xtilde += v
         return self._prox(xtilde, rho, len(b))
 
 
 class weighted_sum_squares(sum_squares):
-    """ |Ax-b|_2^2 
-        (AtA + I)^-1(Atb + v)
+    """|Ax-b|_2^2
+    (AtA + I)^-1(Atb + v)
     """
 
     def __init__(self, linop, weight: LinOp, b, eps=0):
@@ -60,7 +61,7 @@ class weighted_sum_squares(sum_squares):
         elif self.weight.is_self_diag(freq=True):
             self._prox_fn = self._prox_freq
         else:
-            raise ValueError('weight {} must be diagonalizable'.format(weight))
+            raise ValueError("weight {} must be diagonalizable".format(weight))
 
     @property
     def Ktb(self):
@@ -89,7 +90,7 @@ class least_squares(ProxFn):
         other_fns: List[ProxFn],
         try_diagonalize=True,
         try_freq_diagonalize=True,
-        fallback_solver='cg',
+        fallback_solver="cg",
         linear_solve_config=LinearSolveConfig(),
     ):
         self.quad_fns = quad_fns
@@ -106,13 +107,14 @@ class least_squares(ProxFn):
         self.freq_diagonalizable = stacked.is_gram_diag(freq=True) and try_diagonalize and try_freq_diagonalize
 
         super().__init__(stacked)
-        # print(f'diagonalizable={self.diagonalizable}, freq_diagonalizable={self.freq_diagonalizable}')
+        # print(f"diagonalizable={self.diagonalizable}, freq_diagonalizable={self.freq_diagonalizable}")
 
     def _prox(self, v, lam):
         return self.solve([], lam, v=v)
 
     def solve(self, b, rho, v=None, eps=1e-7):
-        if rho.ndim == 1: rho = rho.view(rho.shape[0], 1, 1, 1)
+        if rho.ndim == 1:
+            rho = rho.view(rho.shape[0], 1, 1, 1)
         if self.diagonalizable or self.freq_diagonalizable:
             return self.solve_direct(b, rho, v, eps)
         else:
@@ -155,18 +157,33 @@ class least_squares(ProxFn):
 
     def solve_cg(self, b, rho, v=None, linear_solve_config=LinearSolveConfig()):
         # KtKfun being a function that computes the matrix vector product KtK x
+        
+        # TODO: check the gradient
+        class KtK(nn.Module):
+            def __init__(self, rho, quad_fns, other_fns):
+                super().__init__()
+                self.rho = nn.Parameter(rho)
+                self.quad_fns = nn.ModuleList(quad_fns)
+                self.other_fns = nn.ModuleList(other_fns)
 
-        def KtK(x, **kwargs):
-            out = 0
-            for fn in self.quad_fns:
-                out += fn.dag.adjoint(fn.dag.forward(x))
-            for fn in self.other_fns:
-                out += rho * fn.dag.adjoint(fn.dag.forward(x))  # slow when rho is small
-            if v is not None:
-                out += rho * x
-            return out
+            def forward(self, x):
+                out = 0
+                for fn in self.quad_fns:
+                    out += fn.dag.adjoint(fn.dag.forward(x))
+                for fn in self.other_fns:
+                    out += rho * fn.dag.adjoint(fn.dag.forward(x))  # slow when rho is small
+                if v is not None:
+                    out += rho * x
+                return out
 
-        linop = LinOpFactory(KtK, KtK)()
+            @property
+            def T(self):
+                return self
+
+            def clone(self):
+                return self
+
+        linop = KtK(rho, self.quad_fns, self.other_fns)
 
         Ktb = 0
         for fn in self.quad_fns:

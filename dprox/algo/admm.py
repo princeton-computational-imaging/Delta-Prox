@@ -29,8 +29,9 @@ class ADMM(Algorithm):
         for fn in prox_fns:
             if not flag and isinstance(fn, ext_sum_squares):
                 omega_fns += [fn]
+                flag=True
             elif type(fn) == sum_squares and not isinstance(fn, ext_sum_squares):
-                omega_fns = [fn]
+                omega_fns += [fn]
         psi_fns = [fn for fn in prox_fns if fn not in omega_fns]
         return psi_fns, omega_fns
 
