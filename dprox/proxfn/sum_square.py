@@ -107,7 +107,7 @@ class least_squares(ProxFn):
         self.freq_diagonalizable = stacked.is_gram_diag(freq=True) and try_diagonalize and try_freq_diagonalize
 
         super().__init__(stacked)
-        print(f"diagonalizable={self.diagonalizable}, freq_diagonalizable={self.freq_diagonalizable}")
+        # print(f"diagonalizable={self.diagonalizable}, freq_diagonalizable={self.freq_diagonalizable}")
 
     def _prox(self, v, lam):
         return self.solve([], lam, v=v)
@@ -157,7 +157,6 @@ class least_squares(ProxFn):
 
     def solve_cg(self, b, rho, v=None, linear_solve_config=LinearSolveConfig()):
         # KtKfun being a function that computes the matrix vector product KtK x
-
         class KtK(nn.Module):
             def __init__(self, rho, quad_fns, other_fns):
                 super().__init__()
