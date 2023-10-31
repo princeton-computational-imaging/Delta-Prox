@@ -9,17 +9,17 @@ from dprox.utils import to_torch_tensor
 
 
 def cast_to_const(expr):
-    """Converts a non-LinOp to a Constant.
-    """
+    """Converts a non-LinOp to a Constant."""
     from .constant import Constant
+
     return expr if isinstance(expr, LinOp) else Constant(expr)
 
 
 class LinOp(nn.Module):
-    """ Abstract class for all linear operator.
-    """
+    """Abstract class for all linear operator."""
 
-    class MultOutput(list): pass
+    class MultOutput(list):
+        pass
 
     instanceCnt = 0
 
@@ -32,7 +32,7 @@ class LinOp(nn.Module):
         LinOp.instanceCnt += 1
 
         # create a dummy parameter to automatically infer device
-        self.dummy = torch.nn.parameter.Parameter(torch.tensor(0), requires_grad=False)
+        self.dummy = torch.nn.parameter.Parameter(torch.tensor(0.0), requires_grad=False)
 
         # will be set later by proximal algorithm to indicate current iteration step
         self.step = 0
@@ -43,14 +43,12 @@ class LinOp(nn.Module):
 
     @abc.abstractmethod
     def forward(self, inputs):
-        """The forward operator. Compute x -> Kx
-        """
+        """The forward operator. Compute x -> Kx"""
         return NotImplemented
 
     @abc.abstractmethod
     def adjoint(self, inputs):
-        """The adjoint operator. Compute x -> K^Tx
-        """
+        """The adjoint operator. Compute x -> K^Tx"""
         return NotImplemented
 
     # ---------------------------------------------------------------------------- #
@@ -58,13 +56,11 @@ class LinOp(nn.Module):
     # ---------------------------------------------------------------------------- #
 
     def is_gram_diag(self, freq=False):
-        """Is the lin op's Gram matrix K^TK diagonal (in the frequency domain)?
-        """
+        """Is the lin op's Gram matrix K^TK diagonal (in the frequency domain)?"""
         return self.is_diag(freq)
 
     def is_diag(self, freq=False):
-        """Is the lin op K diagonal (in the frequency domain)?
-        """
+        """Is the lin op K diagonal (in the frequency domain)?"""
         return False
 
     def get_diag(self, freq=False):
@@ -92,8 +88,7 @@ class LinOp(nn.Module):
 
     @property
     def variables(self):
-        """Return the list of variables used in the LinOp.
-        """
+        """Return the list of variables used in the LinOp."""
         vars_ = []
         for arg in self.input_nodes:
             vars_ += arg.variables
@@ -102,16 +97,14 @@ class LinOp(nn.Module):
 
     @property
     def constants(self):
-        """Returns a list of constants in the LinOp.
-        """
+        """Returns a list of constants in the LinOp."""
         consts = []
         for arg in self.input_nodes:
             consts += arg.constants
         return consts
 
     def is_constant(self):
-        """Is the LinOp constant?
-        """
+        """Is the LinOp constant?"""
         return len(self.variables()) == 0
 
     @property
@@ -124,8 +117,7 @@ class LinOp(nn.Module):
 
     @property
     def offset(self):
-        """Get the constant offset.
-        """
+        """Get the constant offset."""
         old_vals = {}
         for var in self.variables:
             old_vals[var] = var.value
@@ -156,30 +148,28 @@ class LinOp(nn.Module):
     # ---------------------------------------------------------------------------- #
 
     @property
-    def T(self) -> 'LinOp':
-        """ The transpose :math:`A^T` of this linear operator :math:`A`.
-        """
+    def T(self) -> "LinOp":
+        """The transpose :math:`A^T` of this linear operator :math:`A`."""
         op = self.clone()
         op.forward, op.adjoint = op.adjoint, op.forward
         return op
 
     @property
-    def gram(self) -> 'LinOp':
-        """ The gram :math:`A^TA` of this linear operator :math:`A`$`.
-        """
+    def gram(self) -> "LinOp":
+        """The gram :math:`A^TA` of this linear operator :math:`A`$`."""
         op = self.clone()
         forward, adjoint = op.forward, op.adjoint
         op.forward = lambda inputs: adjoint(forward(inputs))
         op.adjoint = lambda inputs: forward(adjoint(inputs))
         return op
 
-    def clone(self) -> 'LinOp':
-        """ The deep copy of this linear operator.
-        """
+    def clone(self) -> "LinOp":
+        """The deep copy of this linear operator."""
         return copy.deepcopy(self)
 
     def unwrap(self, value):
         from .placeholder import Placeholder
+
         if isinstance(value, Placeholder):
             return value.value
         return to_torch_tensor(value, batch=True)
@@ -189,10 +179,10 @@ class LinOp(nn.Module):
     # ---------------------------------------------------------------------------- #
 
     def __add__(self, other):
-        """Lin Op + Lin Op.
-        """
+        """Lin Op + Lin Op."""
         other = cast_to_const(other)
         from .sum import sum
+
         args = []
         for elem in [self, other]:
             if isinstance(elem, sum):
@@ -202,8 +192,7 @@ class LinOp(nn.Module):
         return sum(args)
 
     def __mul__(self, other):
-        """Lin Op * Number.
-        """
+        """Lin Op * Number."""
         from .scale import scale
 
         # Can only divide by scalar constants.
@@ -213,52 +202,46 @@ class LinOp(nn.Module):
             raise TypeError("Can only multiply by a scalar constant.")
 
     def __rmul__(self, other):
-        """Called for Number * Lin Op.
-        """
+        """Called for Number * Lin Op."""
         return self * other
 
     def __truediv__(self, other):
-        """Lin Op / Number.
-        """
+        """Lin Op / Number."""
         return self.__div__(other)
 
     def __div__(self, other):
-        """Lin Op / Number.
-        """
+        """Lin Op / Number."""
         from .scale import scale
 
         # Can only divide by scalar constants.
         if np.isscalar(other):
-            return scale(1. / other, self)
+            return scale(1.0 / other, self)
         else:
             raise TypeError("Can only divide by a scalar constant.")
 
     def __sub__(self, other):
-        """Called for lin op - other.
-        """
+        """Called for lin op - other."""
         return self + -other
 
     def __rsub__(self, other):
-        """Called for other - lin_op.
-        """
+        """Called for other - lin_op."""
         return -self + other
 
     def __neg__(self):
-        """The negation of the Lin Op.
-        """
+        """The negation of the Lin Op."""
         return -1 * self
-    
+
     def __rmatmul__(self, other):
         # other @ self
         from .constaints import matmul
         from .variable import Variable
+
         if not isinstance(self, Variable):
-            print('only support variable')
+            print("only support variable")
         return matmul(self, other)
-    
+
     def __str__(self):
-        """Default to string is name of class.
-        """
+        """Default to string is name of class."""
         return self.__class__.__name__
-    
+
     __array_priority__ = 10000

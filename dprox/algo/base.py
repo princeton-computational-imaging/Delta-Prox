@@ -1,12 +1,13 @@
 import abc
+from typing import Callable, Iterable, List, Union
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
-from typing import List, Callable, Union, Iterable
 from tqdm import tqdm
 
-from dprox.proxfn import ProxFn
 from dprox.linop import CompGraph, vstack
+from dprox.proxfn import ProxFn
 from dprox.utils import to_torch_tensor
 
 
@@ -17,8 +18,8 @@ def expand(r):
 
 
 def auto_convert_to_tensor(names: List[str], batchify: bool):
-    """ A decorator that automatically converts specified arguments to PyTorch tensors.
-    """
+    """A decorator that automatically converts specified arguments to PyTorch tensors."""
+
     def outter_wrapper(fn):
         def wrapper(*args, **kwargs):
             for k, v in kwargs.items():
@@ -26,7 +27,9 @@ def auto_convert_to_tensor(names: List[str], batchify: bool):
                     if v is not None:
                         kwargs[k] = to_tensor(v, batch=k in batchify)
             return fn(*args, **kwargs)
+
         return wrapper
+
     return outter_wrapper
 
 
@@ -35,7 +38,8 @@ def move(*args, device):
 
 
 def to_device(x, device):
-    if x is None: return None
+    if x is None:
+        return None
     if isinstance(x, dict):
         return {k: to_device(v, device) for k, v in x.items()}
     return x.to(device)
@@ -78,7 +82,7 @@ class Algorithm(nn.Module):
     def device(self):
         return next(self.parameters()).device
 
-    @auto_convert_to_tensor(['x0', 'rhos', 'lams'], batchify=['x0'])
+    @auto_convert_to_tensor(["x0", "rhos", "lams"], batchify=["x0"])
     def solve(
         self,
         x0: Union[torch.Tensor, np.ndarray] = None,
@@ -86,7 +90,7 @@ class Algorithm(nn.Module):
         lams: Union[float, Iterable[float], dict] = None,
         max_iter: int = 24,
         pbar: bool = False,
-        callback: Callable = None
+        callback: Callable = None,
     ) -> torch.Tensor:
         """
         Solve a problem using an iterative algorithm with given parameters and return
@@ -116,15 +120,7 @@ class Algorithm(nn.Module):
 
         return state[0]
 
-    def iters(
-        self,
-        state,
-        rhos,
-        lams,
-        max_iter,
-        pbar=False,
-        callback=None
-    ):
+    def iters(self, state, rhos, lams, max_iter, pbar=False, callback=None):
         """
         Iterate over a given number of iterations and update the state using the given
         rhos and lams.
@@ -142,7 +138,7 @@ class Algorithm(nn.Module):
             to False, no progress bar will be displayed, defaults to False (optional)
 
         Return:
-          the final state after iterating over the given number of iterations using the `iter` 
+          the final state after iterating over the given number of iterations using the `iter`
           function with the given `rho` and `lam` values.
         """
         for iter in tqdm(range(max_iter), disable=not pbar):
@@ -203,11 +199,15 @@ class Algorithm(nn.Module):
 
     def defaults(self, x0=None, rhos=None, lams=None, max_iter=24):
         # TODO: initialize with defaults if not specified
-        if rhos is None: rhos = 1e-5
-        if lams is None: lams = 0.02
+        if rhos is None:
+            rhos = 1e-5
+        if lams is None:
+            lams = 0.02
 
-        if isscalar(rhos): rhos = to_tensor([rhos] * max_iter)
-        if isscalar(lams): lams = {fn: to_tensor([lams] * max_iter) for fn in self.psi_fns}
+        if isscalar(rhos):
+            rhos = to_tensor([rhos] * max_iter)
+        if isscalar(lams):
+            lams = {fn: to_tensor([lams] * max_iter) for fn in self.psi_fns}
 
         lams = {k: to_tensor([v] * max_iter) if isscalar(v) else v for k, v in lams.items()}
         return x0, rhos, lams, max_iter
@@ -229,15 +229,15 @@ class Algorithm(nn.Module):
         """
         flatten = []
         for s in state:
-            if isinstance(s, list): flatten += s
-            else: flatten += [s]
+            if isinstance(s, list):
+                flatten += s
+            else:
+                flatten += [s]
         return torch.cat(flatten, dim=1)
 
-    #TODO: refactor
+    # TODO: refactor
     def unpack(self, tensor):
-        vars = list(torch.split(tensor,
-                                tensor.shape[1] // self.state_dim,
-                                dim=1))
+        vars = list(torch.split(tensor, tensor.shape[1] // self.state_dim, dim=1))
         splits = []
         start, end = 0, 0
         for d in self.state_split:
@@ -255,8 +255,10 @@ class Algorithm(nn.Module):
     def state_dim(self):
         ans = 0
         for s in self.state_split:
-            if isinstance(s, list): ans += sum(s)
-            else: ans += s
+            if isinstance(s, list):
+                ans += sum(s)
+            else:
+                ans += s
         return ans
 
     @abc.abstractproperty
