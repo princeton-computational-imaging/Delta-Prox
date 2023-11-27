@@ -2,8 +2,8 @@ from typing import Union
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 import torch.nn as nn
+import torch.nn.functional as F
 
 from dprox.utils.misc import batchify, to_ndarray, to_torch_tensor
 from dprox.utils.psf2otf import psf2otf
@@ -13,8 +13,7 @@ from .placeholder import Placeholder
 
 
 class conv(LinOp):
-    """Circular convolution of the input with a kernel.
-    """
+    """Circular convolution of the input with a kernel."""
 
     def __init__(self, arg, kernel):
         self.kernel = to_ndarray(kernel)
@@ -82,28 +81,24 @@ def psf2otf2(psf, output_size):
 
 
 class conv_doe(LinOp):
-    """Circular convolution of the input with a kernel.
-    """
+    """Circular convolution of the input with a kernel."""
 
-    def __init__(
-        self,
-        arg: LinOp,
-        psf: Union[Placeholder, torch.Tensor, np.array],
-        circular: bool = False
-    ):
+    def __init__(self, arg: LinOp, psf: Union[Placeholder, torch.Tensor, np.array], circular: bool = True):
         super().__init__([arg])
         self._psf = psf
         self.circular = circular
 
         if isinstance(psf, Placeholder):
+
             def on_change(val):
                 self.psf = nn.parameter.Parameter(val)
+
             self._psf.change(on_change)
         else:
             self.psf = nn.parameter.Parameter(to_torch_tensor(psf, batch=True))
 
     def forward(self, img, **kwargs):
-        psf = self.psf.to(img.device)
+        psf = self.unwrap(self.psf).to(img.device)
 
         if not self.circular:
             # linearized conv
