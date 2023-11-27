@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-import dprox
 
+import dprox
 
 seed = 123
 
@@ -32,7 +32,7 @@ class SymmetricLinOp(dprox.LinOp):
 
 def test_linear_solver_torch_forward():
     torch.manual_seed(seed)
-    
+
     dtype = torch.float64
     P = torch.randn(5, 5, dtype=dtype)
     I = torch.eye(5, dtype=dtype)
@@ -45,7 +45,7 @@ def test_linear_solver_torch_forward():
     A = LinOp(A)
     # xhat = dprox.linalg.linear_solve(A, b)
     # xhat = dprox.linalg.solve.conjugate_gradient(A, b, max_iters=100)
-    xhat = dprox.linalg.solve.pcg(A, b, max_iters=100)    
+    xhat = dprox.linalg.solve.pcg(A, b, max_iters=100)
 
     print(xhat.dtype)
     print(torch.mean(torch.abs(xhat - x)))
@@ -105,7 +105,7 @@ def test_linear_solver_torch_backward_dtheta():
     x = torch.randn(5)
     with torch.no_grad():
         b = A(x)
-    b = b.clone().detach().requires_grad_(True)
+    b = b.clone().detach().requires_grad_(False)
 
     xhat = dprox.linalg.linear_solve(A, b)
     xhat.mean().backward()
@@ -120,14 +120,14 @@ def test_linear_solver_torch_backward_dtheta():
     x = torch.randn(5)
     with torch.no_grad():
         b = A(x)
-    b = b.clone().detach().requires_grad_(True)
+    b = b.clone().detach().requires_grad_(False)
 
     xhat = dprox.linalg.solve.cg(A, b)
     xhat.mean().backward()
     grad2 = A.P.grad
 
     # summary
-    print('dtheta')
+    print("dtheta")
     print(grad1)
     print(grad2)
 
@@ -188,7 +188,7 @@ def test_linear_solver_torch_backward_dtheta2():
     grad3 = A.grad
 
     # summary
-    print('dtheta')
+    print("dtheta")
     print(grad1)
     print(grad2)
     print(grad3)
@@ -199,76 +199,110 @@ def test_linear_solver_torch_backward_dtheta2():
 
 def test_linear_solver_torch_forward_dconv_doe():
     torch.manual_seed(seed)
-    x = dprox.Variable((1,1,10,10))
-    psf = torch.randn((1,5,5))
+    x = dprox.Variable((1, 1, 10, 10))
+    psf = torch.randn((1, 5, 5))
     KtK = dprox.conv_doe(x, psf=psf).gram
-    
-    x = torch.randn(1,1,10,10)
+
+    x = torch.randn(1, 1, 10, 10)
     b = KtK(x)
-    
+
     xhat = dprox.linalg.linear_solve(KtK, b)
-    
+
     print(x.squeeze()[0])
     print(xhat.squeeze()[0])
-    print((xhat-x).abs().mean())
-    
+    print((xhat - x).abs().mean())
+
     assert torch.allclose(xhat, x, atol=0.5, rtol=1)
-    
-    
+
+
 def test_linear_solver_torch_backward_dconv_doe():
+    seed = 124
+
+    class Gram(dprox.LinOp):
+        def __init__(self, op):
+            super().__init__()
+            self.op = op
+
+        def forward(self, inputs):
+            return self.op.adjoint(self.op.forward(inputs))
+
+        def adjoint(self, inputs):
+            return self.op.forward(self.op.adjoint(inputs))
+
+        def clone(self):
+            return Gram(self.op.clone())
+
+        @property
+        def psf(self):
+            return self.op.psf
+
     torch.manual_seed(seed)
-    x = dprox.Variable((1,1,10,10))
-    psf = torch.randn((1,5,5))
-    KtK = dprox.conv_doe(x, psf=psf).gram
-    
-    x = torch.randn(1,1,10,10)
-    b = KtK(x)
-    
+    x = dprox.Variable((1, 1, 10, 10))
+    psf = torch.randn((5, 5))
+    psf = psf.T @ psf
+    psf = psf.unsqueeze(0).unsqueeze(0)
+    KtK = dprox.conv_doe(x, psf=psf)
+    KtK = Gram(KtK)
+
+    x = torch.randn(1, 1, 10, 10)
+    with torch.no_grad():
+        b = KtK(x)
+    b = b.clone().detach().requires_grad_(True)
+
     xhat = dprox.linalg.linear_solve(KtK, b)
-    
+
     xhat.mean().backward()
-    
+
     grad1 = KtK.psf.grad
+    print("########")
     print(KtK.psf.grad)
+    print(b.grad)
     print(x.squeeze()[0])
     print(xhat.squeeze()[0])
-    print((xhat-x).abs().mean())
-    
+    print((xhat - x).abs().mean())
+
     torch.manual_seed(seed)
-    x = dprox.Variable((1,1,10,10))
-    psf = torch.randn((1,5,5))
-    KtK = dprox.conv_doe(x, psf=psf).gram
-    
-    x = torch.randn(1,1,10,10)
-    b = KtK(x)
-    
+    x = dprox.Variable((1, 1, 10, 10))
+    psf = torch.randn((5, 5))
+    psf = psf.T @ psf
+    psf = psf.unsqueeze(0).unsqueeze(0)
+    KtK = dprox.conv_doe(x, psf=psf)
+    KtK = Gram(KtK)
+
+    x = torch.randn(1, 1, 10, 10)
+    with torch.no_grad():
+        b = KtK(x)
+    b = b.clone().detach().requires_grad_(True)
+
     xhat = dprox.linalg.solve.cg(KtK, b)
-    
+
     xhat.mean().backward()
-    
+
     grad2 = KtK.psf.grad
+    print("########")
     print(KtK.psf.grad)
+    print(b.grad)
     print(x.squeeze()[0])
     print(xhat.squeeze()[0])
-    print((xhat-x).abs().mean())
-    
-    print('########')
-    print((grad1-grad2).abs().mean())
-    
-    
+    print((xhat - x).abs().mean())
+
+    print("########")
+    print((grad1 - grad2).abs().mean())
+    assert torch.allclose(grad1, grad2, rtol=1e-2, atol=1e-2)
+
+
 def test_linear_solver_torch_backward_dconv_doe_ktk():
     torch.manual_seed(seed)
-    x = dprox.Variable((1,1,10,10))
-    psf = torch.randn((1,5,5))
+    x = dprox.Variable((1, 1, 10, 10))
+    psf = torch.randn((1, 5, 5))
     KtK = dprox.conv_doe(x, psf=psf).gram
-    
-    x = torch.randn(1,1,10,10)
+
+    x = torch.randn(1, 1, 10, 10)
     b = KtK(x)
-    
+
     xhat = dprox.linalg.linear_solve(KtK, b)
-    
+
     xhat.mean().backward()
-    
+
     print(KtK.psf.grad)
     # TODO: need a finite difference method to check gradient
-    
