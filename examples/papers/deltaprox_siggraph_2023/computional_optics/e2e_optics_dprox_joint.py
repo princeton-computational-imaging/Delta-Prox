@@ -18,6 +18,7 @@ from dprox.contrib.optic import (
     load_sample_img,
     normalize_psf,
 )
+from dprox.linalg import LinearSolveConfig
 from dprox.linop.conv import conv_doe
 from dprox.utils import *
 
@@ -35,7 +36,7 @@ def build_model():
     PSF = Placeholder()
     data_term = sum_squares(mosaic(conv_doe(x, PSF, circular=circular)), y)
     reg_term = deep_prior(x, denoiser="ffdnet_color")
-    solver = compile(data_term + reg_term, method="admm")
+    solver = compile(data_term + reg_term, method="admm", linear_solve_config=LinearSolveConfig(use_analytic_grad=False))
     solver.eval()
 
     # ---------------- Setup Hyperparameter ----------------- #
@@ -174,55 +175,61 @@ def train(
 
     while epoch < epochs:
         tracker = tl.trainer.util.MetricTracker()
-        pbar = tqdm(total=len(loader), dynamic_ncols=True, desc=f"Epcoh[{epoch}]")
+        # pbar = tqdm(total=len(loader), dynamic_ncols=True, desc=f"Epcoh[{epoch}]")
 
         for i, batch in enumerate(loader):
-            # if gstep % 10 == 0:
-            #     # validate
-            #     with torch.no_grad():
-            #         psnr = eval(
-            #             step_fn=step_fn,
-            #             dataset='data/visual',
-            #             result_dir='results_eval',
-            #         )
-            #         if psnr > best_psnr:
-            #             best_psnr = psnr
-            #             save_ckpt('best.pth')
-            #         logger.info('Validate Epoch {} PSNR={} Best PSNR={}'.format(epoch, psnr, best_psnr))
+            try:
+                if gstep % 10 == 0:
+                    # validate
+                    # with torch.no_grad():
+                    #     psnr = eval(
+                    #         step_fn=step_fn,
+                    #         dataset='data/visual',
+                    #         result_dir='results_eval',
+                    #     )
+                    #     if psnr > best_psnr:
+                    #         best_psnr = psnr
+                    #         save_ckpt('best.pth')
+                    #     logger.info('Validate Epoch {} PSNR={} Best PSNR={}'.format(epoch, psnr, best_psnr))
 
-            #     psf = rgb_collim_model.get_psf()
-            #     psf = crop_center_region(
-            #         normalize_psf(to_ndarray(psf, debatch=True), clip_percentile=0.01)
-            #     )
-            #     imageio.imsave(imgdir / f'psf_{gstep}.png', psf)
-            #     history_psf.append(psf)
-            #     history_psnr.append(psnr)
+                    psf = rgb_collim_model.get_psf()
+                    psf = crop_center_region(normalize_psf(to_ndarray(psf, debatch=True), clip_percentile=0.01))
+                    # print(psf)
+                    psf = (psf * 255).astype("uint8")
+                    imageio.imsave(imgdir / f"psf_{gstep}.png", psf)
+                    history_psf.append(psf)
+                    # history_psnr.append(psnr)
 
-            #     with open(savedir / 'stat.txt', 'a') as f:
-            #         f.write(f'{gstep} {psnr}\n')
+                    # with open(savedir / 'stat.txt', 'a') as f:
+                    #     f.write(f'{gstep} {psnr}\n')
 
-            gt, inp, pred = step_fn(batch)
+                gt, inp, pred = step_fn(batch)
 
-            loss = F.mse_loss(gt, pred)
-            loss.backward()
+                loss = F.mse_loss(gt, pred)
+                loss.backward()
 
-            optimizer.step()
-            optimizer.zero_grad()
+                optimizer.step()
+                optimizer.zero_grad()
 
-            psnr = tl.metrics.psnr(pred, gt)
-            loss = loss.item()
-            tracker.update("loss", loss)
-            tracker.update("psnr", psnr)
+                psnr = tl.metrics.psnr(pred, gt)
+                loss = loss.item()
+                tracker.update("loss", loss)
+                tracker.update("psnr", psnr)
 
-            pbar.set_postfix({"loss": f'{tracker["loss"]:.4f}', "psnr": f'{tracker["psnr"]:.4f}'})
-            pbar.update()
+                logger.debug({"gstep": gstep, "loss": f'{tracker["loss"]:.4f}', "psnr": f'{tracker["psnr"]:.4f}'})
+                # pbar.set_postfix({"loss": f'{tracker["loss"]:.4f}', "psnr": f'{tracker["psnr"]:.4f}'})
+                # pbar.update()
 
-            gstep += 1
+                gstep += 1
+            except Exception as e:
+                logger.debug("exception, continue")
+                optimizer.zero_grad()
+                continue
 
         logger.info("Epoch {} Loss={} LR={}".format(epoch, tracker["loss"], tlnn.utils.get_learning_rate(optimizer)))
 
         save_ckpt("last.pth", tracker["psnr"])
-        pbar.close()
+        # pbar.close()
         epoch += 1
 
     imageio.mimsave(savedir / "psf.mp4", history_psf)

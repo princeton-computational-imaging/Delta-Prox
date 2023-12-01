@@ -179,7 +179,9 @@ class least_squares(ProxFn):
                 return self
 
             def clone(self):
-                return self
+                from copy import deepcopy
+
+                return KtK(deepcopy(self.rho), self.quad_fns, self.other_fns)
 
         linop = KtK(rho, self.quad_fns, self.other_fns)
 
