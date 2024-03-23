@@ -40,7 +40,7 @@ def clone(x, nums, shared):
 
 
 class deep_prior(ProxFn):
-    def __init__(self, linop, denoiser='ffdnet', x8=False, clamp=False, trainable=False, unroll_step=None, sqrt=True):
+    def __init__(self, linop, denoiser='ffdnet', x8=False, clamp=False, trainable=False, unroll_step=None, sqrt=False):
         super().__init__(linop)
         self.name = denoiser
 
@@ -73,14 +73,14 @@ class deep_prior(ProxFn):
     def _prox(self, v: torch.Tensor, lam: torch.Tensor):
         """ v: [N, C, H, W] or [N, H, W]
             lam: [1]
-        """
-        # if self.sqrt: lam = lam.sqrt()
+        """        
+        sigma = lam.sqrt() if self.sqrt else lam
         if self.clamp: v = v.clamp(0, 1)
         if torch.is_complex(v): v = v.real
         if len(v.shape) == 3: input = v.unsqueeze(1)
         else: input = v
-        if self.unroll: out = self.denoisers[self.step].denoise(input, lam)
-        else: out = self.denoiser.denoise(input, lam)
+        if self.unroll: out = self.denoisers[self.step].denoise(input, sigma)  # sigma = lam.sqrt()
+        else: out = self.denoiser.denoise(input, sigma)
         out = out.type_as(v)
         out = out.reshape(*v.shape)
         return out

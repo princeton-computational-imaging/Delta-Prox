@@ -129,6 +129,7 @@ def _train(
     epochs=10,
     bs=2,
     lr=1e-4,
+    weight_decay=1e-3,
     resume=None,
 ):
     savedir = Path(savedir)
@@ -142,7 +143,7 @@ def _train(
 
     optimizer = torch.optim.AdamW(
         model.parameters(),
-        lr=1e-4, weight_decay=1e-3
+        lr=lr, weight_decay=weight_decay
     )
     tlnn.utils.adjust_learning_rate(optimizer, lr)
 

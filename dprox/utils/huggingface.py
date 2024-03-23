@@ -82,7 +82,7 @@ def load_checkpoint(path, user_id="delta-prox"):
     return torch.load(ckpt_path)
 
 
-def download_dataset(path, user_id="delta-prox", local_dir=None, force_download=True):
+def download_dataset(path, user_id="delta-prox", local_dir=None, force_download=False):
     if local_dir is None:
         local_dir = os.path.join(CACHE_DIR, path)
     if os.path.exists(local_dir) and not force_download:

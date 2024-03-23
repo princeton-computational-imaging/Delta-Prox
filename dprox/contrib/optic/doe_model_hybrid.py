@@ -35,7 +35,7 @@ class HeightMap(nn.Module):
         height_map = self.phase_to_height_map(fresnel_phase, idx)
         return height_map ** 0.5
 
-    def get_phase_profile(self, height_map=None):
+    def get_phase_profile(self, height_map=None, refractive_len=None):
         """
         calculate the phase profile of a height map using wave numbers and phase delay.
 
@@ -47,6 +47,8 @@ class HeightMap(nn.Module):
             height_map = torch.square(self.height_map_sqrt + 1e-7)
         # phase delay indiced by height field
         phi = self.wave_nos * self.delta_N * height_map
+        if refractive_len is not None:
+            phi += refractive_len.to(phi.device)
         return torch.exp(1j * phi)
 
     def phase_to_height_map(self, phi, wave_length_idx=1):
@@ -77,6 +79,7 @@ class RGBCollimator(nn.Module):
                  patch_size,
                  sample_interval,
                  wave_resolution,
+                 aperture_type='half_circular'
                  ):
         super().__init__()
         self.wave_res = wave_resolution
@@ -85,7 +88,7 @@ class RGBCollimator(nn.Module):
         self.sample_interval = sample_interval
         self.patch_size = patch_size
         self.refractive_idcs = refractive_idcs
-        self._init_setup()
+        self._init_setup(aperture_type=aperture_type)
 
     def get_psf(self, phase_profile=None):
         """
@@ -98,14 +101,14 @@ class RGBCollimator(nn.Module):
         distribution of the image formed by a point source after passing through the optical system.
         """
         if phase_profile is None:
-            phase_profile = self.height_map.get_phase_profile()
+            phase_profile = self.height_map.get_phase_profile(refractive_len=self.refractive_len)
         field = phase_profile * self.input_field
         field = self.aperture * field
         field = self.propagator(field)
         psfs = (torch.abs(field) ** 2).float()
         psfs = area_downsampling(psfs, self.patch_size)
-        # psfs = psfs / psfs.sum(dim=[2, 3], keepdim=True)
-        psfs = psfs / psfs.sum()
+        psfs = psfs / psfs.sum(dim=[2, 3], keepdim=True)
+        # psfs = psfs / psfs.sum()
         return psfs
 
     def forward(self, input_img, phase_profile=None, circular=False):
@@ -113,7 +116,7 @@ class RGBCollimator(nn.Module):
         output_image = img_psf_conv(input_img, psfs, circular=circular)
         return output_image, psfs
 
-    def _init_setup(self):
+    def _init_setup(self, aperture_type):
         input_field = torch.ones((1, len(self.wave_lengths), self.wave_res[0], self.wave_res[1]))
         self.register_buffer("input_field", input_field, persistent=False)
 
@@ -122,14 +125,21 @@ class RGBCollimator(nn.Module):
         self.register_buffer("xx", xx, persistent=False)
         self.register_buffer("yy", yy, persistent=False)
 
-        aperture = self._get_circular_aperture(xx, yy)
+        if aperture_type == 'half_circular':
+            aperture = self._get_halfcircular_aperture(xx, yy)
+        elif aperture_type == 'circular':
+            aperture = self._get_circular_aperture(xx, yy)
+        else:
+            raise ImportError(f"Aperture type {aperture_type} not supported")
         self.register_buffer("aperture", aperture, persistent=False)
 
         self.height_map = self._get_height_map()
         self.propagator = self._get_propagator()
 
+        self.refractive_len = self._get_refractive_len()
+
     def _get_height_map(self):
-        height_map_shape = (1, 3, self.wave_res[0], self.wave_res[1])
+        height_map_shape = (1, 1, self.wave_res[0], self.wave_res[1])
         height_map = HeightMap(height_map_shape,
                                self.wave_lengths,
                                self.refractive_idcs,
@@ -138,7 +148,7 @@ class RGBCollimator(nn.Module):
         return height_map
 
     def _get_propagator(self):
-        input_shape = (1, 3, self.wave_res[0], self.wave_res[1])
+        input_shape = (1, len(self.wave_lengths), self.wave_res[0], self.wave_res[1])
         propagator = FresnelPropagator(input_shape,
                                        self.sensor_distance,
                                        self.sample_interval,
@@ -151,19 +161,38 @@ class RGBCollimator(nn.Module):
         aperture = (r < max_val).float()[None][None]
         return aperture
 
+    def _get_halfcircular_aperture(self, xx, yy):
+        max_val = xx.max()
+        r = torch.sqrt(xx ** 2 + yy ** 2)
+        aperture = ((yy > 0) * (r < max_val)).float()[None][None]
+        return aperture
+    
+    def _get_refractive_len(self):
+        refractive_len = []
+        for idx in range(len(self.wave_lengths)):   
+            k = 2 * torch.pi / self.wave_lengths[idx]
+            fresnel_phase = - k * ((self.xx**2 + self.yy**2)[None][None] / (2 * self.sensor_distance))
+            fresnel_phase = fresnel_phase % (torch.pi * 2)
+            refractive_len.append(fresnel_phase)
+        return torch.cat(refractive_len, dim = 1)
+
+
+wvls = torch.tensor([460, 550, 640])
+wvl_um = wvls * 1e-3
+RI = (1 + 0.6961663 / (1 - (0.0684043 / wvl_um) ** 2) + 0.4079426 / (1 - (0.1162414 / wvl_um) ** 2) + 0.8974794 / (1 - (9.896161 / wvl_um) ** 2)) ** .5 
 
 @dataclass
 class DOEModelConfig:
     circular: bool = True  # circular convolution
-    aperture_diameter: float = 3e-3  # aperture diameter
-    sensor_distance: float = 15e-3  # Distance of sensor to aperture
-    refractive_idcs = torch.tensor([1.4648, 1.4599, 1.4568])  # Refractive idcs of the phaseplate
-    wave_lengths = torch.tensor([460, 550, 640]) * 1e-9  # Wave lengths to be modeled and optimized for
+    aperture_diameter: float = 9e-3  # aperture diameter
+    aperture_type: str = 'half_circular'  # Type of aperture to be used
+    sensor_distance: float = 50e-3  # Distance of sensor to aperture
+    wave_lengths = wvls * 1e-9  # Wave lengths to be modeled and optimized for
+    refractive_idcs = RI # Refractive idcs of the phaseplate
     num_steps: int = 10001  # Number of SGD steps
-    # patch_size = 1248  # Size of patches to be extracted from images, and resolution of simulated sensor
-    patch_size: int = 748  # Size of patches to be extracted from images, and resolution of simulated sensor
-    sample_interval: float = 2e-6  # Sampling interval (size of one "pixel" in the simulated wavefront)
-    wave_resolution = 1496, 1496  # Resolution of the simulated wavefront
+    patch_size: int = 512  # Size of patches to be extracted from images, and resolution of simulated sensor
+    sample_interval: float = 5.4e-6  # Sampling interval (size of one "pixel" in the simulated wavefront)
+    wave_resolution = 1536, 1536  # Resolution of the simulated wavefront
     model_kwargs: dict = field(default_factory=dict)
 
 
@@ -182,6 +211,7 @@ def build_doe_model(config: DOEModelConfig = DOEModelConfig()):
                                      patch_size=config.patch_size,
                                      sample_interval=config.sample_interval,
                                      wave_resolution=config.wave_resolution,
+                                     aperture_type=config.aperture_type
                                      )
     return rgb_collim_model
 
