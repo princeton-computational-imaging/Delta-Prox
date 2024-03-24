@@ -3,7 +3,7 @@ import copy
 import torch
 import torch.nn as nn
 
-from dprox.utils import hf
+from dprox.utils import hf, safe_sqrt
 
 from ..base import ProxFn
 from .denoisers import (DRUNetDenoiser, FFDNetColorDenoiser, FFDNetDenoiser,
@@ -74,7 +74,7 @@ class deep_prior(ProxFn):
         """ v: [N, C, H, W] or [N, H, W]
             lam: [1]
         """        
-        sigma = lam.sqrt() if self.sqrt else lam
+        sigma = safe_sqrt(lam) if self.sqrt else lam
         if self.clamp: v = v.clamp(0, 1)
         if torch.is_complex(v): v = v.real
         if len(v.shape) == 3: input = v.unsqueeze(1)

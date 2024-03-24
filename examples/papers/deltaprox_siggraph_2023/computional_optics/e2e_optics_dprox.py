@@ -31,7 +31,7 @@ def build_model():
     y = Placeholder()
     PSF = Placeholder()
     data_term = sum_squares(conv_doe(x, PSF, circular=circular), y)
-    reg_term = deep_prior(x, denoiser='ffdnet_color')
+    reg_term = deep_prior(x, denoiser='ffdnet_color', sqrt=True)
     solver = compile(data_term + reg_term, method='admm')
     solver.eval()
 
@@ -53,7 +53,7 @@ def build_model():
 
         out = solver.solve(x0=inp,
                            rhos=rgb_collim_model.rhos,
-                           lams={reg_term: rgb_collim_model.sigmas.sqrt()},
+                           lams={reg_term: rgb_collim_model.sigmas},
                            max_iter=max_iter)
         return gt, inp, out
 

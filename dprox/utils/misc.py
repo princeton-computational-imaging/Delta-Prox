@@ -148,6 +148,19 @@ def to_ndarray(x, debatch=False, squeeze=False):
     return out
 
 
+def safe_sqrt(x, eps=1e-8):
+    """
+	Compute the square root of a given input tensor, ensuring that the input is non-negative.
+
+	Args:
+	  x: The input tensor for which the square root needs to be computed.
+
+	Returns:
+	  the square root of the input tensor `x`. If the input tensor is negative, the function returns 0.
+	"""
+    return torch.sqrt(torch.clamp(x, min=eps))
+
+
 def fft2(x):
     """
     Perform a 2D Fast Fourier Transform on a tensor using PyTorch.
