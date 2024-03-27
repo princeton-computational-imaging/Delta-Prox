@@ -56,9 +56,9 @@ class weighted_sum_squares(sum_squares):
     def __init__(self, linop, weight: LinOp, b, eps=0):
         super().__init__(linop, b, eps)
         self.weight = weight
-        if self.weight.is_self_diag():
+        if self.weight.is_diag():
             self._prox_fn = self._prox
-        elif self.weight.is_self_diag(freq=True):
+        elif self.weight.is_diag(freq=True):
             self._prox_fn = self._prox_freq
         else:
             raise ValueError("weight {} must be diagonalizable".format(weight))
@@ -195,3 +195,7 @@ class least_squares(ProxFn):
 
         x_pred = linear_solve(linop, Ktb, config=linear_solve_config)
         return x_pred
+
+    def extra_repr(self) -> str:
+        info = f'diagonalizable: {self.diagonalizable}; freq_diagonalizable: {self.freq_diagonalizable}'
+        return info

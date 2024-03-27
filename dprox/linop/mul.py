@@ -65,7 +65,7 @@ class mul_elementwise(LinOp):
         return self.forward(x)
 
     def is_diag(self, freq=False):
-        return not freq
+        return not freq and self.input_nodes[0].is_diag(freq)
 
     def get_diag(self, x, freq=False):
         if not freq:

@@ -26,7 +26,7 @@ def blurring(img, psf):
     device = img.device
     img = to_ndarray(img, debatch=True)
     psf = to_ndarray(psf)
-    b = scipy.ndimage.filters.convolve(img, psf, mode="wrap")
+    b = scipy.ndimage.convolve(img, psf, mode="wrap")
     b = to_torch_tensor(b, batch=True).to(device)
     return b
 

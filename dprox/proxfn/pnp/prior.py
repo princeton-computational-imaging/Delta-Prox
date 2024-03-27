@@ -86,4 +86,4 @@ class deep_prior(ProxFn):
         return out
 
     def __repr__(self):
-        return f'deep_prior(denoiser="{self.name}")'
+        return f'deep_prior(denoiser="{self.name}", unroll={self.unroll})'

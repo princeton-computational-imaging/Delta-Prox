@@ -44,7 +44,8 @@ class HeightMap(nn.Module):
         :return: a complex exponential phase profile calculated from the input height map.
         """
         if height_map is None:
-            height_map = torch.square(self.height_map_sqrt + 1e-7)
+            # height_map = torch.square(self.height_map_sqrt + 1e-7)
+            height_map = torch.square(self.height_map_sqrt)
         # phase delay indiced by height field
         phi = self.wave_nos * self.delta_N * height_map
         return torch.exp(1j * phi)

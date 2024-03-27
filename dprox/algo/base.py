@@ -91,6 +91,8 @@ class Algorithm(nn.Module):
         max_iter: int = 24,
         pbar: bool = False,
         callback: Callable = None,
+        return_full_states=False,
+        **kwargs,
     ) -> torch.Tensor:
         """
         Solve a problem using an iterative algorithm with given parameters and return
@@ -115,10 +117,13 @@ class Algorithm(nn.Module):
         x0, rhos, lams, max_iter = self.defaults(x0, rhos, lams, max_iter)
         x0, rhos, lams = move(x0, rhos, lams, device=self.device)
 
-        state = self.initialize(x0)
+        state = self.initialize(x0, **kwargs)
         state = self.iters(state, rhos, lams, max_iter, pbar, callback=callback)
 
-        return state[0]
+        if return_full_states:
+            return state
+        else:
+            return state[0]
 
     def iters(self, state, rhos, lams, max_iter, pbar=False, callback=None):
         """
@@ -200,7 +205,7 @@ class Algorithm(nn.Module):
     def defaults(self, x0=None, rhos=None, lams=None, max_iter=24):
         # TODO: initialize with defaults if not specified
         if rhos is None:
-            rhos = 1e-5
+            rhos = 1.0
         if lams is None:
             lams = 0.02
 
